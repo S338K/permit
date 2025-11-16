@@ -1,246 +1,149 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Create Account - HIA Permit to Work</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="../shared/build/tailwind.css" />
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
-    />
-  </head>
 
-  <body
-    class="min-h-screen flex flex-col bg-[var(--bg-surface)] text-[var(--text-primary)] pt-16"
-  >
-    <!-- Navigation Bar (simplified from shared layout - logo and theme only) -->
-    <nav
-      class="fixed top-0 inset-x-0 z-50 h-16 flex items-center border-b border-[var(--button-border)] bg-[var(--navbar-bg)] text-[var(--navbar-text)]"
-    >
-      <div class="flex items-center justify-between w-full px-4">
-        <!-- Left: Logo -->
-        <div
-          class="flex items-center gap-3 shrink-0 w-24 sm:w-28 md:w-24 lg:w-32"
-        >
-          <img
-            src="../images/HIA_logo.png"
-            alt="HIA Logo"
-            class="h-10 w-auto"
-          />
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Create Account - HIA Permit to Work</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="../shared/build/tailwind.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+</head>
+
+<body class="min-h-screen flex flex-col bg-[var(--bg-surface)] text-primary pt-16">
+  <!-- Navigation Bar (simplified from shared layout - logo and theme only) -->
+  <nav
+    class="fixed top-0 inset-x-0 z-50 h-16 flex items-center border-b border-[var(--button-border)] bg-[var(--navbar-bg)] text-navbar-text">
+    <div class="flex items-center justify-between w-full px-4">
+      <!-- Left: Logo -->
+      <div class="flex items-center gap-3 shrink-0 w-24 sm:w-28 md:w-24 lg:w-32">
+        <img src="../images/HIA_logo.png" alt="HIA Logo" class="h-10 w-auto" />
+      </div>
+
+      <!-- Right: Theme toggle -->
+      <button id="theme-toggle" type="button" data-theme-toggle
+        class="flex h-9 w-9 md:h-10 md:w-10 items-center justify-center rounded-full text-navbar-text icon-btn hover-lite"
+        aria-label="Toggle theme">
+        <i class="fas fa-sun icon-sun text-xl md:text-2xl"></i>
+        <i class="fas fa-moon icon-moon text-xl md:text-2xl"></i>
+      </button>
+    </div>
+  </nav>
+
+  <main class="flex-1 w-full">
+    <div class="max-w-7xl mx-auto grid lg:grid-cols-2 gap-10 px-6 py-10">
+      <!-- Left: Marketing / Benefits -->
+      <section class="hidden lg:flex flex-col justify-center space-y-6 pr-4">
+        <div class="space-y-3">
+          <h1 class="text-3xl font-bold leading-tight text-primary">
+            Create your account
+          </h1>
+          <p class="text-primary opacity-70 text-base leading-relaxed">
+            Access the Permit to Work system to submit requests, track
+            approvals, and stay informed. Secure, role-based workflow built
+            for operational safety.
+          </p>
         </div>
+        <ul class="space-y-3 text-sm text-primary">
+          <li class="flex items-start gap-3">
+            <span class="text-page-color"><i class="fas fa-shield-alt"></i></span><span>Secure role-based access
+              controls</span>
+          </li>
+          <li class="flex items-start gap-3">
+            <span class="text-page-color"><i class="fas fa-bolt"></i></span><span>Fast permit submission workflow</span>
+          </li>
+          <li class="flex items-start gap-3">
+            <span class="text-page-color"><i class="fas fa-chart-line"></i></span><span>Real-time status &
+              notifications</span>
+          </li>
+          <li class="flex items-start gap-3">
+            <span class="text-page-color"><i class="fas fa-file-signature"></i></span><span>Audit trail & compliance
+              ready</span>
+          </li>
+        </ul>
+        <div class="mt-4 text-xs text-primary opacity-60">
+          By creating an account you agree to our
+          <a href="terms.html" class="text-link-color hover:text-link-hover underline">Terms & Conditions</a>.
+        </div>
+      </section>
 
-        <!-- Right: Theme toggle -->
-        <button
-          id="theme-toggle"
-          type="button"
-          data-theme-toggle
-          class="flex h-9 w-9 md:h-10 md:w-10 items-center justify-center rounded-full text-[var(--navbar-text)] icon-btn hover-lite"
-          aria-label="Toggle theme"
-        >
-          <i class="fas fa-sun icon-sun text-xl md:text-2xl"></i>
-          <i class="fas fa-moon icon-moon text-xl md:text-2xl"></i>
-        </button>
-      </div>
-    </nav>
-
-    <main class="flex-1 w-full">
-      <div class="max-w-7xl mx-auto grid lg:grid-cols-2 gap-10 px-6 py-10">
-        <!-- Left: Marketing / Benefits -->
-        <section class="hidden lg:flex flex-col justify-center space-y-6 pr-4">
-          <div class="space-y-3">
-            <h1
-              class="text-3xl font-bold leading-tight text-[var(--text-primary)]"
-            >
-              Create your account
-            </h1>
-            <p
-              class="text-[var(--text-primary)] opacity-70 text-base leading-relaxed"
-            >
-              Access the Permit to Work system to submit requests, track
-              approvals, and stay informed. Secure, role-based workflow built
-              for operational safety.
-            </p>
+      <!-- Right: Signup Form Card -->
+      <section
+        class="bg-[var(--bg-surface)] border border-[var(--input-border)] rounded-2xl shadow-xl overflow-hidden flex flex-col">
+        <div class="bg-[var(--button-bg)] px-6 py-5">
+          <h2 class="text-xl font-semibold text-button-text flex items-center gap-2">
+            <i class="fas fa-user-plus"></i> Register
+          </h2>
+          <p class="text-button-text opacity-90 text-sm mt-1">
+            Fill in your details to create a requester account.
+          </p>
+        </div>
+        <form id="publicSignupForm" class="p-6 space-y-5 flex-1 overflow-y-auto" novalidate>
+          <div>
+            <label for="fullName" class="block text-sm font-semibold mb-1">Full Name
+              <span class="text-error-color">*</span></label>
+            <input id="fullName" name="username" type="text" required placeholder="Full Name"
+              class="w-full px-4 py-3 rounded-xl bg-[var(--input-bg)] border-2 border-[var(--input-border)] text-primary focus:outline-none" />
           </div>
-          <ul class="space-y-3 text-sm text-[var(--text-primary)]">
-            <li class="flex items-start gap-3">
-              <span class="text-[var(--page-color)]"
-                ><i class="fas fa-shield-alt"></i></span
-              ><span>Secure role-based access controls</span>
-            </li>
-            <li class="flex items-start gap-3">
-              <span class="text-[var(--page-color)]"
-                ><i class="fas fa-bolt"></i></span
-              ><span>Fast permit submission workflow</span>
-            </li>
-            <li class="flex items-start gap-3">
-              <span class="text-[var(--page-color)]"
-                ><i class="fas fa-chart-line"></i></span
-              ><span>Real-time status & notifications</span>
-            </li>
-            <li class="flex items-start gap-3">
-              <span class="text-[var(--page-color)]"
-                ><i class="fas fa-file-signature"></i></span
-              ><span>Audit trail & compliance ready</span>
-            </li>
-          </ul>
-          <div class="mt-4 text-xs text-[var(--text-primary)] opacity-60">
-            By creating an account you agree to our
-            <a
-              href="terms.html"
-              class="text-[var(--link-color)] hover:text-[var(--link-hover)] underline"
-              >Terms & Conditions</a
-            >.
+          <div>
+            <label for="email" class="block text-sm font-semibold mb-1">Email <span
+                class="text-error-color">*</span></label>
+            <input id="email" name="email" type="email" required placeholder="you@example.com"
+              class="w-full px-4 py-3 rounded-xl bg-[var(--input-bg)] border-2 border-[var(--input-border)] text-primary focus:outline-none" />
           </div>
-        </section>
-
-        <!-- Right: Signup Form Card -->
-        <section
-          class="bg-[var(--bg-surface)] border border-[var(--input-border)] rounded-2xl shadow-xl overflow-hidden flex flex-col"
-        >
-          <div class="bg-[var(--button-bg)] px-6 py-5">
-            <h2
-              class="text-xl font-semibold text-[var(--button-text)] flex items-center gap-2"
-            >
-              <i class="fas fa-user-plus"></i> Register
-            </h2>
-            <p class="text-[var(--button-text)] opacity-90 text-sm mt-1">
-              Fill in your details to create a requester account.
-            </p>
+          <div>
+            <label for="phone" class="block text-sm font-semibold mb-1">Phone (+974...)
+              <span class="text-error-color">*</span></label>
+            <input id="phone" name="phone" type="tel" required placeholder="+974XXXXXXXX"
+              class="w-full px-4 py-3 rounded-xl bg-[var(--input-bg)] border-2 border-[var(--input-border)] text-primary focus:outline-none" />
           </div>
-          <form
-            id="publicSignupForm"
-            class="p-6 space-y-5 flex-1 overflow-y-auto"
-            novalidate
-          >
-            <div>
-              <label for="fullName" class="block text-sm font-semibold mb-1"
-                >Full Name
-                <span class="text-[var(--error-color)]">*</span></label
-              >
-              <input
-                id="fullName"
-                name="username"
-                type="text"
-                required
-                placeholder="Full Name"
-                class="w-full px-4 py-3 rounded-xl bg-[var(--input-bg)] border-2 border-[var(--input-border)] text-[var(--text-primary)] focus:outline-none"
-              />
-            </div>
-            <div>
-              <label for="email" class="block text-sm font-semibold mb-1"
-                >Email <span class="text-[var(--error-color)]">*</span></label
-              >
-              <input
-                id="email"
-                name="email"
-                type="email"
-                required
-                placeholder="you@example.com"
-                class="w-full px-4 py-3 rounded-xl bg-[var(--input-bg)] border-2 border-[var(--input-border)] text-[var(--text-primary)] focus:outline-none"
-              />
-            </div>
-            <div>
-              <label for="phone" class="block text-sm font-semibold mb-1"
-                >Phone (+974...)
-                <span class="text-[var(--error-color)]">*</span></label
-              >
-              <input
-                id="phone"
-                name="phone"
-                type="tel"
-                required
-                placeholder="+974XXXXXXXX"
-                class="w-full px-4 py-3 rounded-xl bg-[var(--input-bg)] border-2 border-[var(--input-border)] text-[var(--text-primary)] focus:outline-none"
-              />
-            </div>
-            <div>
-              <label for="company" class="block text-sm font-semibold mb-1"
-                >Company (optional)</label
-              >
-              <input
-                id="company"
-                name="company"
-                type="text"
-                placeholder="Company name"
-                class="w-full px-4 py-3 rounded-xl bg-[var(--input-bg)] border-2 border-[var(--input-border)] text-[var(--text-primary)] focus:outline-none"
-              />
-            </div>
-            <div>
-              <label for="password" class="block text-sm font-semibold mb-1"
-                >Password
-                <span class="text-[var(--error-color)]">*</span></label
-              >
-              <input
-                id="password"
-                name="password"
-                type="password"
-                required
-                placeholder="Min 8 chars incl upper, lower, number, special"
-                class="w-full px-4 py-3 rounded-xl bg-[var(--input-bg)] border-2 border-[var(--input-border)] text-[var(--text-primary)] focus:outline-none"
-              />
-            </div>
-            <div>
-              <label
-                for="confirmPassword"
-                class="block text-sm font-semibold mb-1"
-                >Confirm Password
-                <span class="text-[var(--error-color)]">*</span></label
-              >
-              <input
-                id="confirmPassword"
-                name="confirmPassword"
-                type="password"
-                required
-                placeholder="Re-enter password"
-                class="w-full px-4 py-3 rounded-xl bg-[var(--input-bg)] border-2 border-[var(--input-border)] text-[var(--text-primary)] focus:outline-none"
-              />
-            </div>
-            <div class="flex items-center gap-2 pt-2">
-              <input
-                id="acceptTerms"
-                type="checkbox"
-                required
-                class="h-4 w-4 rounded border-[var(--input-border)]"
-              />
-              <label for="acceptTerms" class="text-sm"
-                >I agree to the
-                <a
-                  href="terms.html"
-                  target="_blank"
-                  class="text-[var(--link-color)] hover:text-[var(--link-hover)] underline"
-                  >terms & conditions</a
-                >.</label
-              >
-            </div>
-            <div
-              class="flex flex-col sm:flex-row sm:items-center sm:justify-end gap-3 pt-4 pb-2 border-t border-[var(--input-border)]"
-            >
-              <a
-                href="../login/index.html"
-                class="px-5 py-3 rounded-lg border border-[var(--button-border)] bg-transparent text-[var(--text-primary)] hover:bg-[var(--bg-surface)]/10 transition-colors text-center font-semibold shadow-sm"
-                >Back to Login</a
-              >
-              <button
-                type="submit"
-                id="createAccountBtn"
-                class="px-5 py-3 rounded-lg bg-[var(--button-bg)] hover:bg-[var(--button-hover-bg)] text-[var(--button-text)] font-semibold transition-all duration-200 flex items-center justify-center shadow-md hover:shadow-lg"
-              >
-                <i class="fas fa-user-plus mr-2"></i><span>Create Account</span>
-              </button>
-            </div>
-          </form>
-        </section>
-      </div>
-    </main>
+          <div>
+            <label for="company" class="block text-sm font-semibold mb-1">Company (optional)</label>
+            <input id="company" name="company" type="text" placeholder="Company name"
+              class="w-full px-4 py-3 rounded-xl bg-[var(--input-bg)] border-2 border-[var(--input-border)] text-primary focus:outline-none" />
+          </div>
+          <div>
+            <label for="password" class="block text-sm font-semibold mb-1">Password
+              <span class="text-error-color">*</span></label>
+            <input id="password" name="password" type="password" required
+              placeholder="Min 8 chars incl upper, lower, number, special"
+              class="w-full px-4 py-3 rounded-xl bg-[var(--input-bg)] border-2 border-[var(--input-border)] text-primary focus:outline-none" />
+          </div>
+          <div>
+            <label for="confirmPassword" class="block text-sm font-semibold mb-1">Confirm Password
+              <span class="text-error-color">*</span></label>
+            <input id="confirmPassword" name="confirmPassword" type="password" required placeholder="Re-enter password"
+              class="w-full px-4 py-3 rounded-xl bg-[var(--input-bg)] border-2 border-[var(--input-border)] text-primary focus:outline-none" />
+          </div>
+          <div class="flex items-center gap-2 pt-2">
+            <input id="acceptTerms" type="checkbox" required class="h-4 w-4 rounded border-[var(--input-border)]" />
+            <label for="acceptTerms" class="text-sm">I agree to the
+              <a href="terms.html" target="_blank"
+                class="text-[var(--link-color)] hover:text-[var(--link-hover)] underline">terms &
+                conditions</a>.</label>
+          </div>
+          <div
+            class="flex flex-col sm:flex-row sm:items-center sm:justify-end gap-3 pt-4 pb-2 border-t border-[var(--input-border)]">
+            <a href="../login/index.html"
+              class="px-5 py-3 rounded-lg border border-[var(--button-border)] bg-transparent text-primary hover:bg-[var(--bg-surface)]/10 transition-colors text-center font-semibold shadow-sm">Back
+              to Login</a>
+            <button type="submit" id="createAccountBtn"
+              class="px-5 py-3 rounded-lg bg-[var(--button-bg)] hover:bg-[var(--button-hover-bg)] text-button-text font-semibold transition-all duration-200 flex items-center justify-center shadow-md hover:shadow-lg">
+              <i class="fas fa-user-plus mr-2"></i><span>Create Account</span>
+            </button>
+          </div>
+        </form>
+      </section>
+    </div>
+  </main>
 
-    <footer class="text-center text-xs py-6 text-[var(--text-primary)]/70">
-      © 2025 Hamad International Airport. All rights reserved.
-    </footer>
+  <footer class="text-center text-xs py-6 text-primary opacity-70">
+    © 2025 Hamad International Airport. All rights reserved.
+  </footer>
 
-    <script src="../shared/toast.js"></script>
-    <script src="../shared/theme-toggle.js"></script>
-    <script type="module" src="signup.js"></script>
-  </body>
+  <script src="../shared/toast.js"></script>
+  <script src="../shared/theme-toggle.js"></script>
+  <script type="module" src="signup.js"></script>
+</body>
+
 </html>

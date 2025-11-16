@@ -120,6 +120,28 @@ router.post('/permit', requireAuth, upload.array('files', 5), async (req, res) =
       // Don't fail the request if notification fails
     }
 
+    // Notify all PreApprover users about the new submission
+    try {
+      const preApprovers = await User.find({ role: 'PreApprover', userStatus: 'Active' }).lean();
+      const notifPromises = preApprovers.map((u) =>
+        createNotification(
+          u._id,
+          'permit_submitted',
+          'New Permit Submitted',
+          `A new permit "${permit.permitTitle || 'N/A'}" has been submitted and requires your review.`,
+          {
+            permitId: permit._id.toString(),
+            permitNumber: permit.permitNumber || '',
+            status: 'Pending',
+            requester: req.session.userId,
+          }
+        )
+      );
+      await Promise.allSettled(notifPromises);
+    } catch (e) {
+      console.error('Failed to notify pre-approvers about new permit:', e);
+    }
+
     res.status(201).json({ message: 'Permit saved successfully', permit });
   } catch (err) {
     console.error('Permit save error:', err);

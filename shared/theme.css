@@ -6,37 +6,47 @@ body {
   min-height: 100vh;
   transition: background-color 0.3s ease, color 0.3s ease;
 }
-body,
-body * {
-  color: var(--text-primary);
-}
-a {
-  color: var(--text-primary);
-}
+/* Avoid forcing color on all descendants (overrides utility classes like text-white). */
 
 /* ===== Typography (project-wide defaults) ===== */
 :root {
   --font-size-base: 16px; /* new base */
-  --line-height-base: 1.45;
-  --font-weight-normal: 400;
+  /* Typography scale */
+  --font-size-xs: 0.75rem; /* 12px */
+  --font-size-sm: 0.875rem; /* 14px */
+  --font-size-md: 1rem; /* 16px */
+  --font-size-lg: 1.125rem; /* 18px */
+  --font-size-xl: 1.25rem; /* 20px */
+  --font-size-2xl: 1.5rem; /* 24px */
+
+  /* Font-weight tokens (used throughout the CSS) */
+  --font-weight-regular: 400;
   --font-weight-medium: 500;
   --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  /* Muted color fallback used by .text-muted and similar */
+  --muted-color: var(--muted-600);
+  /* Basic text colors (fallbacks) */
+  --text-primary: #273172; /* primary brand blue (fallback) */
+  --text-secondary: #9ca3af;
+  /* Brand accents (fallbacks) */
+  --hia-blue: #273172;
+  --hia-green: #10b981;
 }
 
-/* Shared color tokens (consolidate repeated magic hex values) */
 :root {
   --white: #ffffff;
-  --muted-50: #f8fafc;
   --muted-100: #f3f4f6;
-  --muted-200: #f9f9fb;
+
   --muted-700: #374151;
   --blue-500: #2563eb;
   --blue-600: #1d4ed8;
-  --gold: #ffd700;
+
   --blue-400: #60a5fa;
-  --blue-300: #93c5fd;
+
   --blue-strong: #3b82f6;
-  --indigo-800: #1e3a8a;
+
   --indigo-900: #1e40af;
   --muted-500: #6b7280;
   --muted-600: #4b5563;
@@ -49,13 +59,24 @@ a {
   --status-rejected-text: #991b1b;
   --status-inprogress-bg: #dbeafe;
   --status-inprogress-text: var(--indigo-900);
+  /* Inline color literals converted to variables */
+  --color-f8fafc: #f8fafc;
+  --color-f9f9fb: #f9f9fb;
+  --color-ffd700: #ffd700;
+  --color-e2e8f0: #e2e8f0;
+  --color-1e293b: #1e293b;
+  --color-1e3a8a: #1e3a8a;
+  --color-0f1724: #0f1724;
+  --color-10b981: #10b981;
+  --color-ef4444: #ef4444;
+  --color-93c5fd: #93c5fd;
 }
 /* ensure the whole site inherits the base size */
 html,
 body {
   font-size: var(--font-size-base);
-  line-height: var(--line-height-base);
-  font-weight: var(--font-weight-normal);
+  line-height: 1.45;
+  font-weight: var(--font-weight-regular);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -76,6 +97,130 @@ div {
   font-weight: var(--font-weight-regular);
 }
 
+/* Bootstrap utility overrides to align with theme tokens */
+.fw-bold {
+  font-weight: var(--font-weight-bold) !important;
+}
+.fw-semibold,
+.fw-semibold * {
+  font-weight: var(--font-weight-semibold) !important;
+}
+.fw-medium {
+  font-weight: var(--font-weight-medium) !important;
+}
+.text-dark {
+  color: var(--text-primary) !important;
+}
+.text-muted,
+.muted,
+small {
+  color: var(--muted-color) !important;
+  font-weight: var(--font-weight-regular) !important;
+}
+.text-white {
+  color: var(--white) !important;
+}
+.small,
+.text-sm {
+  font-size: var(--font-size-sm) !important;
+}
+.card-title {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+}
+.card-category {
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+}
+
+/* Specific UI tweaks requested: permit dates, requester names, view button and KPI labels */
+.permit-submitted {
+  font-weight: var(--font-weight-medium);
+  color: var(--text-secondary);
+}
+.requester-name {
+  font-weight: var(--font-weight-medium);
+  color: var(--text-primary);
+}
+.view-btn {
+  cursor: pointer;
+  transition: transform 120ms ease, box-shadow 120ms ease, filter 120ms ease;
+}
+.view-btn:hover,
+.view-btn:focus {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(16, 24, 40, 0.06);
+  filter: brightness(1.03);
+}
+.kpi-label {
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-secondary);
+}
+
+/* Buttons and badges should follow theme tokens */
+.btn-primary {
+  background: var(--button-bg) !important;
+  color: var(--button-text) !important;
+  border-color: var(--button-border) !important;
+}
+.btn-danger {
+  background: var(--danger-bg) !important;
+  color: var(--danger-text) !important;
+  border-color: var(--danger-border) !important;
+}
+.badge-approved {
+  background: var(--status-approved-bg);
+  color: var(--status-approved-text);
+  font-weight: var(--font-weight-medium);
+}
+.badge-pending {
+  background: var(--status-pending-bg);
+  color: var(--status-pending-text);
+  font-weight: var(--font-weight-medium);
+}
+.badge-rejected {
+  background: var(--status-rejected-bg);
+  color: var(--status-rejected-text);
+  font-weight: var(--font-weight-medium);
+}
+
+/* Theme-aware text utility classes (map common var(...) usages to simple classes)
+   These allow replacing `text-[var(...)]` with predictable class names. */
+.text-primary {
+  color: var(--text-primary) !important;
+}
+.text-secondary {
+  color: var(--text-secondary) !important;
+}
+.text-navbar-text {
+  color: var(--navbar-text) !important;
+}
+.text-button-text {
+  color: var(--button-text) !important;
+}
+.text-link-color {
+  color: var(--link-color) !important;
+}
+.text-link-hover {
+  color: var(--link-hover) !important;
+}
+.text-page-color {
+  color: var(--page-color) !important;
+}
+.text-error-color {
+  color: var(--error-color) !important;
+}
+
+/* Support hover: utility classes written with escaped colon for direct class usage like `hover:text-link-hover` */
+.hover\:text-link-hover:hover {
+  color: var(--link-hover) !important;
+}
+.hover\:text-link-color:hover {
+  color: var(--link-color) !important;
+}
+
 /* Headings */
 h1,
 h2,
@@ -86,25 +231,25 @@ h6 {
   color: var(--text-primary);
   margin: 0 0 0.5rem 0;
   line-height: 1.25;
-  font-weight: var(--font-weight-semibold);
+  font-weight: 600;
 }
 h1 {
-  font-size: 1.5rem;
+  font-size: var(--font-size-2xl);
 }
 h2 {
-  font-size: 1.25rem;
+  font-size: var(--font-size-xl);
 }
 h3 {
-  font-size: 1.125rem;
+  font-size: var(--font-size-lg);
 }
 h4 {
-  font-size: 1rem;
+  font-size: var(--font-size-md);
 }
 h5 {
-  font-size: 0.9375rem;
+  font-size: var(--font-size-sm);
 }
 h6 {
-  font-size: 0.875rem;
+  font-size: var(--font-size-xs);
 }
 
 /* Muted / secondary text */
@@ -122,7 +267,7 @@ input[type="submit"],
 .btn {
   font-family: inherit;
   font-size: inherit;
-  font-weight: var(--font-weight-medium);
+  font-weight: 500;
   color: var(--button-text, var(--text-primary));
 }
 
@@ -144,7 +289,7 @@ td {
 }
 
 #global-sidebar .sidebar-logo {
-  background: var(--muted-50);
+  background: var(--color-f8fafc);
 }
 
 #global-sidebar .avatar-circle {
@@ -152,7 +297,7 @@ td {
 }
 
 #global-sidebar .card {
-  background: var(--muted-200);
+  background: var(--color-f9f9fb);
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
@@ -340,6 +485,65 @@ html.dark:root {
   --hia-blue-20: rgba(39, 49, 114, 0.12);
 }
 
+/* Ensure notification bell icon uses the button color in light theme
+   (keeps visual consistency between CTA color and notification affordance) */
+:root[data-theme="light"] #notification-bell,
+:root[data-theme="light"] #notification-bell i,
+:root[data-theme="light"] button#notification-bell i {
+  color: var(--button-bg) !important;
+}
+
+/* Light-theme overrides for analytics panels and charts
+   Ensure permit analytics KPI tiles and chart panels use the light
+   surface and primary text color while leaving dark theme untouched. */
+:root[data-theme="light"] #permitAnalyticsContent .p-4,
+:root[data-theme="light"] #permitAnalyticsContent .text-center.p-4,
+:root[data-theme="light"] #permitAnalyticsContent .permit-status-wrapper,
+:root[data-theme="light"] #permitAnalyticsContent .monthly-trend-wrapper,
+:root[data-theme="light"] #approvalAnalyticsContent .p-4,
+:root[data-theme="light"] #approvalAnalyticsContent .text-center.p-4,
+:root[data-theme="light"] #approvalAnalyticsContent .approval-trend-wrapper,
+:root[data-theme="light"] .kpi-sparkline {
+  background: var(--section-bg) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--input-border) !important;
+}
+
+/* Make chart wrapper surfaces visually consistent with KPI tiles in light mode */
+:root[data-theme="light"] .permit-status-wrapper,
+:root[data-theme="light"] .monthly-trend-wrapper,
+:root[data-theme="light"] .approval-trend-wrapper {
+  padding: 0.75rem;
+  border: 1px solid var(--input-border) !important;
+  border-radius: 0.75rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+/* Fix KPI/title label colors in light theme so they remain readable
+   regardless of category accent (purple, cyan, etc.). Keep the
+   numeric accent color (e.g. purple 9d) intact. */
+:root[data-theme="light"] .kpi-title {
+  color: var(--text-primary) !important;
+  font-weight: 600 !important;
+}
+
+:root[data-theme="light"] .text-center .text-sm {
+  /* descriptive labels under the big number (e.g. "Average Approval") */
+  color: var(--text-secondary) !important;
+  font-weight: 600 !important;
+}
+
+/* When a KPI tile carries an accent (moved to wrapper as `kpi-tile`),
+   make the label a slightly darker variant of that accent for continuity. */
+.kpi-tile .kpi-title {
+  color: color-mix(
+    in srgb,
+    currentColor 72%,
+    var(--text-primary) 28%
+  ) !important;
+  font-weight: 600 !important;
+}
+
 :root[data-theme="dark"] {
   --navbar-bg: #273172;
   --navbar-text: #ffffff;
@@ -374,7 +578,7 @@ html.dark:root {
   --status-approved-text: #86efac;
   --status-pending-text: #fde047;
   --status-rejected-text: #fca5a5;
-  --status-inprogress-text: var(--blue-300);
+  --status-inprogress-text: #93c5fd;
 
   /* Ensure buttons invert in dark theme per request */
   --button-bg: #ffffff;
@@ -515,7 +719,6 @@ html.dark:root {
   background: var(--bg-surface);
 }
 
-/* Fixed footer so it's always visible; add body padding to avoid overlap */
 #page-footer {
   position: fixed;
   left: 0;
@@ -526,22 +729,15 @@ html.dark:root {
   border-top: 1px solid rgba(0, 0, 0, 0.06);
 }
 
-/* Reserve space at the bottom so fixed footer doesn't cover content */
 body.has-sticky-footer {
-  padding-bottom: 56px; /* matches footer visual height (py-4) */
+  padding-bottom: 56px;
 }
 
-/* When a page uses a sticky header, reserve space at the top so content isn't
-   hidden behind the header. The actual header height is set via the
-   --page-header-height CSS variable by JS (measured on load/resize). */
 body.has-sticky-header {
   padding-top: var(--page-header-height, 64px);
 }
 
-/* Announcement modal: ensure language dropdown and Save button follow theme colors */
-/* Note: native select dropdown styling can be limited by the OS/browser, but
-   setting option colors helps in most browsers and ensures closed control
-   matches the theme. */
+/* Announcement modal */
 #announcement_lang {
   background: var(--input-bg) !important;
   color: var(--text-primary) !important;
@@ -608,11 +804,7 @@ body.has-sticky-header {
   color: var(--button-text) !important;
 }
 
-/* Theme-specific button colors requested by user:
-   - Light theme: button font color #273172 (dark blue), light/transparent background
-   - Dark theme: button background #273172 with white text
-*/
-/* Light theme (explicit) */
+/* Light theme */
 :root[data-theme="light"] #announcementSaveBtn,
 html:not([data-theme]) #announcementSaveBtn {
   background-color: transparent !important;
@@ -729,7 +921,7 @@ html.dark [data-theme-toggle] .icon-moon {
 
 /* Make the sun icon gold in the navbar toggle */
 [data-theme-toggle] .icon-sun {
-  color: var(--gold) !important;
+  color: var(--color-ffd700) !important;
 }
 
 /* Ensure navbar, desktop sidebar and mobile menu follow the active theme surface color */
@@ -864,6 +1056,21 @@ html.dark #sidebar-hamburger {
   font-weight: 600;
   margin-bottom: 8px;
   color: var(--text-primary);
+}
+
+/* Permit ID wrapping for mobile modal view */
+#permitDetailsModal .permit-id-value {
+  word-break: break-all; /* allow long IDs to wrap */
+  overflow-wrap: anywhere;
+  hyphens: auto;
+}
+
+@media (max-width: 640px) {
+  #permitDetailsModal .permit-id-value {
+    font-size: 1rem; /* reduce size to improve wrapping */
+    line-height: 1.15;
+    word-break: break-word;
+  }
 }
 
 #permit-form-modal .form-group {
@@ -1058,6 +1265,8 @@ html.dark #sidebar-hamburger {
   z-index: 9999;
   display: flex;
   flex-direction: column;
+  align-items: center;
+  justify-content: center;
   gap: 8px;
   pointer-events: none;
   /* container ignores clicks; child toasts are clickable */
@@ -1068,449 +1277,46 @@ html.dark #sidebar-hamburger {
   align-items: flex-start;
   gap: 10px;
   background: var(--bg-surface);
-  color: var(--text-primary);
+  color: #ffffff !important; /* all toast text white */
+  font-weight: 700; /* bold text for all toasts */
   border: 1px solid var(--input-border);
   border-left: 4px solid var(--page-color);
   border-radius: 12px;
   padding: 12px 16px;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15), 0 4px 10px rgba(0, 0, 0, 0.1);
   pointer-events: auto;
-  /* allow clicking close button */
   min-width: 280px;
   max-width: min(92vw, 500px);
   animation: toast-in 160ms ease-out;
 }
 
+/* Success: green background, white bold text */
 .toast--success {
-  background: var(--success-color);
-  border-left-color: var(--success-color);
-  color: var(--white);
+  background: #008000 !important;
+  border-left-color: #008000 !important;
+  color: #ffffff !important;
 }
 
-.toast--success .toast-icon {
-  color: var(--success-color);
-}
-
+/* Error / failure: red background, white bold text */
 .toast--error {
-  background: var(--error-color);
-  border-left-color: var(--error-color);
-  color: var(--white);
+  background: #dc143c !important;
+  border-left-color: #dc143c !important;
+  color: #ffffff !important;
 }
 
-.toast--error .toast-icon {
-  color: var(--error-color);
+/* Validation message (explicit): orange-red background, white bold text */
+.toast--validation,
+.toast--warning,
+.toast--validate {
+  background: #ff4500 !important;
+  border-left-color: #ff4500 !important;
+  color: #ffffff !important;
 }
 
-.toast--info {
-  background: var(--button-bg);
-  border-left-color: var(--button-bg);
-  color: var(--button-text);
-}
-
-.toast--info .toast-icon {
-  color: var(--blue-strong);
-}
-
-.toast-icon {
-  line-height: 1;
-  margin-top: 2px;
-  font-size: 1.125rem;
-}
-
-.toast-body {
-  flex: 1;
-  font-size: 0.9375rem;
-  line-height: 1.4;
-  color: inherit;
-  font-weight: 500;
-}
-
-.toast-close {
-  border: 0;
-  background: transparent;
-  color: inherit;
-  font-size: 1.25rem;
-  cursor: pointer;
-  padding: 0 4px;
-  margin-left: 6px;
-  opacity: 0.7;
-  transition: opacity 200ms ease;
-}
-
-.toast-close:hover {
-  opacity: 1;
-}
-
-@keyframes toast-in {
-  from {
-    opacity: 0;
-    transform: translateY(-6px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes toast-out {
-  from {
-    opacity: 1;
-    transform: translateY(0);
-  }
-
-  to {
-    opacity: 0;
-    transform: translateY(-6px);
-  }
-}
-
-#desktop-sidebar .rounded-xl.border,
-#mobile-menu .rounded-xl.border {
-  background: var(--section-bg) !important;
-  border-color: var(--button-border) !important;
-}
-
-/* Sidebar accordion headers and contents */
-#desktop-sidebar .accordion-toggle,
-#mobile-menu .accordion-toggle {
-  background: var(--bg-surface) !important;
-  color: var(--text-primary) !important;
-  border-bottom: 1px solid var(--button-border) !important;
-}
-
-/* Do not force icon colors; allow their own classes to control */
-
-#desktop-sidebar .accordion-content,
-#mobile-menu .accordion-content {
-  background: transparent !important;
-  color: var(--text-primary) !important;
-}
-
-/* Links/items inside Quick Actions, Account etc. */
-#desktop-sidebar a,
-#mobile-menu a {
-  color: var(--text-primary) !important;
-}
-
-#desktop-sidebar a:hover,
-#mobile-menu a:hover {
-  background: var(--bg-surface) !important;
-  /* keep uniform */
-}
-
-/* Borders should use a theme-aware variable */
-#desktop-sidebar {
-  border-right-color: var(--button-border) !important;
-}
-
-#mobile-menu {
-  border-top-color: var(--button-border) !important;
-}
-
-/* Normalize text color across main content and sidebars */
-#main-content,
-#main-content *,
-#desktop-sidebar,
-#desktop-sidebar *,
-#mobile-menu,
-#mobile-menu * {
-  color: var(--text-primary) !important;
-}
-
-/* Ensure input values are visible in both themes */
-input,
-textarea,
-select {
-  color: var(--text-primary) !important;
-  caret-color: var(--text-primary);
-  -webkit-text-fill-color: var(--text-primary);
-}
-
-/* Placeholder color tuned per theme */
-input::placeholder,
-textarea::placeholder,
-select::placeholder {
-  color: color-mix(in srgb, var(--text-primary) 60%, transparent);
-  opacity: 0.85;
-}
-
-/* Autofill text color (Chromium/WebKit) */
-input:-webkit-autofill,
-textarea:-webkit-autofill,
-select:-webkit-autofill {
-  -webkit-text-fill-color: var(--text-primary) !important;
-  box-shadow: 0 0 0 1000px var(--bg-surface) inset !important;
-  transition: background-color 9999s ease-in-out 0s;
-}
-
-/* Normalize icons only in main content; keep sidebar icon original colors */
-#main-content i {
-  color: var(--text-primary) !important;
-}
-
-/* Sidebar typography: make all sidebar text bold */
-#desktop-sidebar,
-#desktop-sidebar *,
-#mobile-menu,
-#mobile-menu * {
-  font-weight: 600 !important;
-}
-
-/* Mobile menu fade/slide transitions
-   We use a `.mobile-open` class to control visibility so we can animate opacity
-   and transform. The JS will add/remove `.mobile-open` and only toggle display
-   (Tailwind `hidden`) after the transition completes. */
-#mobile-menu {
-  opacity: 0;
-  transform: translateY(-8px);
-  transition: opacity 260ms ease-in-out,
-    transform 320ms cubic-bezier(0.2, 0.8, 0.2, 1);
-  will-change: opacity, transform;
-  pointer-events: none;
-}
-
-#mobile-menu.mobile-open {
-  opacity: 1;
-  transform: translateY(0);
-  pointer-events: auto;
-}
-
-/* Overlay that fades in behind the mobile/desktop sidebar */
-#sidebar-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.35);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 260ms ease-in-out;
-  z-index: 36;
-  /* below sidebars (z-40) but above page content */
-}
-
-#sidebar-overlay.overlay-open {
-  opacity: 1;
-  pointer-events: auto;
-}
-
-/* ===== Floating Theme Toggle Slider (top-left under header) ===== */
-.theme-toggle-slider {
-  position: absolute;
-  top: 100%;
-  left: 20px;
-  margin-top: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 120px;
-  height: 44px;
-  background: var(--bg-surface);
-  border: 2px solid var(--button-bg);
-  border-radius: 22px;
-  cursor: pointer;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);
-  overflow: hidden;
-  z-index: 1500;
-  transition: background 0.3s ease, border-color 0.3s ease;
-}
-
-.theme-toggle-slider .toggle-text {
-  flex: 1;
-  text-align: center;
-  font-size: calc(var(--font-size-base) * 0.875);
-  font-weight: 600;
-  color: var(--text-primary);
-  opacity: 0.5;
-  transition: opacity 0.3s ease;
-  z-index: 1;
-}
-
-.theme-toggle-slider .toggle-thumb {
-  position: absolute;
-  width: 50%;
-  height: 100%;
-  background: var(--button-bg);
-  border-radius: 20px;
-  top: 0;
-  left: 0;
-  transition: left 0.3s ease, background 0.3s ease;
-  z-index: 0;
-}
-
-/* Active states */
-:root[data-theme="light"] .theme-toggle-slider .light {
-  opacity: 1;
-}
-
-:root[data-theme="light"] .theme-toggle-slider .toggle-thumb {
-  left: 0;
-}
-
-:root[data-theme="dark"] .theme-toggle-slider .dark {
-  opacity: 1;
-}
-
-:root[data-theme="dark"] .theme-toggle-slider .toggle-thumb {
-  left: 50%;
-}
-
-/* Draggable state */
-.theme-toggle-slider {
-  cursor: grab;
-}
-
-.theme-toggle-slider.dragging {
-  cursor: grabbing;
-}
-
-/* ===== Idle Warning Modal ===== */
-#idleWarningModal {
-  position: fixed;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  display: none;
-  align-items: center;
-  justify-content: center;
-  background: rgba(0, 0, 0, 0.45);
-  z-index: 9999;
-}
-
-#idleWarningModal .iw-box {
-  background: var(--bg-surface);
-  color: var(--text-primary);
-  padding: 20px;
-  border-radius: 10px;
-  min-width: 320px;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
-  text-align: center;
-}
-
-#idleWarningModal h3 {
-  margin: 0 0 8px 0;
-  font-size: 1.1rem;
-}
-
-#idleWarningModal p {
-  margin: 6px 0;
-}
-
-.iw-btn-row {
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-  margin-top: 12px;
-}
-
-.iw-btn {
-  padding: 8px 14px;
-  border-radius: 6px;
-  cursor: pointer;
-  border: none;
-  font-weight: 600;
-}
-
-.iw-btn.extend {
-  background: var(--button-bg);
-  color: var(--button-text);
-}
-
-.iw-btn.logout {
-  background: transparent;
-  color: var(--error-color);
-  border: 2px solid var(--error-color);
-}
-
-/* Small pulse effect used on logout */
-.logout-pulse {
-  animation: logoutPulse 0.8s ease-in-out;
-}
-
-@keyframes logoutPulse {
-  0% {
-    transform: scale(1);
-    box-shadow: 0 0 0 rgba(0, 0, 0, 0);
-  }
-
-  50% {
-    transform: scale(1.05);
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
-  }
-
-  100% {
-    transform: scale(1);
-    box-shadow: 0 0 0 rgba(0, 0, 0, 0);
-  }
-}
-
-/* Page color utilities: use --page-color for selected/highlighted elements */
-.selected-bg {
-  background-color: var(--page-color) !important;
-  color: var(--button-text) !important;
-}
-
-/* Navbar icon interactions (eye-catching micro-interactions) */
-.nav-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  transition: transform 0.18s ease, color 0.18s ease, filter 0.18s ease;
-  will-change: transform;
-}
-
-.nav-icon:hover {
-  transform: translateY(-3px) scale(1.06);
-  filter: drop-shadow(0 6px 18px rgba(0, 0, 0, 0.12));
-}
-
-.nav-icon:active {
-  transform: translateY(-1px) scale(0.98);
-}
-
-/* Notification badge bounce + pulse */
-.notif-badge {
-  animation: pulse 2s infinite ease-in-out;
-  transform-origin: center;
-}
-
-@keyframes pulse {
-  0% {
-    transform: scale(1);
-    opacity: 1;
-  }
-
-  50% {
-    transform: scale(1.08);
-    opacity: 0.9;
-  }
-
-  100% {
-    transform: scale(1);
-    opacity: 1;
-  }
-}
-
-/* Small attention bounce used when new notification arrives */
-@keyframes bounce-in {
-  0% {
-    transform: translateY(-6px) scale(0.95);
-    opacity: 0;
-  }
-
-  60% {
-    transform: translateY(2px) scale(1.05);
-    opacity: 1;
-  }
-
-  100% {
-    transform: translateY(0) scale(1);
-    opacity: 1;
-  }
-}
-
-.notif-attention {
-  animation: bounce-in 480ms cubic-bezier(0.2, 0.9, 0.2, 1);
+/* Ensure toast icons / close buttons contrast on colored backgrounds */
+.toast .toast-icon,
+.toast .toast-close {
+  color: #ffffff !important;
 }
 
 /* Theme toggle ring and focus */
@@ -1898,13 +1704,13 @@ nav img[src*="HIA_logo.png"] {
 [data-theme="dark"] #themeToggle {
   background: rgba(255, 255, 255, 0.1);
   border-color: rgba(255, 255, 255, 0.2);
-  color: #e2e8f0;
+  color: var(--color-e2e8f0);
 }
 
 [data-theme="light"] #themeToggle {
   background: rgba(255, 255, 255, 0.8);
   border-color: rgba(0, 0, 0, 0.1);
-  color: #1e293b;
+  color: var(--color-1e293b);
 }
 
 /* Enhanced card shadows for both themes */
@@ -1958,7 +1764,7 @@ button#loginBtn:focus * {
 [data-theme="dark"] .btn-primary:hover {
   background: linear-gradient(
     135deg,
-    var(--indigo-800),
+    var(--color-1e3a8a),
     var(--indigo-900)
   ) !important;
 }
@@ -2025,13 +1831,17 @@ button#loginBtn:focus * {
   overflow: hidden;
 }
 
-/* Desktop grid view for permits: modern card layout */
+/* Permits grid/list view: stacked list on mobile, grid on desktop */
 .permits-grid {
-  display: none;
+  /* Default to stacked list so cards are visible on small screens */
+  display: block;
   gap: 1rem;
   margin: 0 0 0.5rem 0;
   padding-left: 0.75rem;
   padding-right: 0.75rem;
+  box-sizing: border-box;
+  width: 100%;
+  overflow: hidden;
 }
 
 /* Space between section header and permits content */
@@ -2045,12 +1855,96 @@ button#loginBtn:focus * {
   border-radius: 12px;
   padding: 1rem;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
   min-height: 120px;
   transition: transform 180ms cubic-bezier(0.2, 0.8, 0.2, 1),
     box-shadow 180ms ease, border-color 180ms ease;
+  box-sizing: border-box;
+  min-width: 0; /* allow the card to shrink below its content if needed */
+  overflow: hidden;
+  display: grid; /* using grid for internal layout */
+}
+
+/* Improved internal layout for permit cards */
+.permit-card {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-rows: auto auto 1fr;
+  grid-template-areas:
+    "header header"
+    "title title"
+    "meta actions";
+  gap: 0.5rem 0.75rem;
+  align-items: start;
+  font-weight: 600;
+}
+
+.permit-card-header {
+  grid-area: header;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.permit-card .permit-title {
+  grid-area: title;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  /* emphasize the title */
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+/* Title block holds title and permit number stacked */
+.permit-title-block {
+  grid-area: title;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.permit-number {
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.permit-card .permit-meta {
+  grid-area: meta;
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.permit-card .permit-actions {
+  grid-area: actions;
+  justify-self: end;
+  align-self: center;
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap; /* allow action buttons to wrap to new line */
+  max-width: 100%;
+}
+
+@media (max-width: 640px) {
+  .permit-card {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto auto auto;
+    grid-template-areas:
+      "header"
+      "title"
+      "meta"
+      "actions";
+  }
+  .permit-card .permit-actions {
+    justify-self: stretch;
+    width: 100%;
+  }
 }
 
 .permit-card .permit-title {
@@ -2086,19 +1980,67 @@ button#loginBtn:focus * {
   border-color: color-mix(in srgb, var(--hia-blue) 16%, var(--input-border));
 }
 
-@media (min-width: 641px) {
-  /* show grid and hide table on desktop */
+/* Responsive grid: reduce columns as viewport narrows
+   - mobile (default): stacked list
+   - >=640px: 2 columns
+   - >=992px: 3 columns
+   - >=1280px: 4 columns */
+@media (min-width: 640px) {
   .permits-grid {
     display: grid;
-    /* Limit to a maximum of 4 columns for desktop row layout */
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    /* Use auto-fit to avoid horizontal overflow: columns will fit the container */
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
     gap: 1rem;
   }
 
-  /* hide the table on desktop; desktop uses cards */
+  /* hide the table on small+ screens; desktop uses cards */
   #permitsTable {
     display: none !important;
   }
+}
+
+@media (min-width: 992px) {
+  .permits-grid {
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  }
+}
+
+@media (min-width: 1280px) {
+  .permits-grid {
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  }
+}
+
+/* On small screens, hide the table and present cards as a vertical list */
+@media (max-width: 640px) {
+  #permitsTable {
+    display: none !important;
+  }
+  .permits-grid {
+    display: block;
+  }
+  .permits-grid > * {
+    margin-bottom: 0.75rem;
+  }
+}
+
+/* Increase font-weight for search input, status dropdown and the 'Showing x of y permits' text */
+#permitsSearchInput,
+#permitsStatusFilter {
+  font-weight: 600 !important;
+}
+
+#permitsStatusFilter option {
+  font-weight: 600 !important;
+}
+
+/* Emphasize the 'Showing x of y permits' area inside the submitted permits card */
+#submittedPermitsCard .text-sm {
+  font-weight: 600 !important;
+}
+#permitsShowingCount,
+#permitsTotalCount {
+  font-weight: 700 !important;
 }
 
 /* Monthly trend should fill the card - provide a generous height */
@@ -2217,6 +2159,167 @@ canvas[id$="Spark"] {
   .kpi-sparkline canvas {
     height: 32px !important; /* slightly larger on desktop */
   }
+
+  /* Approver hierarchy connector and cards (used in permit details modal) */
+  #permitDetailsModal .approver-row {
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+    align-items: center;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+  }
+  #permitDetailsModal .approver-card {
+    flex: 1 1 160px;
+    min-width: 140px;
+    background: var(--bg-surface);
+    border: 1px solid var(--input-border);
+    padding: 14px;
+    border-radius: 8px;
+  }
+  #permitDetailsModal .approver-card .title {
+    font-size: 12px;
+    color: var(--text-secondary);
+  }
+  #permitDetailsModal .approver-card .name {
+    font-weight: 600;
+    margin-top: 6px;
+  }
+  #permitDetailsModal .connector-horizontal {
+    flex: 1;
+    height: 20px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  /* Simple SVG arrow connector (horizontal on desktop, vertical on small screens) */
+  #permitDetailsModal .connector-horizontal {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  #permitDetailsModal .connector-line {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  #permitDetailsModal .connector-svg {
+    display: block;
+    max-width: 100%;
+    height: auto;
+  }
+
+  /* desktop: horizontal line with arrowhead */
+  #permitDetailsModal .connector-svg line {
+    stroke: var(--connector-color);
+    stroke-width: 6;
+    stroke-linecap: round;
+  }
+  #permitDetailsModal .connector-svg polygon {
+    fill: var(--connector-color);
+  }
+
+  /* mobile: stack cards vertically and rotate connector to vertical */
+  /* Desktop: cards side-by-side, arrow horizontal (default glyph points right) */
+  #permitDetailsModal .approver-row {
+    flex-direction: row;
+    align-items: center;
+  }
+  #permitDetailsModal .connector-horizontal {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  #permitDetailsModal .connector-line {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  #permitDetailsModal .connector-svg {
+    width: 36px;
+    height: 24px;
+  }
+  #permitDetailsModal .connector-char {
+    transform: rotate(0deg);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Small screens: stack cards vertically and rotate arrow to point downwards */
+  @media (max-width: 700px) {
+    /* keep cards side-by-side on small screens; allow horizontal scroll if necessary */
+    #permitDetailsModal .approver-row {
+      flex-direction: row;
+      align-items: center;
+      flex-wrap: nowrap;
+    }
+    #permitDetailsModal .connector-horizontal {
+      width: 100%;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 8px 0;
+    }
+    #permitDetailsModal .connector-line {
+      width: 100%;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    #permitDetailsModal .connector-svg {
+      width: 24px;
+      height: 36px;
+    }
+    #permitDetailsModal .connector-char {
+      transform: rotate(90deg);
+      font-size: 28px;
+      padding: 6px 10px;
+    }
+  }
+
+  @media (max-width: 420px) {
+    /* further reduce sizes on very small screens */
+    #permitDetailsModal .connector-horizontal,
+    #permitDetailsModal .connector-line {
+      height: 36px;
+    }
+    #permitDetailsModal .connector-char {
+      font-size: 24px;
+      padding: 6px 8px;
+    }
+  }
+
+  /* Arrow glyph connector (alternative to SVG) */
+  #permitDetailsModal .connector-char {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    line-height: 1;
+    font-weight: 700;
+    color: var(--connector-color);
+    background: color-mix(in srgb, var(--connector-color) 10%, transparent);
+    padding: 6px 10px;
+    border-radius: 8px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+  }
+
+  @media (max-width: 700px) {
+    #permitDetailsModal .connector-char {
+      transform: rotate(90deg);
+      font-size: 24px;
+      padding: 6px 8px;
+    }
+  }
 }
 
 /* SVG sparklines match canvas sizing for crisp rendering */
@@ -2230,6 +2333,19 @@ canvas[id$="Spark"] {
   .kpi-sparkline svg {
     height: 32px !important;
   }
+}
+
+/* Emphasize the 'Change:' line and percentage in KPI tiles (analytics) */
+#permitAnalyticsContent .text-xs,
+#approvalAnalyticsContent .text-xs {
+  font-weight: 600 !important; /* make the label and value more prominent */
+  color: var(--text-secondary) !important;
+}
+
+#permitAnalyticsContent .text-xs span[id$="Change"],
+#approvalAnalyticsContent .text-xs span[id$="Change"] {
+  font-weight: 700 !important; /* bold the percentage value */
+  color: var(--text-primary) !important;
 }
 
 /* On narrow screens (card layout), let sparklines fill the card width */
@@ -2258,7 +2374,7 @@ canvas[id$="Spark"] {
 
 @media (prefers-color-scheme: dark) {
   .quick-action {
-    background: #0f1724;
+    background: var(--color-0f1724);
     /* darker surface */
     color: var(--text-primary);
   }
@@ -2275,12 +2391,12 @@ canvas[id$="Spark"] {
 
 /* Input validation states enhanced */
 .form-group input.valid {
-  border-color: #10b981 !important;
+  border-color: var(--color-10b981) !important;
   box-shadow: 0 0 0 3px rgba(240, 241, 243, 0.2) !important;
 }
 
 .form-group input.invalid {
-  border-color: #ef4444 !important;
+  border-color: var(--color-ef4444) !important;
   box-shadow: 0 0 0 3px rgba(240, 241, 243, 0.2) !important;
 }
 
@@ -2468,329 +2584,349 @@ select.error {
 }
 
 [data-theme="dark"] #permitTable tbody td a:hover {
-  color: #93c5fd;
+  color: var(--color-93c5fd);
 }
 
-/* Signup modal theming: ensure form elements follow theme variables and
-   floating labels don't carry a solid background so they blend with theme. */
-/* Signup modal styles removed — signup UI has been removed from shared layout.
-   If you keep a standalone signup page, migrate any required styles into that
-   page's CSS or a dedicated signup stylesheet. */
+/* LIGHT THEME VARIABLES */
+:root[data-theme="light"] {
+  /* Headings */
+  --theme-heading-color: #000080;
 
-/* =====================
-   Admin page styles (merged from admin inline styles)
-   These were previously inlined in admin/admin.html — kept scoped to admin selectors.
-   Avoid duplicating rules already present in shared theme; these are minimal and
-   targeted to admin page components.
-*/
-.expandBtn i {
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-.expandBtn.active i {
-  transform: rotate(180deg);
-}
-.panel {
-  overflow: hidden;
-  transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s ease;
-}
+  /* Permit number */
+  --theme-permit-number: var(--theme-permit-number);
 
-/* Zebra striping and hover for admin tables */
-#usersTable tbody tr:nth-child(odd),
-#permitsTable tbody tr:nth-child(odd) {
-  background-color: rgba(15, 23, 42, 0.02);
-}
-#usersTable tbody tr:hover,
-#permitsTable tbody tr:hover {
-  background-color: rgba(15, 23, 42, 0.04);
-}
+  /* Toasts */
+  --theme-toast-bg: #fffff0;
+  --theme-toast-success-text: #008000;
+  --theme-toast-error-text: #dc143c;
 
-@media (prefers-color-scheme: dark) {
-  #usersTable tbody tr:nth-child(odd),
-  #permitsTable tbody tr:nth-child(odd) {
-    background-color: rgba(255, 255, 255, 0.02);
-  }
-  #usersTable tbody tr:hover,
-  #permitsTable tbody tr:hover {
-    background-color: rgba(255, 255, 255, 0.03);
-  }
+  /* Cards */
+  --theme-card-hover-bg: #faebd7;
+
+  /* Dropdowns */
+  --theme-dropdown-bg: #ffffff;
+  --theme-dropdown-text: var(--text-primary);
+
+  /* Buttons */
+  --theme-logout-font: #b22222;
+  --theme-logout-bg: #ffffff;
+  --theme-logout-border: #b22222;
+  --theme-logout-hover-bg: #dc143c;
+
+  --theme-login-bg: #000080;
+  --theme-login-border: #ffffff;
+  --theme-login-text: #ffffff;
+  --theme-login-hover-bg: #cd5c5c;
+
+  --theme-submit-bg: #000080;
+  --theme-submit-border: #ffffff;
+  --theme-submit-text: #ffffff;
+  --theme-submit-hover-bg: #cd5c5c;
+
+  --theme-delete-bg: #b22222;
+  --theme-delete-border: #dc143c;
+  --theme-delete-text: #ffffff;
+  --theme-delete-hover-bg: #dc143c;
 }
 
-#usersTable,
-#permitsTable {
-  border-collapse: separate;
-  border-spacing: 0;
+/* DARK THEME VARIABLES */
+:root[data-theme="dark"] {
+  /* Page text */
+  --text-primary: #ffffff;
+
+  /* Headings (kept per request) */
+  --theme-heading-color: #ffffff;
+
+  /* Permit number (kept same color as requested) */
+  --theme-permit-number: var(--theme-permit-number);
+
+  /* Toasts: white text; backgrounds per request */
+  --theme-toast-bg: var(--bg-surface);
+  --theme-toast-success-text: #ffffff;
+  --theme-toast-error-text: #ffffff;
+  --theme-toast-success-bg: #008000;
+  --theme-toast-error-bg: #dc143c;
+
+  /* Cards: subtle hover + deeper 3D shadow */
+  --theme-card-hover-bg: rgba(255, 255, 255, 0.03);
+  --theme-card-3d-shadow: 0 22px 36px rgba(0, 0, 0, 0.55);
+
+  /* Dropdowns */
+  --theme-dropdown-bg: #28283b;
+  --theme-dropdown-text: #ffffff;
+
+  /* Buttons */
+  --theme-logout-font: #b22222;
+  --theme-logout-bg: #ffffff;
+  --theme-logout-border: #b22222;
+  --theme-logout-hover-bg: #dc143c;
+
+  --theme-login-bg: #000080;
+  --theme-login-border: #ffffff;
+  --theme-login-text: #ffffff;
+  --theme-login-hover-bg: #cd5c5c;
+
+  --theme-submit-bg: #000080;
+  --theme-submit-border: #ffffff;
+  --theme-submit-text: #ffffff;
+  --theme-submit-hover-bg: #cd5c5c;
+
+  --theme-delete-bg: #b22222;
+  --theme-delete-border: #dc143c;
+  --theme-delete-text: #ffffff;
+  --theme-delete-hover-bg: #dc143c;
 }
 
-#usersTable thead th,
-#permitsTable thead th {
-  border-bottom: 1px solid var(--input-border);
-  background-color: var(--bg-surface);
-  color: var(--text-primary);
-  font-weight: 700;
+/* -----------------------------
+   Component rules (use above variables)
+   ----------------------------- */
+
+/* Headings: use theme heading color (overrides body text color) */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  color: var(--theme-heading-color) !important;
 }
 
-#usersTable th,
-#usersTable td,
-#permitsTable th,
-#permitsTable td {
-  border-right: 1px solid rgba(255, 255, 255, 0.04);
-}
-
-#usersTable tr th:last-child,
-#usersTable tr td:last-child,
-#permitsTable tr th:last-child,
-#permitsTable tr td:last-child {
-  border-right: none;
-}
-
-#usersTable tbody td:first-child,
-#permitsTable tbody td:first-child {
-  background-color: var(--bg-surface);
-  font-weight: 600;
-  padding-left: 1rem;
-  border-right: 1px solid var(--input-border);
-  color: var(--text-primary);
-}
-
-.stats-grid .text-center {
-  position: relative;
-  padding-top: 1.75rem;
-}
-.stats-grid .text-center .text-sm {
-  position: absolute;
-  top: 0.5rem;
-  left: 0.75rem;
-  font-weight: 700;
-  font-size: 0.85rem;
-  color: var(--text-primary);
-}
-.stats-grid .text-center .w-12,
-.stats-grid .text-center .text-2xl {
-  margin-top: 0.5rem;
-}
-
-#usersTable th,
-#usersTable td,
-#permitsTable th,
-#permitsTable td {
-  border: 1px solid var(--input-border) !important;
-}
-
-/* Allow permit number cell to wrap and break long tokens */
+/* Permit number styling */
+.permit-number,
 #permitsTable td[data-label="Permit Number"],
-#permitsTable td[data-label="Permit Number"] a {
-  white-space: normal !important;
-  word-break: break-word !important;
-  overflow-wrap: anywhere !important;
+.permit-card .permit-number {
+  font-weight: 700;
+  color: var(--theme-permit-number) !important;
 }
 
-#usersTable,
-#permitsTable {
-  border: 1px solid var(--input-border);
-  border-collapse: separate;
-  border-spacing: 0;
-  border-radius: 0.375rem;
-  overflow: hidden;
+/* Toasts: base background and type styles */
+.toast {
+  background: var(--theme-toast-bg) !important;
+  color: var(--text-primary) !important;
+}
+.toast--success {
+  color: var(--theme-toast-success-text) !important;
+  background: var(--theme-toast-bg) !important;
+}
+:root[data-theme="dark"] .toast--success {
+  color: var(--theme-toast-success-text) !important;
+  background: var(--theme-toast-success-bg) !important;
+}
+.toast--error {
+  color: var(--theme-toast-error-text) !important;
+  background: var(--theme-toast-bg) !important;
+}
+:root[data-theme="dark"] .toast--error {
+  color: var(--theme-toast-error-text) !important;
+  background: var(--theme-toast-error-bg) !important;
 }
 
-/* Responsive: convert users table to stacked card layout on small screens */
-@media (max-width: 640px) {
-  /* hide headers and force table container to behave like a block list */
-  #usersTable thead,
-  #permitsTable thead {
-    display: none;
-  }
-
-  /* Force table and its sections to stop using table layout */
-  #usersTable,
-  #usersTable tbody,
-  #permitsTable,
-  #permitsTable tbody {
-    display: block !important;
-    width: 100% !important;
-    border: none !important;
-  }
-
-  /* Prevent the overflow wrapper from adding horizontal scroll on mobile */
-  .overflow-x-auto {
-    overflow: visible !important;
-  }
-
-  /* Make each row a standalone card */
-  #usersTable tr,
-  #permitsTable tr {
-    display: block !important;
-    margin-bottom: 0.75rem;
-    border: 1px solid var(--input-border);
-    border-radius: 0.375rem;
-    padding: 0.75rem;
-    background: var(--section-bg);
-    box-shadow: none;
-  }
-
-  /* Maintain gap between the (hidden) table header and the first card */
-  #usersTable,
-  #permitsTable {
-    padding-top: 0.6rem;
-  }
-
-  #usersTable tr:first-child,
-  #permitsTable tr:first-child {
-    margin-top: 0.25rem;
-  }
-
-  /* Each cell becomes a labeled inline line inside the card: "Label : Value" */
-  #usersTable td,
-  #permitsTable td {
-    display: flex !important;
-    align-items: center;
-    gap: 0.5rem;
-    width: 100% !important;
-    padding: 0.35rem 0 !important;
-    border: none !important;
-    border-bottom: 1px dashed rgba(0, 0, 0, 0.06);
-    background: transparent;
-  }
-
-  #usersTable td:last-child,
-  #permitsTable td:last-child {
-    border-bottom: none !important;
-  }
-
-  /* Show label inline before the value as "Label :" */
-  #usersTable td::before,
-  #permitsTable td::before {
-    content: attr(data-label) " :";
-    display: inline-block;
-    font-weight: 600;
-    color: var(--text-secondary);
-    margin: 0;
-    flex: 0 0 auto;
-  }
+/* Cards: subtle hover and (dark) 3D hover */
+.card,
+.permit-card,
+.section-card {
+  transition: transform 200ms ease, box-shadow 220ms ease, background 160ms ease;
+}
+:root[data-theme="light"] .card:hover,
+:root[data-theme="light"] .permit-card:hover,
+:root[data-theme="light"] .section-card:hover {
+  background: var(--theme-card-hover-bg) !important;
+  transform: translateY(-4px);
+  box-shadow: 0 10px 24px rgba(16, 24, 40, 0.06);
+}
+:root[data-theme="dark"] .card:hover,
+:root[data-theme="dark"] .permit-card:hover,
+:root[data-theme="dark"] .section-card:hover {
+  background: var(--theme-card-hover-bg) !important;
+  transform: translateY(-6px);
+  box-shadow: var(--theme-card-3d-shadow) !important;
 }
 
-/* Center table cell data on desktop screens for a cleaner look */
-@media (min-width: 641px) {
-  /* Center table body cells horizontally and vertically for desktop */
-  #permitsTable tbody td,
-  #usersTable tbody td {
-    text-align: center;
-    vertical-align: middle;
-  }
-
-  /* Center header text */
-  #permitsTable thead th,
-  #usersTable thead th {
-    text-align: center;
-    vertical-align: middle;
-  }
+/* Dropdowns/selects */
+select,
+select option,
+.dropdown,
+.dropdown-menu {
+  background: var(--theme-dropdown-bg) !important;
+  color: var(--theme-dropdown-text) !important;
+  border-color: var(--input-border) !important;
 }
 
-/* Replace shorthand '#' label with 'Serial No.' on small screens */
-#usersTable td[data-label="#"]::before,
-#permitsTable td[data-label="#"]::before {
-  content: "Serial No." ":";
+/* Logout button */
+.btn-logout,
+button[data-logout-trigger] {
+  color: var(--theme-logout-font) !important;
+  background: var(--theme-logout-bg) !important;
+  border: 1px solid var(--theme-logout-border) !important;
+  transition: background 160ms ease, transform 120ms ease, color 120ms ease;
 }
-
-/* Arrange name line with avatar on the same row */
-#usersTable td[data-label="Name"],
-#permitsTable td[data-label="Requester"] {
-  display: flex !important;
-  gap: 0.75rem;
-  align-items: center;
-}
-
-/* Hide name/requester initials (avatar) on small screens per request */
-#usersTable td[data-label="Name"] .avatar-accent,
-#permitsTable td[data-label="Requester"] .avatar-accent {
-  display: none !important;
-}
-
-/* Make action buttons full-width and prominent */
-#usersTable td[data-label="Actions"] .user-details-btn,
-#permitsTable td[data-label="Actions"] .btn-hia-soft {
-  width: 100%;
-  justify-content: center;
-  padding: 0.6rem 0.5rem;
-}
-
-/* Slightly smaller avatar inside a card */
-.avatar-accent {
-  width: 36px;
-  height: 36px;
-  font-size: 0.85rem;
-}
-
-/* Remove background colors from Role and Status columns (desktop + mobile) */
-#usersTable td[data-label="Role"],
-#usersTable td[data-label="Status"],
-#permitsTable td[data-label="Status"] {
-  background: transparent !important;
-}
-
-/* Ensure any badge or inline element inside those cells does not retain a colored background */
-#usersTable td[data-label="Status"] .status-badge,
-#permitsTable td[data-label="Status"] .status-badge,
-#usersTable td[data-label="Status"] span.inline-flex,
-#permitsTable td[data-label="Status"] span.inline-flex,
-#usersTable td[data-label="Role"] .status-badge,
-#permitsTable td[data-label="Role"] .status-badge,
-/* Target role badge spans that use inline-flex / Tailwind classes */
-#usersTable td[data-label="Role"] span.inline-flex,
-#usersTable td[data-label="Role"] span,
-#usersTable td[data-label="Role"] .inline-flex {
-  background: transparent !important;
-  color: inherit !important;
-  padding: 0 !important;
-  border-radius: 0 !important;
-  box-shadow: none !important;
-}
-
-.section-card.collapsed .panel {
-  display: none !important;
-}
-
-/* approver stat icons */
-.stat-icon {
-  width: 80px;
-  height: 80px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 0.5rem; /* or keep square if desired */
-  color: var(--white);
-  flex-shrink: 0;
-}
-
-/* `.stat-icon--*` color variants removed — not referenced elsewhere in repository. */
-
-/* Chart container sizing */
-.chart-container {
-  position: relative;
-  height: 250px;
-  max-height: 250px;
-}
-
-/* Hidden utility */
-.hidden {
-  display: none;
-}
-
-:root[data-theme="light"] #global-header {
-  background: var(--hia-blue);
-}
-
-:root[data-theme="light"] #global-header,
-:root[data-theme="light"] #global-header h1,
-:root[data-theme="light"] #global-header a,
-:root[data-theme="light"] #global-header .nav-link {
+.btn-logout:hover,
+button[data-logout-trigger]:hover {
+  background: var(--theme-logout-hover-bg) !important;
   color: var(--white) !important;
 }
 
-/* Dark theme: ensure header text is white for readability */
-:root[data-theme="dark"] #global-header h1,
-:root[data-theme="dark"] #global-header,
-:root[data-theme="dark"] #global-header a,
-:root[data-theme="dark"] #global-header .nav-link {
+/* Login button */
+.btn-login,
+button#loginBtn {
+  color: var(--theme-login-text) !important;
+  background: var(--theme-login-bg) !important;
+  border: 1px solid var(--theme-login-border) !important;
+  transition: background 160ms ease, transform 120ms ease;
+}
+.btn-login:hover,
+button#loginBtn:hover {
+  background: var(--theme-login-hover-bg) !important;
+}
+
+/* Submit button (primary) */
+.btn-submit,
+button[type="submit"],
+input[type="submit"] {
+  color: var(--theme-submit-text) !important;
+  background: var(--theme-submit-bg) !important;
+  border: 1px solid var(--theme-submit-border) !important;
+  transition: background 160ms ease;
+}
+.btn-submit:hover,
+button[type="submit"]:hover,
+input[type="submit"]:hover {
+  background: var(--theme-submit-hover-bg) !important;
+}
+
+/* Delete / Danger action */
+.btn-delete,
+button.btn-danger {
+  color: var(--theme-delete-text) !important;
+  background: var(--theme-delete-bg) !important;
+  border: 1px solid var(--theme-delete-border) !important;
+  transition: background 160ms ease, transform 120ms ease;
+}
+.btn-delete:hover,
+button.btn-danger:hover {
+  background: var(--theme-delete-hover-bg) !important;
   color: var(--white) !important;
+}
+
+/* Modal form buttons — apply role-based theme colors inside modals */
+.modal,
+.modal * {
+  /* ensure modal elements inherit theme tokens for consistent rendering */
+  transition: background-color 160ms ease, color 160ms ease,
+    border-color 160ms ease;
+}
+
+/* Submit / primary buttons inside modals */
+.modal button[type="submit"],
+.modal .btn-submit,
+#permit-form-modal button[type="submit"],
+#permit-form-modal .btn-submit {
+  color: var(--theme-submit-text) !important;
+  background: var(--theme-submit-bg) !important;
+  border: 1px solid var(--theme-submit-border) !important;
+}
+.modal button[type="submit"]:hover,
+.modal .btn-submit:hover,
+#permit-form-modal button[type="submit"]:hover,
+#permit-form-modal .btn-submit:hover {
+  background: var(--theme-submit-hover-bg) !important;
+}
+
+/* Login action buttons in modals (if present) */
+.modal .btn-login,
+.modal button.login,
+#loginModal .btn-login {
+  color: var(--theme-login-text) !important;
+  background: var(--theme-login-bg) !important;
+  border: 1px solid var(--theme-login-border) !important;
+}
+/* View and Download action buttons (semantic aliases) */
+/* View: secondary/neutral action */
+.btn-view {
+  background: var(--muted-100) !important;
+  color: var(--muted-700) !important;
+  border: 1px solid var(--input-border) !important;
+  transition: background 140ms ease, color 120ms ease, transform 120ms ease;
+}
+.btn-view:hover {
+  background: color-mix(in srgb, var(--muted-100) 88%, transparent) !important;
+}
+
+/* Download: primary/submit alias (uses theme submit tokens) */
+.btn-download {
+  color: var(--theme-submit-text) !important;
+  background: var(--theme-submit-bg) !important;
+  border: 1px solid var(--theme-submit-border) !important;
+  transition: background 140ms ease, transform 120ms ease;
+}
+.btn-download:hover {
+  background: var(--theme-submit-hover-bg) !important;
+}
+
+/* Ensure dark theme variants remain readable */
+[data-theme="dark"] .btn-view {
+  background: var(--section-bg) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--input-border) !important;
+}
+.modal .btn-login:hover,
+.modal button.login:hover {
+  background: var(--theme-login-hover-bg) !important;
+}
+
+/* Logout / sign-out action inside modals */
+.modal .btn-logout,
+.modal button[data-logout-trigger],
+#confirmLogoutModal .btn-logout {
+  color: var(--theme-logout-font) !important;
+  background: var(--theme-logout-bg) !important;
+  border: 1px solid var(--theme-logout-border) !important;
+}
+.modal .btn-logout:hover,
+.modal button[data-logout-trigger]:hover {
+  background: var(--theme-logout-hover-bg) !important;
+  color: var(--white) !important;
+}
+
+/* Delete / danger actions inside modals */
+.modal .btn-delete,
+.modal button.btn-danger,
+#confirmDeleteModal .btn-delete {
+  color: var(--theme-delete-text) !important;
+  background: var(--theme-delete-bg) !important;
+  border: 1px solid var(--theme-delete-border) !important;
+}
+.modal .btn-delete:hover,
+.modal button.btn-danger:hover {
+  background: var(--theme-delete-hover-bg) !important;
+  color: var(--white) !important;
+}
+
+/* Secondary/neutral modal buttons — keep muted appearance but theme-aware */
+.modal .btn-secondary,
+.modal button.cancel,
+#permit-form-modal .btn-secondary {
+  background: transparent !important;
+  color: var(--hia-blue) !important;
+  border: 1px solid var(--hia-blue) !important;
+}
+.modal .btn-secondary:hover {
+  background: color-mix(in srgb, var(--hia-blue) 8%, transparent) !important;
+}
+
+/* Datepicker (Flatpickr) month dropdown: force theme dropdown colors */
+.flatpickr-calendar select.flatpickr-monthDropdown-month,
+.flatpickr-calendar .flatpickr-monthDropdown-month,
+.flatpickr-calendar select.flatpickr-monthDropdown-month option {
+  background: var(--theme-dropdown-bg) !important;
+  color: var(--theme-dropdown-text) !important;
+  border-color: var(--input-border) !important;
+}
+
+/* Also apply to year input / numeric wrappers for consistency */
+.flatpickr-calendar .flatpickr-current-month .numInputWrapper input,
+.flatpickr-calendar .flatpickr-monthDropdown-month,
+.flatpickr-calendar .flatpickr-monthDropdown-month option {
+  background: var(--theme-dropdown-bg) !important;
+  color: var(--theme-dropdown-text) !important;
 }

@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Notification = require('../models/notification');
+const sse = require('../sse');
 
 // GET /notifications or /api/notifications
 // Returns notifications for the signed-in user from the database
@@ -36,6 +37,69 @@ router.get(['/notifications', '/api/notifications'], async (req, res) => {
   } catch (err) {
     console.error('Notifications endpoint error:', err);
     res.status(500).json({ message: 'Failed to fetch notifications', error: err.message });
+  }
+});
+
+// SSE stream for real-time notifications
+router.get('/api/notifications/stream', async (req, res) => {
+  try {
+    if (!req.session || !req.session.userId) {
+      return res.status(401).json({ message: 'Not authenticated' });
+    }
+    const userId = req.session.userId;
+
+    // Set SSE headers
+    res.writeHead(200, {
+      'Content-Type': 'text/event-stream',
+      'Cache-Control': 'no-cache',
+      Connection: 'keep-alive',
+      'X-Accel-Buffering': 'no',
+    });
+
+    // Add to clients map
+    sse.addClient(userId, res);
+
+    // Send initial payload (unread notifications)
+    const notifications = await Notification.find({ userId, read: false })
+      .sort({ createdAt: -1 })
+      .limit(50)
+      .lean();
+
+    const formatted = notifications.map((n) => ({
+      _id: n._id,
+      id: n._id.toString(),
+      userId: n.userId,
+      type: n.type,
+      title: n.title,
+      message: n.message,
+      read: n.read,
+      metadata: n.metadata || {},
+      createdAt: n.createdAt,
+    }));
+
+    // send init event as notification event with type 'init'
+    try {
+      res.write(`event: notification\n`);
+      res.write(`data: ${JSON.stringify({ type: 'init', notifications: formatted })}\n\n`);
+    } catch (e) {}
+
+    // keep connection alive with periodic comments
+    const iv = setInterval(() => {
+      try {
+        res.write(`: keepalive\n\n`);
+      } catch (e) {}
+    }, 20000);
+
+    // Cleanup on close
+    req.on('close', () => {
+      clearInterval(iv);
+      sse.removeClient(userId, res);
+    });
+  } catch (err) {
+    console.error('SSE stream error', err);
+    try {
+      res.end();
+    } catch (_) {}
   }
 });
 
@@ -93,6 +157,26 @@ async function createNotification(userId, type, title, message, metadata = {}) {
       read: false,
     });
     await notification.save();
+    // push via SSE (best-effort)
+    try {
+      const payload = {
+        type: 'notification',
+        notification: {
+          _id: notification._id,
+          id: notification._id.toString(),
+          userId: notification.userId,
+          type: notification.type,
+          title: notification.title,
+          message: notification.message,
+          read: notification.read,
+          metadata: notification.metadata || {},
+          createdAt: notification.createdAt,
+        },
+      };
+      sse.sendToUser(String(userId), payload);
+    } catch (e) {
+      console.warn('Failed to push SSE notification (non-fatal)', e);
+    }
     return notification;
   } catch (error) {
     console.error('Error creating notification:', error);

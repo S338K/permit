@@ -35,8 +35,12 @@ router.get('/permits/:id', async (req, res) => {
       return res.status(400).json({ message: 'Invalid permit ID' });
     }
     // Find permit and populate requester, preApprover, and approver user details
+    // Populate requester with fuller profile so frontend can show all requester details
     const permit = await Permit.findById(id)
-      .populate({ path: 'requester', select: 'fullName username email role' })
+      .populate({
+        path: 'requester',
+        select: 'fullName username email phone company role officeAddress lastLogin prevLogin',
+      })
       .populate({ path: 'preApprovedBy', select: 'fullName username email role' })
       .populate({ path: 'approvedBy', select: 'fullName username email role' });
     if (!permit) return res.status(404).json({ message: 'Permit not found' });

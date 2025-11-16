@@ -300,6 +300,14 @@ app.use('/preapprover', preApproverRoutes);
 const notificationRoutes = require('./routes/notifications');
 app.use(notificationRoutes);
 
+//=========DEBUG (dev-only)======= //
+try {
+  const debugRoutes = require('./routes/debug');
+  app.use(debugRoutes);
+} catch (e) {
+  logger.debug('No debug routes found or failed to load');
+}
+
 //=========REPORTS======= //
 const reportsRoutes = require('./routes/reports');
 app.use(reportsRoutes);

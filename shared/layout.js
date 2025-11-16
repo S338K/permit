@@ -42,7 +42,7 @@ if (!window.__API_BASE__ && !localStorage.getItem("API_BASE")) {
       try {
         localStorage.setItem(
           "ptw:session",
-          JSON.stringify({ ts: Date.now(), ...data }),
+          JSON.stringify({ ts: Date.now(), ...data })
         );
       } catch (_) {
         /* ignore */
@@ -252,7 +252,7 @@ if (!window.__API_BASE__ && !localStorage.getItem("API_BASE")) {
                 if (window.showToast)
                   window.showToast(
                     "error",
-                    "Your session expired — please sign in again.",
+                    "Your session expired — please sign in again."
                   );
               } catch (_) {}
               setTimeout(() => {
@@ -301,7 +301,7 @@ if (!window.__API_BASE__ && !localStorage.getItem("API_BASE")) {
               if (window.showToast)
                 window.showToast(
                   "error",
-                  "Your session ended because it was used on another device. Please sign in again.",
+                  "Your session ended because it was used on another device. Please sign in again."
                 );
             } catch (_) {
               /* ignore */
@@ -432,7 +432,7 @@ if (!window.__API_BASE__ && !localStorage.getItem("API_BASE")) {
       try {
         if (detectedUserId) {
           const perUser = localStorage.getItem(
-            USER_KEY_PREFIX + detectedUserId,
+            USER_KEY_PREFIX + detectedUserId
           );
           if (perUser && perUser.trim()) return perUser.trim();
         }
@@ -586,7 +586,7 @@ if (!window.__API_BASE__ && !localStorage.getItem("API_BASE")) {
     // dispatch a custom event so other scripts can react and for debugging
     try {
       window.dispatchEvent(
-        new CustomEvent("theme:changed", { detail: { theme: next } }),
+        new CustomEvent("theme:changed", { detail: { theme: next } })
       );
     } catch (e) {
       /* ignore */
@@ -611,7 +611,7 @@ if (!window.__API_BASE__ && !localStorage.getItem("API_BASE")) {
       if (hasFaMoon || hasFaSun) {
         // animate the visible icon(s) if present
         const icons = Array.from(
-          el.querySelectorAll("i.fa-moon, i.fa-sun, i.icon-sun, i.icon-moon"),
+          el.querySelectorAll("i.fa-moon, i.fa-sun, i.icon-sun, i.icon-moon")
         );
         icons.forEach((ic) => {
           try {
@@ -834,10 +834,10 @@ if (!window.__API_BASE__ && !localStorage.getItem("API_BASE")) {
       const facilityContainer = formRoot.querySelector("#facilityContainer");
       const facilitySel = formRoot.querySelector("#facility");
       const specifyTerminalContainer = formRoot.querySelector(
-        "#specifyTerminalContainer",
+        "#specifyTerminalContainer"
       );
       const specifyFacilityContainer = formRoot.querySelector(
-        "#specifyFacilityContainer",
+        "#specifyFacilityContainer"
       );
       const equipmentTypeSel = formRoot.querySelector("#equipmentTypeInput");
       const natureOfWorkSel = formRoot.querySelector("#natureOfWork");
@@ -1020,21 +1020,21 @@ if (!window.__API_BASE__ && !localStorage.getItem("API_BASE")) {
           populateSelect(
             terminalSel,
             "Select the Terminal",
-            lookups.terminals || [],
+            lookups.terminals || []
           );
         // Populate equipment types
         if (equipmentTypeSel)
           populateSelect(
             equipmentTypeSel,
             "Select Equipment Type",
-            lookups.equipmentTypes || [],
+            lookups.equipmentTypes || []
           );
         // Populate nature of work
         if (natureOfWorkSel)
           populateSelect(
             natureOfWorkSel,
             "Select Nature of Work",
-            lookups.natureOfWork || [],
+            lookups.natureOfWork || []
           );
 
         // Sync facilities based on current terminal selection
@@ -1050,7 +1050,7 @@ if (!window.__API_BASE__ && !localStorage.getItem("API_BASE")) {
       // Impact -> dependent fields
       const impactSel = formRoot.querySelector("#impact");
       const levelOfImpactContainer = formRoot.querySelector(
-        "#levelOfImpactContainer",
+        "#levelOfImpactContainer"
       );
       const equipmentType = formRoot.querySelector("#equipmentType");
       const impactDetails = formRoot.querySelector("#impactDetails");
@@ -1091,7 +1091,7 @@ if (!window.__API_BASE__ && !localStorage.getItem("API_BASE")) {
         "fmmWorkorder",
         "fmmWorkorderYes",
         "fmmWorkorderNo",
-        "fmmwrkordr",
+        "fmmwrkordr"
       );
       wireRadioPair("hseRisk", "hseRiskYes", "hseRiskNo", "hseassmnt");
       wireRadioPair("opRisk", "opRiskYes", "opRiskNo", "opsassmnt");
@@ -1180,7 +1180,7 @@ if (!window.__API_BASE__ && !localStorage.getItem("API_BASE")) {
           if (previewBtn) {
             const idx = parseInt(
               previewBtn.getAttribute("data-preview-index"),
-              10,
+              10
             );
             const f = selectedFiles[idx];
             if (!f) return;
@@ -1192,7 +1192,7 @@ if (!window.__API_BASE__ && !localStorage.getItem("API_BASE")) {
           if (removeBtn) {
             const idx = parseInt(
               removeBtn.getAttribute("data-remove-index"),
-              10,
+              10
             );
             if (
               Number.isInteger(idx) &&
@@ -1249,7 +1249,7 @@ if (!window.__API_BASE__ && !localStorage.getItem("API_BASE")) {
       if (docsFieldset) {
         docsFieldset.addEventListener(
           "change",
-          updateFileUploadVisibilityWrapper,
+          updateFileUploadVisibilityWrapper
         );
       }
 
@@ -1298,12 +1298,12 @@ if (!window.__API_BASE__ && !localStorage.getItem("API_BASE")) {
                 emailDB.trim().toLowerCase()
             ) {
               emailInput.setCustomValidity(
-                "Email does not match your registered email",
+                "Email does not match your registered email"
               );
               window.showToast &&
                 window.showToast(
                   "error",
-                  "Email does not match your registered email",
+                  "Email does not match your registered email"
                 );
             } else {
               emailInput.setCustomValidity("");
@@ -1316,12 +1316,12 @@ if (!window.__API_BASE__ && !localStorage.getItem("API_BASE")) {
               phoneInput.value.trim() !== phoneDB.trim()
             ) {
               phoneInput.setCustomValidity(
-                "Mobile number does not match your registered number",
+                "Mobile number does not match your registered number"
               );
               window.showToast &&
                 window.showToast(
                   "error",
-                  "Mobile number does not match your registered number",
+                  "Mobile number does not match your registered number"
                 );
             } else {
               phoneInput.setCustomValidity("");
@@ -1434,7 +1434,7 @@ if (!window.__API_BASE__ && !localStorage.getItem("API_BASE")) {
             filesInput && filesInput.files ? Array.from(filesInput.files) : [];
           if (!files.length)
             errors.push(
-              "Please upload required document(s) for the selected items",
+              "Please upload required document(s) for the selected items"
             );
           files.forEach((f) => {
             const ext = (f.name.split(".").pop() || "").toLowerCase();
@@ -1489,7 +1489,7 @@ if (!window.__API_BASE__ && !localStorage.getItem("API_BASE")) {
               errors.push("Email does not match your registered email");
             if (phoneDB && phoneVal && phoneVal !== phoneDB)
               errors.push(
-                "Mobile number does not match your registered number",
+                "Mobile number does not match your registered number"
               );
           }
         } catch (_) {
@@ -1546,7 +1546,7 @@ if (!window.__API_BASE__ && !localStorage.getItem("API_BASE")) {
         close();
         try {
           window.dispatchEvent(
-            new CustomEvent("permit:submitted", { detail: data }),
+            new CustomEvent("permit:submitted", { detail: data })
           );
         } catch (_) {}
       } catch (e) {
@@ -1814,7 +1814,7 @@ if (!window.__API_BASE__ && !localStorage.getItem("API_BASE")) {
       if (mobileMenu._closeHandler) {
         mobileMenu.removeEventListener(
           "transitionend",
-          mobileMenu._closeHandler,
+          mobileMenu._closeHandler
         );
         delete mobileMenu._closeHandler;
       }
@@ -1952,7 +1952,7 @@ if (!window.__API_BASE__ && !localStorage.getItem("API_BASE")) {
               /* ignore */
             }
             timers.delete(destId);
-          }, 150),
+          }, 150)
         );
       });
 
@@ -2010,7 +2010,7 @@ if (!window.__API_BASE__ && !localStorage.getItem("API_BASE")) {
       if (group) {
         document
           .querySelectorAll(
-            `.accordion-toggle[data-accordion-group="${group}"]`,
+            `.accordion-toggle[data-accordion-group="${group}"]`
           )
           .forEach((t) => {
             if (t === btn) return;
@@ -2103,8 +2103,8 @@ if (!window.__API_BASE__ && !localStorage.getItem("API_BASE")) {
           data && data.session && data.session.role
             ? data.session.role
             : u && u.role
-              ? u.role
-              : null;
+            ? u.role
+            : null;
 
         // Store role globally for other scripts to access
         window.__USER_ROLE__ = role;
@@ -2250,7 +2250,7 @@ if (!window.__API_BASE__ && !localStorage.getItem("API_BASE")) {
       btn.addEventListener("click", (e) => {
         e.preventDefault();
         openModal();
-      }),
+      })
     );
     if (cancelBtn)
       cancelBtn.addEventListener("click", (e) => {
@@ -2399,7 +2399,7 @@ if (!window.__API_BASE__ && !localStorage.getItem("API_BASE")) {
     }
     function meetsPolicy(pw) {
       return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d]).{8,}$/.test(
-        pw || "",
+        pw || ""
       );
     }
     function updateStrengthUI() {
@@ -2422,7 +2422,7 @@ if (!window.__API_BASE__ && !localStorage.getItem("API_BASE")) {
       btn.addEventListener("click", (e) => {
         e.preventDefault();
         open();
-      }),
+      })
     );
     // Delegated binding so dynamically cloned items in the mobile menu work too
     document.addEventListener("click", (e) => {
@@ -2499,7 +2499,7 @@ if (!window.__API_BASE__ && !localStorage.getItem("API_BASE")) {
                 if (window.showToast)
                   showToast(
                     "info",
-                    "Verification step unavailable; continue to update.",
+                    "Verification step unavailable; continue to update."
                   );
                 updateSubmitState();
                 return;
@@ -2799,14 +2799,14 @@ if (!window.__API_BASE__ && !localStorage.getItem("API_BASE")) {
     const detailTitle = document.getElementById("notification-detail-title");
     const detailTime = document.getElementById("notification-detail-time");
     const detailMessage = document.getElementById(
-      "notification-detail-message",
+      "notification-detail-message"
     );
     const detailMetadata = document.getElementById(
-      "notification-detail-metadata",
+      "notification-detail-metadata"
     );
     const detailIcon = document.getElementById("notification-detail-icon");
     const detailActionBtn = document.getElementById(
-      "notification-detail-action",
+      "notification-detail-action"
     );
 
     if (!bellBtn || !dropdown) return;
@@ -2890,8 +2890,8 @@ if (!window.__API_BASE__ && !localStorage.getItem("API_BASE")) {
               </div>
               <div class="flex-1 min-w-0">
                 <div class="flex items-start justify-between gap-2">
-                  <p class="text-sm font-medium text-[var(--text-primary)] line-clamp-1">${escapeHtml(
-                    notif.title || "Notification",
+                  <p class="text-sm font-medium text-primary line-clamp-1">${escapeHtml(
+                    notif.title || "Notification"
                   )}</p>
                   ${
                     unread
@@ -2899,11 +2899,11 @@ if (!window.__API_BASE__ && !localStorage.getItem("API_BASE")) {
                       : ""
                   }
                 </div>
-                <p class="text-xs text-[var(--text-primary)]/75 mt-1 line-clamp-2">${escapeHtml(
-                  notif.message || "",
+                <p class="text-xs text-primary opacity-75 mt-1 line-clamp-2">${escapeHtml(
+                  notif.message || ""
                 )}</p>
-                <p class="text-xs text-[var(--text-primary)]/60 mt-1">${formatNotificationTime(
-                  notif.createdAt,
+                <p class="text-xs text-primary opacity-60 mt-1">${formatNotificationTime(
+                  notif.createdAt
                 )}</p>
               </div>
             </div>
@@ -2967,7 +2967,7 @@ if (!window.__API_BASE__ && !localStorage.getItem("API_BASE")) {
                 <div class="flex items-center justify-between py-2 border-b border-gray-200 dark:border-gray-700">
                   <span class="text-gray-500 dark:text-gray-400">Permit Reference</span>
                   <span class="font-medium text-gray-800 dark:text-white">${escapeHtml(
-                    notif.metadata.permitNumber || notif.metadata.permitId,
+                    notif.metadata.permitNumber || notif.metadata.permitId
                   )}</span>
                 </div>
               `
@@ -2979,7 +2979,7 @@ if (!window.__API_BASE__ && !localStorage.getItem("API_BASE")) {
                 <div class="flex items-center justify-between py-2 border-b border-gray-200 dark:border-gray-700">
                   <span class="text-gray-500 dark:text-gray-400">Current Status</span>
                   <span class="font-semibold px-2 py-1 rounded text-xs ${getStatusBadgeClass(
-                    notif.metadata.status,
+                    notif.metadata.status
                   )}">${escapeHtml(notif.metadata.status)}</span>
                 </div>
               `
@@ -2991,7 +2991,7 @@ if (!window.__API_BASE__ && !localStorage.getItem("API_BASE")) {
                 <div class="py-2">
                   <p class="text-gray-500 dark:text-gray-400 text-xs mb-1">Additional Comments</p>
                   <p class="text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg italic">"${escapeHtml(
-                    notif.metadata.comments,
+                    notif.metadata.comments
                   )}"</p>
                 </div>
               `
@@ -3036,27 +3036,27 @@ if (!window.__API_BASE__ && !localStorage.getItem("API_BASE")) {
           if (status === "In Progress") {
             // Pre-approved case
             message = `Great news! Your permit <strong>${escapeHtml(
-              permitRef,
+              permitRef
             )}</strong> has been <strong>pre-approved</strong> by ${escapeHtml(
-              approverName,
+              approverName
             )}.`;
             message += `<br><br>The permit is now marked as <strong>In Progress</strong> and has been forwarded to the final approver for review and validation. You will receive another notification once the final approval decision is made.`;
             if (meta.comments) {
               message += `<br><br>The pre-approver noted: <em>"${escapeHtml(
-                meta.comments,
+                meta.comments
               )}"</em>`;
             }
           } else {
             // Final approved case
             message = `Congratulations! Your permit <strong>${escapeHtml(
-              permitRef,
+              permitRef
             )}</strong> has been <strong>fully approved</strong> by ${escapeHtml(
-              approverName,
+              approverName
             )}.`;
             message += `<br><br>The permit is now active and you can proceed with the planned work according to the terms and conditions specified in the permit.`;
             if (meta.comments) {
               message += `<br><br>Approval notes: <em>"${escapeHtml(
-                meta.comments,
+                meta.comments
               )}"</em>`;
             }
           }
@@ -3064,9 +3064,9 @@ if (!window.__API_BASE__ && !localStorage.getItem("API_BASE")) {
 
         case "permit_rejected":
           message = `Unfortunately, your permit <strong>${escapeHtml(
-            permitRef,
+            permitRef
           )}</strong> has been <strong>rejected</strong> by ${escapeHtml(
-            approverName,
+            approverName
           )}.`;
 
           if (
@@ -3082,7 +3082,7 @@ if (!window.__API_BASE__ && !localStorage.getItem("API_BASE")) {
 
           if (meta.comments) {
             message += `<br><br>Reason for rejection: <em>"${escapeHtml(
-              meta.comments,
+              meta.comments
             )}"</em>`;
           } else {
             message += `<br><br>No specific reason was provided. Please contact the approver for more details.`;
@@ -3091,10 +3091,10 @@ if (!window.__API_BASE__ && !localStorage.getItem("API_BASE")) {
 
         case "permit_updated":
           message = `Your permit <strong>${escapeHtml(
-            permitRef,
+            permitRef
           )}</strong> has been <strong>updated</strong>.`;
           message += `<br><br>The current status is now <strong>${escapeHtml(
-            status,
+            status
           )}</strong>. `;
 
           if (meta.approverName) {
@@ -3103,7 +3103,7 @@ if (!window.__API_BASE__ && !localStorage.getItem("API_BASE")) {
 
           if (meta.comments) {
             message += `<br><br>Update notes: <em>"${escapeHtml(
-              meta.comments,
+              meta.comments
             )}"</em>`;
           }
 
@@ -3112,7 +3112,7 @@ if (!window.__API_BASE__ && !localStorage.getItem("API_BASE")) {
 
         case "permit_submitted":
           message = `Your permit <strong>${escapeHtml(
-            permitRef,
+            permitRef
           )}</strong> has been successfully submitted for review.`;
           message += `<br><br>It is currently <strong>Pending</strong> and awaiting review by the pre-approver. You will receive notifications as your permit moves through the approval workflow.`;
           break;
@@ -3152,7 +3152,7 @@ if (!window.__API_BASE__ && !localStorage.getItem("API_BASE")) {
 
         // Remove notification from local array
         const index = notifications.findIndex(
-          (n) => (n._id || n.id) === notificationId,
+          (n) => (n._id || n.id) === notificationId
         );
         if (index > -1) {
           notifications.splice(index, 1);
@@ -3166,7 +3166,7 @@ if (!window.__API_BASE__ && !localStorage.getItem("API_BASE")) {
         console.error("Error marking notification as read:", e);
         // On error, still try to remove from local array
         const index = notifications.findIndex(
-          (n) => (n._id || n.id) === notificationId,
+          (n) => (n._id || n.id) === notificationId
         );
         if (index > -1) {
           notifications.splice(index, 1);
@@ -3301,9 +3301,65 @@ if (!window.__API_BASE__ && !localStorage.getItem("API_BASE")) {
       }
     });
 
-    // Initial fetch and periodic updates
+    // Initial fetch and periodic updates (polling fallback)
     fetchNotifications();
-    setInterval(fetchNotifications, 60000); // Refresh every minute
+    let pollingInterval = setInterval(fetchNotifications, 60000); // Refresh every minute
+
+    // Initialize SSE for real-time notifications (will disable polling on success)
+    function initNotificationsSSE() {
+      try {
+        if (!window.EventSource) return;
+        const esUrl = apiUrl("/api/notifications/stream");
+        const es = new EventSource(esUrl);
+
+        es.addEventListener("open", () => {
+          // stop polling once SSE opens
+          if (pollingInterval) {
+            clearInterval(pollingInterval);
+            pollingInterval = null;
+          }
+        });
+
+        es.addEventListener("message", (ev) => {
+          try {
+            const payload = JSON.parse(ev.data);
+            if (!payload) return;
+            if (payload.type === "init") {
+              notifications = payload.notifications || [];
+              renderNotifications();
+            } else if (payload.type === "notification") {
+              // Add to local list and re-render
+              const notif = payload.notification;
+              if (notif) {
+                // ensure newest on top
+                notifications.unshift(notif);
+                renderNotifications();
+              }
+            }
+          } catch (e) {
+            console.warn("SSE message parse error", e);
+          }
+        });
+
+        es.addEventListener("error", (err) => {
+          // Attempt reconnect: EventSource auto-reconnects, but if closed, fall back to polling
+          if (es.readyState === EventSource.CLOSED) {
+            try {
+              if (!pollingInterval)
+                pollingInterval = setInterval(fetchNotifications, 60000);
+            } catch (_) {}
+          }
+        });
+
+        // keep a reference to allow future control if needed
+        window.__ptw_notifications_es = es;
+      } catch (e) {
+        console.warn("Failed to init notifications SSE", e);
+      }
+    }
+
+    // Try to start SSE connection immediately
+    initNotificationsSSE();
   })();
 
   // --- Announcement Button (Admin Only) ---
@@ -3325,7 +3381,7 @@ if (!window.__API_BASE__ && !localStorage.getItem("API_BASE")) {
             // Create a body-level overlay so it covers the entire viewport
             try {
               let bodyOv = document.querySelector(
-                "[data-announcement-body-overlay]",
+                "[data-announcement-body-overlay]"
               );
               if (!bodyOv) {
                 bodyOv = document.createElement("div");
@@ -3350,7 +3406,7 @@ if (!window.__API_BASE__ && !localStorage.getItem("API_BASE")) {
             // Focus management for accessibility
             try {
               const closeBtn = document.getElementById(
-                "announcementModalClose",
+                "announcementModalClose"
               );
               if (closeBtn) closeBtn.focus();
             } catch (_) {}
@@ -3421,10 +3477,10 @@ if (!window.__API_BASE__ && !localStorage.getItem("API_BASE")) {
         // Use apiUrl so requests go to backend port (5000) when front-end served from Live Server (5500)
         const url = apiUrl(
           `/api/reports?start=${encodeURIComponent(
-            startDate,
+            startDate
           )}&end=${encodeURIComponent(endDate)}&format=${encodeURIComponent(
-            format,
-          )}`,
+            format
+          )}`
         );
         const res = await fetch(url, { method: "GET", credentials: "include" });
 
@@ -3528,7 +3584,7 @@ if (!window.__API_BASE__ && !localStorage.getItem("API_BASE")) {
       try {
         const res = await fetch(
           apiUrl(`/api/check-email?email=${encodeURIComponent(v)}`),
-          { credentials: "include" },
+          { credentials: "include" }
         );
         if (!res.ok) return;
         const j = await res.json();
@@ -3556,7 +3612,7 @@ if (!window.__API_BASE__ && !localStorage.getItem("API_BASE")) {
       try {
         const res = await fetch(
           apiUrl(`/api/check-phone?phone=${encodeURIComponent(v)}`),
-          { credentials: "include" },
+          { credentials: "include" }
         );
         if (!res.ok) return;
         const j = await res.json();
@@ -3593,7 +3649,7 @@ if (!window.__API_BASE__ && !localStorage.getItem("API_BASE")) {
       const role = document.getElementById("register_role").value;
       const password = document.getElementById("register_password").value;
       const confirmPassword = document.getElementById(
-        "register_confirmPassword",
+        "register_confirmPassword"
       ).value;
 
       if (!fullName) errors.push("Full name is required");
@@ -3609,7 +3665,7 @@ if (!window.__API_BASE__ && !localStorage.getItem("API_BASE")) {
         const cleanMobile = mobile.replace(/[\s\-()]/g, "");
         if (!/^\+974\d{8,}$/.test(cleanMobile))
           errors.push(
-            "Phone must start with +974 and contain at least 8 digits",
+            "Phone must start with +974 and contain at least 8 digits"
           );
       }
 
@@ -3618,11 +3674,11 @@ if (!window.__API_BASE__ && !localStorage.getItem("API_BASE")) {
       if (!password) errors.push("Password is required");
       else if (
         !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/.test(
-          password,
+          password
         )
       )
         errors.push(
-          "Password must be at least 8 characters with uppercase, lowercase, number, and special character",
+          "Password must be at least 8 characters with uppercase, lowercase, number, and special character"
         );
 
       if (!confirmPassword) errors.push("Please confirm your password");
@@ -3693,7 +3749,7 @@ if (!window.__API_BASE__ && !localStorage.getItem("API_BASE")) {
           if (window.showToast)
             window.showToast(
               "success",
-              data.message || "User registered successfully",
+              data.message || "User registered successfully"
             );
           close();
           // Refresh user list if on admin page
@@ -3755,14 +3811,14 @@ if (!window.__API_BASE__ && !localStorage.getItem("API_BASE")) {
       const debouncedRegEmail = debounce(checkRegisterEmailUnique, 200);
       regEmailEl.addEventListener("blur", debouncedRegEmail);
       regEmailEl.addEventListener("input", () =>
-        clearFieldError("register_email"),
+        clearFieldError("register_email")
       );
     }
     if (regMobileEl) {
       const debouncedRegMobile = debounce(checkRegisterMobileUnique, 200);
       regMobileEl.addEventListener("blur", debouncedRegMobile);
       regMobileEl.addEventListener("input", () =>
-        clearFieldError("register_mobile"),
+        clearFieldError("register_mobile")
       );
     }
   })();

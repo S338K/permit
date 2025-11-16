@@ -337,9 +337,26 @@ router.get('/permits', async (req, res) => {
       query.status = status;
     }
 
+    // Scope results by user role so non-admins only see permits relevant to them
+    const role = req.session.userRole;
+    const uid = req.session.userId;
+
+    if (!role || role === 'User') {
+      // Regular users: only their own permits
+      query.requester = uid;
+    } else if (role === 'Approver' || role === 'PreApprover') {
+      // Approvers / Pre-approvers: only permits they requested or that they have acted on
+      query.$or = [{ requester: uid }, { preApprovedBy: uid }, { approvedBy: uid }];
+    } else if (role === 'Admin') {
+      // Admins see everything
+    } else {
+      // Fallback: safest option is to show only user's own permits
+      query.requester = uid;
+    }
+
     const permits = await Permit.find(query)
-      .populate('requester', 'username email')
-      .populate('preApprovedBy', 'username email')
+      .populate('requester', 'username email phone fullName')
+      .populate('preApprovedBy', 'username email fullName')
       .sort({ createdAt: -1 })
       .limit(parseInt(limit))
       .skip((parseInt(page) - 1) * parseInt(limit));
@@ -370,7 +387,7 @@ router.get('/permit/:id', async (req, res) => {
 
     const Permit = require('../models/permit');
     const permit = await Permit.findById(req.params.id)
-      .populate('requester', 'username email fullName')
+      .populate('requester', 'username email phone fullName')
       .populate('preApprovedBy', 'username email fullName')
       .populate('approvedBy', 'username email fullName');
 

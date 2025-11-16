@@ -72,6 +72,16 @@ document.addEventListener("DOMContentLoaded", async function () {
     };
   }
 
+  // Simple HTML escape used when inserting fetched values
+  function escapeHtml(s) {
+    return String(s || "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/\"/g, "&quot;")
+      .replace(/'/g, "&#39;");
+  }
+
   // Fallback view trigger used by action buttons
   function triggerView(id) {
     try {
@@ -83,6 +93,12 @@ document.addEventListener("DOMContentLoaded", async function () {
     const ev = new CustomEvent("profile:view-permit", { detail: { id } });
     document.dispatchEvent(ev);
   }
+
+  // The shared permit modal (shared/permit-modal.js) provides the
+  // view behavior and `window.viewPermitDetails(id)`. This file uses
+  // `triggerView(id)` (defined above) which will call the shared API
+  // when present, or dispatch `profile:view-permit` for backwards
+  // compatibility.
 
   // Helpers for analytics
   function monthKeyFromDate(d) {
@@ -381,9 +397,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         card.className = "permit-card";
 
         const hdr = document.createElement("div");
-        hdr.style.display = "flex";
-        hdr.style.justifyContent = "space-between";
-        hdr.style.alignItems = "center";
+        hdr.className = "permit-card-header";
 
         const serial = document.createElement("div");
         serial.className = "text-sm text-[var(--text-secondary)]";
@@ -402,6 +416,22 @@ document.addEventListener("DOMContentLoaded", async function () {
         titleEl.className = "permit-title";
         titleEl.textContent = permit.permitTitle || "—";
 
+        // Permit number shown under the title
+        const numberSpan = document.createElement("div");
+        numberSpan.className =
+          "permit-number text-sm text-[var(--text-secondary)]";
+        if (permit.status === "Approved" && permit.permitNumber) {
+          numberSpan.textContent = permit.permitNumber;
+        } else {
+          numberSpan.textContent = "—";
+        }
+
+        // Title block: title then permit number
+        const titleBlock = document.createElement("div");
+        titleBlock.className = "permit-title-block";
+        titleBlock.appendChild(titleEl);
+        titleBlock.appendChild(numberSpan);
+
         const meta = document.createElement("div");
         meta.className = "permit-meta";
         const statusValue = permit.status || "Pending";
@@ -411,22 +441,13 @@ document.addEventListener("DOMContentLoaded", async function () {
         badge.classList.add("status-badge", statusClass);
         meta.appendChild(badge);
 
-        const numberSpan = document.createElement("span");
-        numberSpan.className = "text-sm text-[var(--text-secondary)]";
-        if (permit.status === "Approved" && permit.permitNumber) {
-          numberSpan.textContent = permit.permitNumber;
-        } else {
-          numberSpan.textContent = "—";
-        }
-        meta.appendChild(numberSpan);
-
         const actions = document.createElement("div");
         actions.className = "permit-actions";
         const viewBtn = document.createElement("button");
         viewBtn.className =
-          "inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium bg-[var(--muted-100)] text-[var(--muted-700)]";
+          "inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium bg-[var(--muted-100)] text-[var(--muted-700)] btn-view";
         viewBtn.type = "button";
-        viewBtn.title = "View details";
+        viewBtn.title = "View Permit";
         viewBtn.textContent = "View";
         viewBtn.addEventListener("click", (e) => {
           e.preventDefault();
@@ -436,9 +457,10 @@ document.addEventListener("DOMContentLoaded", async function () {
         if (permit.status === "Approved" && permit.permitNumber) {
           const dlBtn = document.createElement("button");
           dlBtn.className =
-            "inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium bg-hia-blue text-white";
+            "inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium bg-white text-hia-blue btn-download btn-submit";
           dlBtn.type = "button";
           dlBtn.title = "Download PDF";
+
           dlBtn.textContent = "Download";
           dlBtn.addEventListener("click", (e) => {
             handlePermitClick(e, permit._id, permit.permitNumber);
@@ -447,7 +469,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         }
 
         card.appendChild(hdr);
-        card.appendChild(titleEl);
+        card.appendChild(titleBlock);
         card.appendChild(meta);
         card.appendChild(actions);
 
@@ -499,9 +521,9 @@ document.addEventListener("DOMContentLoaded", async function () {
       // Simple actions: View and Download (if approved)
       const viewBtn = document.createElement("button");
       viewBtn.className =
-        "inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium bg-[var(--muted-100)] text-[var(--muted-700)]";
+        "inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium btn-view";
       viewBtn.type = "button";
-      viewBtn.title = "View details";
+      viewBtn.title = "View Permit";
       viewBtn.textContent = "View";
       viewBtn.addEventListener("click", (e) => {
         e.preventDefault();
@@ -511,7 +533,7 @@ document.addEventListener("DOMContentLoaded", async function () {
       if (permit.status === "Approved" && permit.permitNumber) {
         const dlBtn = document.createElement("button");
         dlBtn.className =
-          "inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium bg-hia-blue text-white ml-2";
+          "inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium bg-hia-blue text-white ml-2 btn-download btn-submit";
         dlBtn.type = "button";
         dlBtn.title = "Download PDF";
         dlBtn.textContent = "Download";
@@ -1121,7 +1143,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     });
   }
 
-  // Enhanced Profile Display Updates (optional helper defined in permitform.js)
+  // Enhanced Profile Display Updates //
   if (typeof updateEnhancedProfileDisplay === "function") {
     try {
       updateEnhancedProfileDisplay(user);
@@ -1714,6 +1736,18 @@ document.addEventListener("DOMContentLoaded", async function () {
     const statusCtx = document.getElementById("permitStatusChart");
     const trendCtx = document.getElementById("monthlyTrendChart");
 
+    // Resolve theme colors for charts so we follow CSS variables
+    const __css = getComputedStyle(document.documentElement);
+    const __textPrimary = (
+      __css.getPropertyValue("--text-primary") || "#273172"
+    ).trim();
+    const __inputBorder = (
+      __css.getPropertyValue("--input-border") || "rgba(0,0,0,0.06)"
+    ).trim();
+    const __hiaBlue = (
+      __css.getPropertyValue("--hia-blue") || __textPrimary
+    ).trim();
+
     // Status Distribution (live)
     if (statusCtx) {
       destroyChart("statusChart");
@@ -1763,6 +1797,19 @@ document.addEventListener("DOMContentLoaded", async function () {
       // Register centerText plugin locally and include it in the chart
       const plugins = [centerTextPlugin];
       const totalCount = data.reduce((a, b) => a + b, 0);
+
+      // Resolve theme colors from CSS variables so charts follow the active theme
+      const _css = getComputedStyle(document.documentElement);
+      const _textPrimary = (
+        _css.getPropertyValue("--text-primary") || "#273172"
+      ).trim();
+      const _inputBorder = (
+        _css.getPropertyValue("--input-border") || "rgba(0,0,0,0.06)"
+      ).trim();
+      const _centerColor = (
+        _css.getPropertyValue("--hia-blue") || _textPrimary
+      ).trim();
+
       window.chartInstances.statusChart = new Chart(statusCtx, {
         type: "doughnut",
         data: {
@@ -1779,21 +1826,26 @@ document.addEventListener("DOMContentLoaded", async function () {
           responsive: true,
           maintainAspectRatio: false,
           cutout: "60%",
-          // centerText options will be used by the plugin; provide initial value
+          // Use a single plugins object so our centerText and legend/tooltip options coexist
           plugins: {
             centerText: {
               value: totalCount,
-              color: "#273172",
+              color: _centerColor,
               font: "600 20px system-ui, -apple-system, 'Segoe UI'",
             },
-          },
-          plugins: {
             legend: {
               position: "bottom",
-              labels: { padding: 12, usePointStyle: true, font: { size: 12 } },
+              labels: {
+                padding: 12,
+                usePointStyle: true,
+                font: { size: 12 },
+                color: _textPrimary,
+              },
             },
             tooltip: {
               enabled: true,
+              titleColor: _textPrimary,
+              bodyColor: _textPrimary,
               callbacks: {
                 label: function (context) {
                   const label = context.label || "";

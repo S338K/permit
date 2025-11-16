@@ -1,848 +1,1076 @@
-import { checkSession, initIdleTimer, logoutUser } from "../shared/session.js";
+import { checkSession, initIdleTimer } from "../shared/session.js";
 import { formatDate24 } from "../date-utils.js";
 import { API_BASE } from "../config.js";
 
+// Lightweight pre-approver client module
 let allPermits = [];
-let allActivities = [];
 let currentUser = null;
 let currentPermitId = null;
+let pollId = null;
+let statusChart = null;
+let monthlyChart = null;
+let approvedPermits = [];
 
-// Update dashboard statistics (cards only)
-function updateStats(permits = []) {
-  try {
-    const userId = currentUser && (currentUser.id || currentUser._id);
+function noop() {}
 
-    const normalized = permits.map((p) => ({
-      status: (p.status || "").toLowerCase(),
-      preApprovedBy: p.preApprovedBy,
-    }));
-
-    const total = normalized.length;
-    const pending = normalized.filter((p) => p.status === "pending").length;
-    const inProgress = normalized.filter(
-      (p) => p.status === "in progress",
-    ).length;
-    const rejected = normalized.filter((p) => p.status === "rejected").length;
-
-    // Scoped to current user
-    const preApprovedByMe = normalized.filter(
-      (p) => p.status === "in progress" && p.preApprovedBy === userId,
-    ).length;
-    const rejectedByMe = normalized.filter(
-      (p) => p.status === "rejected" && p.preApprovedBy === userId,
-    ).length;
-
-    // Update DOM counters if present
-    const setText = (id, value) => {
-      const el = document.getElementById(id);
-      if (el) el.textContent = String(value);
-    };
-    setText("totalPermitsCount", total);
-    setText("pendingReviewCount", pending);
-    setText("preApprovedCount", preApprovedByMe);
-    setText("rejectedByMeCount", rejectedByMe);
-    setText("inProgressCount", inProgress);
-
-    const myDecisions = preApprovedByMe + rejectedByMe;
-    const rate = myDecisions
-      ? Math.round((preApprovedByMe / myDecisions) * 100)
-      : 0;
-    const rateEl = document.getElementById("approvalRate");
-    if (rateEl) rateEl.textContent = `${rate}%`;
-  } catch (err) {
-    console.error("Failed to update stats", err);
-  }
+function debounce(fn, ms = 200) {
+  let t = null;
+  return (...args) => {
+    clearTimeout(t);
+    t = setTimeout(() => fn(...args), ms);
+  };
 }
 
-// Fetch permits for pre-approver
+function el(id) {
+  return document.getElementById(id);
+}
+
+function setText(id, val) {
+  const elmt = document.getElementById(id);
+  if (!elmt) return;
+  elmt.textContent =
+    typeof val === "string" || typeof val === "number"
+      ? val
+      : String(val || "");
+}
+
+// Fetch pending/submitted permits for pre-approver
 async function fetchPermits() {
   try {
-    const res = await fetch(`${API_BASE}/api/permits`, {
+    const res = await fetch(
+      `${API_BASE}/preapprover/permits?filter=submitted`,
+      {
+        credentials: "include",
+      }
+    );
+    if (!res.ok) {
+      if (res.status === 401) {
+        if (window.showToast)
+          window.showToast("error", "Unauthorized - please sign in");
+        allPermits = [];
+        return;
+      }
+      throw new Error("failed to fetch permits");
+    }
+    const body = await res.json();
+    allPermits = Array.isArray(body) ? body : body.permits || [];
+  } catch (err) {
+    console.error("preapprover: failed to fetch permits", err);
+    allPermits = [];
+  }
+}
+
+// Ensure shared toast helper is loaded (layout may load it later)
+function ensureToasts(timeout = 3000) {
+  return new Promise((resolve) => {
+    if (typeof window !== "undefined" && typeof window.showToast === "function")
+      return resolve(true);
+    const existing = Array.from(document.getElementsByTagName("script")).find(
+      (s) => s.src && s.src.indexOf("/shared/toast.js") !== -1
+    );
+    if (existing) {
+      let waited = 0;
+      const iv = setInterval(() => {
+        if (typeof window.showToast === "function") {
+          clearInterval(iv);
+          return resolve(true);
+        }
+        waited += 100;
+        if (waited >= timeout) {
+          clearInterval(iv);
+          return resolve(false);
+        }
+      }, 100);
+      return;
+    }
+    const s = document.createElement("script");
+    s.src = "/shared/toast.js";
+    s.async = true;
+    s.onload = () => resolve(true);
+    s.onerror = () => resolve(false);
+    document.head.appendChild(s);
+    setTimeout(
+      () =>
+        resolve(!!(window.showToast && typeof window.showToast === "function")),
+      timeout
+    );
+  });
+}
+
+async function fetchApprovedPermits() {
+  try {
+    const res = await fetch(`${API_BASE}/preapprover/my-actions`, {
       credentials: "include",
     });
-    if (!res.ok) throw new Error("Failed to fetch permits");
-    const data = await res.json();
-    allPermits = Array.isArray(data) ? data : data.permits || [];
-  } catch (err) {
-    console.error("Error fetching permits:", err);
-    allPermits = [];
-    showNotification("Unable to load permits from server.", "error");
-  }
-
-  // Update dashboard with latest data
-  updateStats(allPermits);
-  updatePermitTables();
-}
-function initializeSidebar() {
-  var sidebar = document.getElementById("sidebar");
-  var trigger = document.getElementById("sidebarTrigger");
-  var body = document.body;
-
-  // No sidebar or trigger present: safely no-op
-  if (!sidebar || !trigger) {
-    return;
-  }
-
-  function openSidebar() {
-    try {
-      sidebar.classList.add("active");
-    } catch (_) {}
-    try {
-      body.classList.add("sidebar-open");
-    } catch (_) {}
-  }
-
-  function closeSidebar() {
-    try {
-      sidebar.classList.remove("active");
-    } catch (_) {}
-    try {
-      body.classList.remove("sidebar-open");
-    } catch (_) {}
-  }
-
-  trigger.addEventListener("click", function (e) {
-    e.stopPropagation();
-    if (sidebar.classList.contains("active")) {
-      closeSidebar();
+    if (!res.ok) throw new Error("fetch approved failed");
+    const body = await res.json();
+    // API may return { preApproved: [...], approved: [...], rejected: [...] }
+    // Prefer `preApproved` (permits pre-approved by the current user). Fall back to `approved`.
+    if (Array.isArray(body.preApproved) && body.preApproved.length) {
+      approvedPermits = body.preApproved;
+    } else if (Array.isArray(body.approved) && body.approved.length) {
+      approvedPermits = body.approved;
     } else {
-      openSidebar();
+      approvedPermits = [];
     }
+  } catch (err) {
+    console.error("preapprover: failed to fetch approved permits", err);
+    approvedPermits = [];
+  }
+}
+
+function renderStats() {
+  // Legacy client-side stats renderer retained for fallback. Prefer server stats.
+  const total = allPermits.length;
+  const pending = allPermits.filter(
+    (p) => ((p.status || "") + "").toLowerCase() === "pending"
+  ).length;
+  const approved = allPermits.filter(
+    (p) => ((p.status || "") + "").toLowerCase() === "approved"
+  ).length;
+  const rejected = allPermits.filter(
+    (p) => ((p.status || "") + "").toLowerCase() === "rejected"
+  ).length;
+
+  setText("totalPermitsCount", total);
+  setText("pendingReviewCount", pending);
+  setText("preApprovedCount", approved);
+  setText("rejectedByMeCount", rejected);
+}
+
+async function fetchStats() {
+  try {
+    const res = await fetch(`${API_BASE}/preapprover/stats`, {
+      credentials: "include",
+    });
+    if (!res.ok) return;
+    const body = await res.json();
+    const total = Number(body.totalPermits || 0);
+    const pending = Number(body.pendingReview || 0);
+    const approved = Number(body.preApproved || 0);
+    const rejected = Number(body.rejectedByMe || 0);
+    setText("pendingReviewCount", pending);
+    setText("preApprovedCount", approved);
+    setText("rejectedByMeCount", rejected);
+    setText("totalPermitsCount", total);
+  } catch (err) {
+    // ignore - keep client-side counts
+  }
+}
+
+function escapeHtml(s) {
+  return String(s || "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function createPermitCard(p, idx) {
+  const a = document.createElement("article");
+  a.className =
+    "rounded-xl bg-[var(--bg-surface)] p-4 border border-[var(--input-border)]";
+
+  const hdr = document.createElement("div");
+  hdr.className =
+    "flex items-center justify-between mb-2 text-sm text-secondary";
+  hdr.innerHTML = `<div>#${idx}</div><div class="permit-submitted text-xs text-secondary">${
+    p.createdAt ? formatDate24(p.createdAt) : "—"
+  }</div>`;
+  // Build card contents (title, requester, status, actions)
+  const title = document.createElement("h3");
+  title.className = "text-sm font-semibold mb-1";
+  title.textContent = p.permitTitle || "Untitled permit";
+
+  const requester = document.createElement("div");
+  requester.className = "requester-name text-sm font-medium text-primary mb-2";
+  requester.textContent = p.requester?.fullName || p.requester?.username || "-";
+
+  const meta = document.createElement("div");
+  meta.className =
+    "flex items-center justify-between gap-2 text-xs text-secondary";
+
+  const status = document.createElement("div");
+  status.className = `status-badge ${(p.status || "")
+    .toLowerCase()
+    .replace(/\s+/g, "-")}`;
+  status.textContent = p.status || "Pending";
+
+  meta.appendChild(status);
+
+  // Actions: only provide 'View' here. Approve/Reject handled from modal where comments are required.
+  const actions = document.createElement("div");
+  actions.className = "mt-3 flex gap-2";
+  const view = document.createElement("button");
+  view.className = "px-3 py-1 rounded bg-[var(--input-bg)] view-btn";
+  view.textContent = "View";
+  view.addEventListener("click", () => viewPermitDetails(p._id));
+  actions.appendChild(view);
+
+  a.appendChild(hdr);
+  a.appendChild(title);
+  a.appendChild(requester);
+  a.appendChild(meta);
+  a.appendChild(actions);
+  return a;
+}
+
+function createPermitRow(p, idx) {
+  const tr = document.createElement("tr");
+  const submitted = p.createdAt ? formatDate24(p.createdAt) : "—";
+  tr.innerHTML = `
+ 		<td class="px-6 py-3 text-sm">${idx}</td>
+ 		<td class="px-6 py-3 text-sm permit-submitted">${escapeHtml(submitted)}</td>
+ 		<td class="px-6 py-3 text-sm w-[320px] truncate">${escapeHtml(
+      p.permitTitle || "-"
+    )}</td>
+ 		<td class="px-6 py-3 text-sm"><span class="status-badge ${(p.status || "")
+      .toLowerCase()
+      .replace(/\s+/g, "-")}">${escapeHtml(p.status || "Pending")}</span></td>
+ 		<td class="px-6 py-3 text-sm requester-name">${escapeHtml(
+      p.requester?.username || "-"
+    )}</td>
+ 		<td class="px-6 py-3 text-sm"><button class="px-3 py-1 rounded bg-[var(--input-bg)] view-btn" data-action="view" data-id="${
+      p._id
+    }">View</button></td>
+ 	`;
+  const btn = tr.querySelector('button[data-action="view"]');
+  if (btn) btn.addEventListener("click", () => viewPermitDetails(p._id));
+  return tr;
+}
+
+function renderPermits() {
+  const grid = el("permitsGrid");
+  const tbody = el("permitsTableBody");
+  if (grid) grid.innerHTML = "";
+  if (tbody) tbody.innerHTML = "";
+
+  const search = (el("permitsSearchInput")?.value || "").toLowerCase();
+  const statusFilter = (el("permitsStatusFilter")?.value || "").toLowerCase();
+
+  let list = Array.isArray(allPermits) ? [...allPermits] : [];
+  list = list.filter((p) => {
+    const okSearch =
+      !search ||
+      (p.permitTitle || "").toLowerCase().includes(search) ||
+      (p._id || "").toLowerCase().includes(search) ||
+      (p.requester?.username || "").toLowerCase().includes(search);
+    const okStatus =
+      !statusFilter || ((p.status || "") + "").toLowerCase() === statusFilter;
+    return okSearch && okStatus;
   });
 
-  document.addEventListener("keydown", function (e) {
-    if (e.key === "Escape") closeSidebar();
+  // Only show newly submitted permits (submitted/pending).
+  // Do not show "in progress" or "approved" permits in this list.
+  list = list.filter((p) => {
+    const s = ((p.status || "") + "").toLowerCase();
+    return s === "submitted" || s === "pending";
   });
 
-  document.addEventListener("click", function (e) {
-    if (window.innerWidth <= 768 && sidebar.classList.contains("active")) {
-      if (!sidebar.contains(e.target) && !trigger.contains(e.target)) {
-        closeSidebar();
+  setText("permitsShowingCount", list.length);
+  setText("permitsTotalCount", allPermits.length);
+
+  list.forEach((p, i) => {
+    if (grid) grid.appendChild(createPermitCard(p, i + 1));
+    if (tbody) tbody.appendChild(createPermitRow(p, i + 1));
+  });
+}
+
+function renderApprovedPermits() {
+  const grid = el("approvedPermitsGrid");
+  const tbody = el("approvedPermitsTableBody");
+  if (grid) grid.innerHTML = "";
+  if (tbody) tbody.innerHTML = "";
+
+  setText(
+    "approvedShowingCount",
+    Array.isArray(approvedPermits) ? approvedPermits.length : 0
+  );
+
+  (approvedPermits || []).forEach((p, i) => {
+    if (grid) grid.appendChild(createPermitCard(p, i + 1));
+    if (tbody) tbody.appendChild(createPermitRow(p, i + 1));
+  });
+}
+
+function openModal() {
+  const m = el("permitDetailsModal");
+  if (!m) return;
+  m.classList.remove("hidden");
+  m.classList.add("flex");
+  m.setAttribute("aria-hidden", "false");
+  document.body.classList.add("modal-open");
+  setTimeout(() => m.classList.add("modal-show"), 20);
+  setTimeout(() => enableModalFocusTrap(m), 100);
+}
+function closeModal() {
+  const m = el("permitDetailsModal");
+  if (!m) return;
+  m.classList.remove("modal-show");
+  disableModalFocusTrap(m);
+  document.body.classList.remove("modal-open");
+  setTimeout(() => {
+    m.classList.add("hidden");
+    m.classList.remove("flex");
+    m.setAttribute("aria-hidden", "true");
+  }, 280);
+}
+
+// Focus trap utilities for modal accessibility
+let _lastFocusedBeforeModal = null;
+let _modalKeyHandler = null;
+function enableModalFocusTrap(modalEl) {
+  if (!modalEl) return;
+  _lastFocusedBeforeModal = document.activeElement;
+
+  const focusableSelector =
+    'a[href], area[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled]), [tabindex]:not([tabindex="-1"])';
+  const focusable = Array.from(
+    modalEl.querySelectorAll(focusableSelector)
+  ).filter((el) => el.offsetParent !== null);
+  const first = focusable[0] || modalEl;
+  const last = focusable[focusable.length - 1] || modalEl;
+
+  if (first && typeof first.focus === "function") first.focus();
+
+  _modalKeyHandler = function (e) {
+    if (e.key === "Tab") {
+      if (focusable.length === 0) {
+        e.preventDefault();
+        return;
+      }
+      if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      } else if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
       }
     }
-  });
-
-  window.addEventListener("resize", function () {
-    if (window.innerWidth > 768) {
-      try {
-        sidebar.classList.remove("active");
-      } catch (_) {}
-      try {
-        body.classList.remove("sidebar-open");
-      } catch (_) {}
-    }
-  });
-}
-function updatePermitTables() {
-  const pendingPermits = allPermits.filter(
-    (p) => (p.status || "").toLowerCase() === "pending",
-  );
-  const preApprovedPermits = allPermits.filter(
-    (p) =>
-      p.preApprovedBy === (currentUser?.id || "current-user") ||
-      (p.status || "").toLowerCase() === "in progress",
-  );
-
-  updateTableBody("pendingPermitsTable", pendingPermits, "pending");
-  updateTableBody("preApprovedPermitsTable", preApprovedPermits, "preapproved");
-}
-
-// Generic function to update table bodies
-function updateTableBody(tableId, permits, type) {
-  const table = document.getElementById(tableId);
-  if (!table) return;
-
-  const tbody = table.querySelector("tbody");
-  if (!tbody) return;
-
-  tbody.innerHTML = "";
-
-  if (permits.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="10" class="text-center py-4">No ${
-      type === "pending" ? "pending" : "pre-approved"
-    } permits found</td></tr>`;
-    return;
-  }
-
-  permits.forEach((permit) => {
-    const row = createPermitRow(permit, type);
-    tbody.appendChild(row);
-  });
-}
-
-// Create table row for permit data
-function createPermitRow(permit, type) {
-  const row = document.createElement("tr");
-
-  // Format dates
-  const submittedDate = permit.createdAt
-    ? formatDate24(new Date(permit.createdAt))
-    : "-";
-  const preApprovedDate = permit.preApprovedAt
-    ? formatDate24(new Date(permit.preApprovedAt))
-    : "-";
-
-  // Get priority badge
-  const getPriorityBadge = (priority) => {
-    const p = (priority || "").toLowerCase();
-    if (p === "high") return '<span class="badge bg-danger">High</span>';
-    if (p === "medium") return '<span class="badge bg-warning">Medium</span>';
-    if (p === "low") return '<span class="badge bg-success">Low</span>';
-    return '<span class="badge bg-secondary">-</span>';
   };
 
-  // Get status badge
-  const getStatusBadge = (status) => {
-    const s = (status || "").toLowerCase();
-    if (s === "pending") return '<span class="badge bg-warning">Pending</span>';
-    if (s === "in progress")
-      return '<span class="badge bg-info">In Progress</span>';
-    if (s === "approved")
-      return '<span class="badge bg-success">Approved</span>';
-    if (s === "rejected")
-      return '<span class="badge bg-danger">Rejected</span>';
-    return '<span class="badge bg-secondary">-</span>';
-  };
+  modalEl.addEventListener("keydown", _modalKeyHandler);
+}
 
-  if (type === "pending") {
-    row.innerHTML = `
-            <td class="small">${permit._id || "-"}</td>
-            <td class="small fw-medium">${permit.permitTitle || "-"}</td>
-            <td class="small">${permit.requester?.username || "-"}</td>
-            <td class="small">${submittedDate}</td>
-            <td class="small">${getPriorityBadge(permit.priority)}</td>
-            <td class="small">
-                <div class="btn-group btn-group-sm">
-                    <button class="btn btn-outline-primary btn-sm" onclick="viewPermitDetails('${
-                      permit._id
-                    }')" title="View Details">
-                        <i class="fas fa-eye"></i>
-                    </button>
-                    <button class="btn btn-success btn-sm" onclick="handlePermitAction('${
-                      permit._id
-                    }', 'preapprove')" title="Pre-Approve">
-                        <i class="fas fa-check"></i>
-                    </button>
-                    <button class="btn btn-danger btn-sm" onclick="handlePermitAction('${
-                      permit._id
-                    }', 'reject')" title="Reject">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-            </td>
-        `;
-  } else if (type === "preapproved") {
-    row.innerHTML = `
-            <td class="small">${permit._id || "-"}</td>
-            <td class="small fw-medium">${permit.permitTitle || "-"}</td>
-            <td class="small">${permit.requester?.username || "-"}</td>
-            <td class="small">${preApprovedDate}</td>
-            <td class="small">${permit.preApproverComments || "-"}</td>
-            <td class="small">${getStatusBadge(permit.status)}</td>
-            <td class="small">
-                <button class="btn btn-outline-primary btn-sm" onclick="viewPermitDetails('${
-                  permit._id
-                }')" title="View Details">
-                    <i class="fas fa-eye"></i>
-                </button>
-            </td>
-        `;
+function disableModalFocusTrap(modalEl) {
+  if (!modalEl) return;
+  if (_modalKeyHandler)
+    modalEl.removeEventListener("keydown", _modalKeyHandler);
+  _modalKeyHandler = null;
+  if (
+    _lastFocusedBeforeModal &&
+    typeof _lastFocusedBeforeModal.focus === "function"
+  ) {
+    _lastFocusedBeforeModal.focus();
   }
-
-  return row;
+  _lastFocusedBeforeModal = null;
 }
 
-// Fetch activity log
-function fetchActivityLog() {
-  allActivities = [
-    `Pre-approved permit P-003 for Fire Safety Equipment Check`,
-    `Reviewed permit P-002 for HVAC System Inspection`,
-    `Permit P-001 submitted for electrical maintenance work`,
-  ];
-  renderActivityLog(allActivities);
-}
+async function viewPermitDetails(id) {
+  if (!id) return;
+  currentPermitId = id;
+  const content = el("permitDetailsContent");
+  if (!content) return;
 
-// Render activity log
-function renderActivityLog(activities) {
-  const log = document.getElementById("activityLog");
-  if (!log) return;
-
-  log.innerHTML = "";
-  if (!activities.length) {
-    log.innerHTML = '<div class="text-muted">No recent activity.</div>';
-    return;
-  }
-
-  activities.forEach((activity, index) => {
-    const timeAgo =
-      index === 0 ? "2 hours ago" : index === 1 ? "1 day ago" : "2 days ago";
-    log.innerHTML += `
-            <div class="activity-item d-flex align-items-center mb-3">
-                <div class="activity-icon bg-warning text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
-                    <i class="fas fa-user-check"></i>
-                </div>
-                <div class="activity-content">
-                    <p class="mb-1">${activity}</p>
-                    <small class="text-muted">${timeAgo}</small>
-                </div>
-            </div>
-        `;
-  });
-}
-
-// View permit details
-function viewPermitDetails(permitId) {
-  const permit = allPermits.find((p) => p._id === permitId);
-  if (!permit) return;
-
-  currentPermitId = permitId;
-
-  const modalContent = document.getElementById("permitDetailsContent");
-  if (!modalContent) return;
-
-  const submittedDate = permit.createdAt
-    ? formatDate24(new Date(permit.createdAt))
-    : "-";
-  const startDate = permit.workStartDateTime
-    ? formatDate24(new Date(permit.workStartDateTime))
-    : "-";
-  const endDate = permit.workEndDateTime
-    ? formatDate24(new Date(permit.workEndDateTime))
-    : "-";
-
-  modalContent.innerHTML = `
-        <div class="container-fluid">
-            <div class="row">
-                <div class="col-md-6">
-                    <h6 class="fw-bold">Basic Information</h6>
-                    <table class="table table-sm">
-                        <tr><td><strong>Permit ID:</strong></td><td>${
-                          permit._id
-                        }</td></tr>
-                        <tr><td><strong>Title:</strong></td><td>${
-                          permit.permitTitle
-                        }</td></tr>
-                        <tr><td><strong>Status:</strong></td><td><span class="badge bg-warning">${
-                          permit.status
-                        }</span></td></tr>
-                        <tr><td><strong>Priority:</strong></td><td>${
-                          permit.priority || "-"
-                        }</td></tr>
-                    </table>
-                </div>
-                <div class="col-md-6">
-                    <h6 class="fw-bold">Requester Information</h6>
-                    <table class="table table-sm">
-                        <tr><td><strong>Name:</strong></td><td>${
-                          permit.requester?.username || "-"
-                        }</td></tr>
-                        <tr><td><strong>Email:</strong></td><td>${
-                          permit.requester?.email || "-"
-                        }</td></tr>
-                        <tr><td><strong>Submitted:</strong></td><td>${submittedDate}</td></tr>
-                    </table>
-                </div>
-            </div>
-            <div class="row mt-3">
-                <div class="col-12">
-                    <h6 class="fw-bold">Work Details</h6>
-                    <table class="table table-sm">
-                        <tr><td><strong>Description:</strong></td><td>${
-                          permit.description || "-"
-                        }</td></tr>
-                        <tr><td><strong>Start Date:</strong></td><td>${startDate}</td></tr>
-                        <tr><td><strong>End Date:</strong></td><td>${endDate}</td></tr>
-                    </table>
-                </div>
-            </div>
-        </div>
-    `;
-
-  const modal = new bootstrap.Modal(
-    document.getElementById("permitDetailsModal"),
-  );
-  modal.show();
-}
-
-// Handle permit actions (pre-approve/reject)
-function handlePermitAction(permitId, action) {
-  currentPermitId = permitId;
-
-  if (action === "preapprove") {
-    showApproveModal();
-  } else if (action === "reject") {
-    showRejectModal();
-  }
-}
-
-// Show approve modal
-function showApproveModal() {
-  const modal = new bootstrap.Modal(document.getElementById("approveModal"));
-  modal.show();
-}
-
-// Show reject modal
-function showRejectModal() {
-  const modal = new bootstrap.Modal(document.getElementById("rejectModal"));
-  modal.show();
-}
-
-// Pre-approve permit
-async function preApprovePermit(permitId, comments) {
+  // Fetch full permit details from API
   try {
-    const res = await fetch(`${API_BASE}/preapprover/approve/${permitId}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
+    const res = await fetch(`${API_BASE}/api/permits/${id}`, {
       credentials: "include",
+    });
+    if (!res.ok) throw new Error("failed to fetch permit");
+    const p = await res.json();
+
+    // Build modern modal form (readonly fields + comments textarea + actions)
+    const filesHtml = (p.files || [])
+      .map(
+        (f) =>
+          `<li class="flex items-center justify-between py-1"><span class="truncate">${escapeHtml(
+            f.originalName
+          )}</span><a class="text-sm text-hia-blue" target="_blank" rel="noopener noreferrer" href="${escapeHtml(
+            f.url
+          )}">Download</a></li>`
+      )
+      .join("");
+
+    const submittedLocal = p.createdAt
+      ? new Date(p.createdAt).toLocaleString()
+      : "-";
+    // Display start/end in user's local timezone for readability
+    const startDisplay = p.startDateTime
+      ? new Date(p.startDateTime).toLocaleString()
+      : "-";
+    const endDisplay = p.endDateTime
+      ? new Date(p.endDateTime).toLocaleString()
+      : "-";
+    // Values for editable inputs (ISO local format) — only used when editable
+    const startInputValue = p.startDateTime
+      ? new Date(p.startDateTime).toISOString().slice(0, 16)
+      : "";
+    const endInputValue = p.endDateTime
+      ? new Date(p.endDateTime).toISOString().slice(0, 16)
+      : "";
+
+    function renderRequester(r) {
+      if (!r)
+        return '<div class="text-sm text-secondary">No requester data</div>';
+      const addr = r.officeAddress
+        ? `${escapeHtml(r.officeAddress.buildingNo || "")} ${escapeHtml(
+            r.officeAddress.floorNo || ""
+          )} ${escapeHtml(r.officeAddress.streetNo || "")} ${escapeHtml(
+            r.officeAddress.zone || ""
+          )} ${escapeHtml(r.officeAddress.city || "")} ${escapeHtml(
+            r.officeAddress.country || ""
+          )} ${escapeHtml(r.officeAddress.poBox || "")}`
+            .replace(/\s+/g, " ")
+            .trim()
+        : "";
+      return `
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <div class="text-xs text-secondary">Full name</div>
+                <div class="mt-1 text-sm">${escapeHtml(
+                  r.fullName || r.username || "-"
+                )}</div>
+                <div class="text-xs text-secondary mt-2">Username</div>
+                <div class="mt-1 text-sm">${escapeHtml(r.username || "-")}</div>
+                <div class="text-xs text-secondary mt-2">Email</div>
+                <div class="mt-1 text-sm">${escapeHtml(r.email || "-")}</div>
+                <div class="text-xs text-secondary mt-2">Phone</div>
+                <div class="mt-1 text-sm">${escapeHtml(r.phone || "-")}</div>
+              </div>
+              <div>
+                <div class="text-xs text-secondary">Company</div>
+                <div class="mt-1 text-sm">${escapeHtml(r.company || "-")}</div>
+                <div class="text-xs text-secondary mt-2">Role</div>
+                <div class="mt-1 text-sm">${escapeHtml(r.role || "-")}</div>
+                <div class="text-xs text-secondary mt-2">Office Address</div>
+                <div class="mt-1 text-sm">${escapeHtml(addr || "-")}</div>
+              </div>
+            </div>`;
+    }
+
+    // Work details mapping — show important fields stored in DB
+    const workFields = [
+      ["Permit Title", p.permitTitle],
+      ["Permit Number", p.permitNumber],
+      ["Status", p.status],
+      ["Terminal", p.terminal],
+      ["Facility", p.facility],
+      ["Work Description", p.workDescription || p.description],
+      ["Impact", p.impact],
+      ["Equipment Type", p.equipmentTypeInput],
+      ["Impact Details", p.impactDetailsInput],
+      ["E-Permit", p.ePermit],
+      ["FMM Workorder", p.fmmWorkorder],
+      ["HSE Risk", p.hseRisk],
+      ["Ops Risk", p.opRisk],
+    ];
+
+    const workHtml = workFields
+      .map(
+        ([label, val]) =>
+          `<div class="mb-2"><div class="text-xs text-secondary">${escapeHtml(
+            label
+          )}</div><div class="mt-1 text-sm">${escapeHtml(
+            val || "-"
+          )}</div></div>`
+      )
+      .join("");
+
+    // Build comments / approver-hierarchy section depending on readonly state
+    const isReadOnlyModal = ["In Progress", "Approved"].includes(p.status);
+    const preApproverName = p.preApprovedBy
+      ? p.preApprovedBy.fullName || p.preApprovedBy.username || "-"
+      : p.preApproverName || "-";
+    const preApprovedAtDisplay = p.preApprovedAt
+      ? new Date(p.preApprovedAt).toLocaleString()
+      : "-";
+    const preApproverComments = p.preApproverComments || "-";
+
+    const approverName = p.approvedBy
+      ? p.approvedBy.fullName || p.approvedBy.username || "-"
+      : p.approverName || "-";
+    const approvedAtDisplay = p.approvedAt
+      ? new Date(p.approvedAt).toLocaleString()
+      : "-";
+    const approverComments = p.approverComments || "-";
+
+    const bothApproved = p.preApprovedAt && p.approvedAt;
+    const connectorColor = bothApproved
+      ? "var(--hia-green)"
+      : "var(--input-border)";
+
+    const commentsSection = isReadOnlyModal
+      ? `
+            <div class="bg-[var(--bg-surface)] border border-[var(--input-border)] rounded-xl p-5">
+              <h4 class="text-sm font-semibold text-primary mb-4">Approver Hierarchy</h4>
+              <div class="approver-row">
+                <div class="approver-card" role="group" aria-labelledby="preapprover-label">
+                  <div id="preapprover-label" class="title">Pre-Approver</div>
+                  <div class="name">${escapeHtml(preApproverName)}</div>
+                  <div class="text-xs text-secondary mt-2">Pre-Approved</div>
+                  <div class="mt-1 text-sm">${escapeHtml(
+                    preApprovedAtDisplay
+                  )}</div>
+                  <div class="text-xs text-secondary mt-3">Comments</div>
+                  <div class="mt-1 text-sm">${escapeHtml(
+                    preApproverComments
+                  )}</div>
+                </div>
+                <div class="connector-horizontal" aria-hidden="true" style="--connector-color: ${connectorColor}">
+                  <div class="connector-line" aria-hidden="true">
+                    <span class="connector-char" aria-hidden="true">🠖</span>
+                  </div>
+                </div>
+                <div class="approver-card" role="group" aria-labelledby="approver-label">
+                  <div id="approver-label" class="title">Approver</div>
+                  <div class="name">${escapeHtml(approverName)}</div>
+                  <div class="text-xs text-secondary mt-2">Approved</div>
+                  <div class="mt-1 text-sm">${escapeHtml(
+                    approvedAtDisplay
+                  )}</div>
+                  <div class="text-xs text-secondary mt-3">Comments</div>
+                  <div class="mt-1 text-sm">${escapeHtml(
+                    approverComments
+                  )}</div>
+                </div>
+              </div>
+            </div>
+          `
+      : `
+            <div class="bg-[var(--bg-surface)] border border-[var(--input-border)] rounded-xl p-5">
+              <h4 class="text-sm font-semibold text-primary mb-2">Comments</h4>
+              <div>
+                <label for="modalActionComments" class="block text-xs font-medium text-secondary mb-1">Action Comments</label>
+                <textarea id="modalActionComments" rows="4" placeholder="Enter comments for Pre-Approve or Reject (required)" class="w-full p-3 bg-[var(--input-bg)] border border-[var(--input-border)] rounded-md text-sm"></textarea>
+                <div class="text-xs text-secondary mt-2">Provide at least 3 characters explaining your decision.</div>
+              </div>
+            </div>
+          `;
+
+    content.innerHTML = `
+          <form id="permitModalForm" class="space-y-5">
+            <!-- Header Card with Permit ID and Status -->
+            <div class="bg-[var(--bg-surface)] border border-[var(--input-border)] rounded-xl p-5">
+              <div class="flex items-start justify-between mb-4">
+                <div>
+                  <div class="text-xs text-secondary mb-1">Permit ID</div>
+                  <div class="text-lg font-semibold permit-id-value">${escapeHtml(
+                    p._id || "-"
+                  )}</div>
+                </div>
+                <div class="text-right">
+                  <div class="text-xs text-secondary mb-1">Status</div>
+                  <span class="status-badge ${(p.status || "")
+                    .toLowerCase()
+                    .replace(/\s+/g, "-")}">${escapeHtml(
+      p.status || "Pending"
+    )}</span>
+                </div>
+              </div>
+
+              <div class="modal-divider" aria-hidden="true"></div>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                <div>
+                  <label class="block text-xs font-medium text-secondary mb-1">Permit Title</label>
+                  <div class="p-3 bg-[var(--input-bg)] border border-[var(--input-border)] rounded-md text-sm">${escapeHtml(
+                    p.permitTitle || "-"
+                  )}</div>
+                </div>
+                <div>
+                  <label class="block text-xs font-medium text-secondary mb-1">Permit Number</label>
+                  <div class="p-3 bg-[var(--input-bg)] border border-[var(--input-border)] rounded-md text-sm">${escapeHtml(
+                    p.permitNumber || "-"
+                  )}</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Requester Details Card -->
+            <div class="bg-[var(--bg-surface)] border border-[var(--input-border)] rounded-xl p-5">
+              <h4 class="text-sm font-semibold mb-4 text-primary">Requester Details</h4>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-xs font-medium text-secondary mb-1">Full name</label>
+                  <div class="p-3 bg-[var(--input-bg)] border border-[var(--input-border)] rounded-md text-sm">${escapeHtml(
+                    p.requester?.fullName || p.requester?.username || "-"
+                  )}</div>
+                </div>
+                <div>
+                  <label class="block text-xs font-medium text-secondary mb-1">Company</label>
+                  <div class="p-3 bg-[var(--input-bg)] border border-[var(--input-border)] rounded-md text-sm">${escapeHtml(
+                    p.requester?.company || "-"
+                  )}</div>
+                </div>
+                <div>
+                  <label class="block text-xs font-medium text-secondary mb-1">Role</label>
+                  <div class="p-3 bg-[var(--input-bg)] border border-[var(--input-border)] rounded-md text-sm">${escapeHtml(
+                    p.requester?.role || "-"
+                  )}</div>
+                </div>
+                <div>
+                  <label class="block text-xs font-medium text-secondary mb-1">Email</label>
+                  <div class="p-3 bg-[var(--input-bg)] border border-[var(--input-border)] rounded-md text-sm">${escapeHtml(
+                    p.requester?.email || "-"
+                  )}</div>
+                </div>
+                <div>
+                  <label class="block text-xs font-medium text-secondary mb-1">Phone</label>
+                  <div class="p-3 bg-[var(--input-bg)] border border-[var(--input-border)] rounded-md text-sm">${
+                    p.requester?.phone
+                      ? `<a href="tel:${escapeHtml(
+                          p.requester.phone
+                        )}" class="text-hia-blue font-medium">${escapeHtml(
+                          p.requester.phone
+                        )}</a>`
+                      : "-"
+                  }</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Work Details Card -->
+            <div class="bg-[var(--bg-surface)] border border-[var(--input-border)] rounded-xl p-5">
+              <h4 class="text-sm font-semibold mb-4 text-primary">Work Details</h4>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                ${workFields
+                  .map(
+                    ([label, val]) => `
+                  <div>
+                    <label class="block text-xs font-medium text-secondary mb-1">${escapeHtml(
+                      label
+                    )}</label>
+                    <div class="p-3 bg-[var(--input-bg)] border border-[var(--input-border)] rounded-md text-sm">${escapeHtml(
+                      val || "-"
+                    )}</div>
+                  </div>
+                `
+                  )
+                  .join("")}
+              </div>
+            </div>
+
+            <!-- Required Documents Card -->
+            <div class="bg-[var(--bg-surface)] border border-[var(--input-border)] rounded-xl p-5">
+              <div class="flex items-center justify-between mb-4">
+                <h4 class="text-sm font-semibold text-primary">Required Documents</h4>
+                <span class="text-xs text-secondary">${
+                  (p.files || []).length
+                } file(s)</span>
+              </div>
+              <div class="space-y-2">
+                ${
+                  (p.files || [])
+                    .map(
+                      (f) =>
+                        `<div class="flex items-center justify-between p-3 bg-[var(--input-bg)] border border-[var(--input-border)] rounded-md">
+                        <span class="text-sm truncate flex-1">${escapeHtml(
+                          f.originalName
+                        )}</span>
+                        <a class="ml-3 text-sm text-hia-blue font-medium" href="${escapeHtml(
+                          f.url
+                        )}" aria-label="Download ${escapeHtml(
+                          f.originalName
+                        )}" target="_blank" rel="noopener noreferrer">Download</a>
+                      </div>`
+                    )
+                    .join("") ||
+                  '<div class="p-3 bg-[var(--input-bg)] border border-[var(--input-border)] rounded-md text-sm text-secondary">No files attached</div>'
+                }
+              </div>
+            </div>
+
+            <!-- Date & Time -->
+            <div class="bg-[var(--bg-surface)] border border-[var(--input-border)] rounded-xl p-5">
+              <div class="flex items-center justify-between mb-4">
+                <h4 class="text-sm font-semibold text-primary">Date & Time</h4>
+              </div>
+              <!-- If permit is pre-approved/approved, show read-only display. Otherwise show editable inputs -->
+              ${
+                ["In Progress", "Approved"].includes(p.status)
+                  ? `
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div>
+                    <div class="text-xs text-secondary">Submitted</div>
+                    <div class="mt-1 p-3 bg-[var(--input-bg)] border border-[var(--input-border)] rounded-md text-sm">${escapeHtml(
+                      submittedLocal
+                    )}</div>
+                  </div>
+                  <div>
+                    <div class="text-xs text-secondary">Start</div>
+                    <div class="mt-1 p-3 bg-[var(--input-bg)] border border-[var(--input-border)] rounded-md text-sm">${escapeHtml(
+                      startDisplay
+                    )}</div>
+                  </div>
+                  <div>
+                    <div class="text-xs text-secondary">End</div>
+                    <div class="mt-1 p-3 bg-[var(--input-bg)] border border-[var(--input-border)] rounded-md text-sm">${escapeHtml(
+                      endDisplay
+                    )}</div>
+                  </div>
+                </div>
+              `
+                  : `
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div>
+                    <label class="block text-xs font-medium text-secondary mb-1">Submitted</label>
+                    <div class="p-3 bg-[var(--input-bg)] border border-[var(--input-border)] rounded-md text-sm">${escapeHtml(
+                      submittedLocal
+                    )}</div>
+                  </div>
+                  <div>
+                    <label for="editStartDateTime" class="block text-xs font-medium text-secondary mb-1">Start</label>
+                    <input id="editStartDateTime" type="text" class="w-full p-3 bg-[var(--input-bg)] border border-[var(--input-border)] rounded-md text-sm flatpickr-input" placeholder="Select start date & time" value="${escapeHtml(
+                      startInputValue
+                    )}" />
+                  </div>
+                  <div>
+                    <label for="editEndDateTime" class="block text-xs font-medium text-secondary mb-1">End</label>
+                    <input id="editEndDateTime" type="text" class="w-full p-3 bg-[var(--input-bg)] border border-[var(--input-border)] rounded-md text-sm flatpickr-input" placeholder="Select end date & time" value="${escapeHtml(
+                      endInputValue
+                    )}" />
+                  </div>
+                </div>
+                <div class="mt-4 text-right">
+                  <button type="button" id="saveTimesBtn" class="btn-submit px-3 py-2 rounded-md text-sm">Save Times</button>
+                </div>
+              `
+              }
+            </div>
+            ${commentsSection}
+          </form>
+        `;
+
+    // Initialize datetime pickers and wire Save
+    const startInput = document.getElementById("editStartDateTime");
+    const endInput = document.getElementById("editEndDateTime");
+    let startPicker = null;
+    let endPicker = null;
+    try {
+      if (startInput && endInput && window.flatpickr) {
+        const now = new Date();
+        const defaultStart = p.startDateTime ? new Date(p.startDateTime) : null;
+        const defaultEnd = p.endDateTime ? new Date(p.endDateTime) : null;
+
+        startPicker = window.flatpickr(startInput, {
+          enableTime: true,
+          dateFormat: "Y-m-d H:i",
+          minDate: now,
+          defaultDate: defaultStart,
+          onChange: (selectedDates) => {
+            const s = selectedDates && selectedDates[0];
+            const minForEnd = s && s > now ? s : now;
+            if (endPicker) endPicker.set("minDate", minForEnd);
+            const currEnd = endPicker?.selectedDates?.[0];
+            if (currEnd && s && currEnd < s) {
+              endPicker.setDate(s, true);
+            }
+          },
+          onOpen: () => {
+            // ensure minDate stays current if user opens later
+            startPicker.set("minDate", new Date());
+          },
+        });
+
+        endPicker = window.flatpickr(endInput, {
+          enableTime: true,
+          dateFormat: "Y-m-d H:i",
+          minDate: defaultStart && defaultStart > now ? defaultStart : now,
+          defaultDate: defaultEnd,
+          onOpen: () => {
+            const s = startPicker?.selectedDates?.[0];
+            const minForEnd = s && s > new Date() ? s : new Date();
+            endPicker.set("minDate", minForEnd);
+          },
+        });
+      }
+    } catch (_) {}
+
+    const saveBtn = document.getElementById("saveTimesBtn");
+    if (saveBtn) {
+      saveBtn.addEventListener("click", async () => {
+        try {
+          const sDate =
+            startPicker?.selectedDates?.[0] ||
+            (startInput?.value ? new Date(startInput.value) : null);
+          const eDate =
+            endPicker?.selectedDates?.[0] ||
+            (endInput?.value ? new Date(endInput.value) : null);
+          if (
+            !sDate ||
+            !eDate ||
+            isNaN(sDate.getTime()) ||
+            isNaN(eDate.getTime())
+          ) {
+            return (
+              window.showToast &&
+              window.showToast(
+                "error",
+                "Please select valid start and end times"
+              )
+            );
+          }
+          const nowCheck = new Date();
+          if (sDate < nowCheck || eDate < nowCheck) {
+            return (
+              window.showToast &&
+              window.showToast("error", "Past date/time is not allowed")
+            );
+          }
+          if (eDate < sDate) {
+            return (
+              window.showToast &&
+              window.showToast("error", "End time must be after start time")
+            );
+          }
+          const resp = await fetch(
+            `${API_BASE}/preapprover/permit/${p._id}/times`,
+            {
+              method: "PATCH",
+              credentials: "include",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                startDateTime: sDate.toISOString(),
+                endDateTime: eDate.toISOString(),
+              }),
+            }
+          );
+          if (!resp.ok) {
+            const j = await resp.json().catch(() => ({}));
+            throw new Error(j.error || "Failed to update times");
+          }
+          window.showToast && window.showToast("success", "Times updated");
+          await refreshAndRender();
+        } catch (e) {
+          console.error("save times error", e);
+          window.showToast &&
+            window.showToast("error", e.message || "Failed to update times");
+        }
+      });
+    }
+
+    // Hide Pre-Approve / Reject footer buttons for read-only (pre-approved/approved) permits
+    const isReadOnly = ["In Progress", "Approved"].includes(p.status);
+    const approveBtn = document.getElementById("approveFromModal");
+    const rejectBtn = document.getElementById("rejectFromModal");
+    if (approveBtn) approveBtn.classList.toggle("hidden", isReadOnly);
+    if (rejectBtn) rejectBtn.classList.toggle("hidden", isReadOnly);
+
+    openModal();
+  } catch (err) {
+    console.error("view permit error", err);
+    if (window.showToast)
+      window.showToast("error", "Unable to load permit details");
+  }
+}
+
+// Submit pre-approver actions; keep modal open on validation failure
+async function handlePermitAction(id, action) {
+  if (!id) return false;
+  try {
+    const url =
+      action === "preapprove"
+        ? `${API_BASE}/preapprover/approve/${id}`
+        : `${API_BASE}/preapprover/reject/${id}`;
+    const commentsEl = document.getElementById("modalActionComments");
+    const comments = commentsEl ? commentsEl.value : "";
+    if (!comments || String(comments).trim().length < 3) {
+      if (window.showToast)
+        window.showToast("error", "Comments are required (min 3 characters)");
+      return false;
+    }
+    const res = await fetch(url, {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ comments }),
     });
-
-    if (!res.ok) {
-      throw new Error("Failed to pre-approve permit");
+    if (!res.ok) throw new Error("action failed");
+    if (window.showToast) {
+      const msg =
+        action === "preapprove"
+          ? "Permit pre-approved successfully"
+          : "Permit rejected successfully";
+      window.showToast("success", msg);
     }
-
-    const result = await res.json();
-
-    // Update local data
-    const permitIndex = allPermits.findIndex((p) => p._id === permitId);
-    if (permitIndex !== -1) {
-      allPermits[permitIndex] = {
-        ...allPermits[permitIndex],
-        status: "In Progress",
-        preApprovedBy: currentUser?.id || "current-user",
-        preApprovedAt: new Date(),
-        preApproverComments: comments,
-      };
-    }
-
-    // Refresh tables
-    updatePermitTables();
-    updateStats(allPermits);
-
-    // Show success message
-    showNotification("Permit pre-approved successfully", "success");
-  } catch (error) {
-    console.error("Error pre-approving permit:", error);
-    showNotification("Error pre-approving permit", "error");
+    await refreshAndRender();
+    return true;
+  } catch (err) {
+    console.error("action error", err);
+    if (window.showToast)
+      window.showToast("error", "Failed to submit action. Please try again");
+    return false;
   }
 }
 
-// Reject permit
-async function rejectPermit(permitId, reason) {
+async function refreshAndRender() {
+  await fetchPermits();
+  await fetchApprovedPermits();
+  await fetchStats();
+  await fetchAnalytics();
+  renderPermits();
+  renderApprovedPermits();
+}
+
+async function fetchAnalytics() {
   try {
-    const res = await fetch(`${API_BASE}/preapprover/reject/${permitId}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
+    const res = await fetch(`${API_BASE}/preapprover/analytics`, {
       credentials: "include",
-      body: JSON.stringify({ reason }),
     });
+    if (!res.ok) return;
+    const body = await res.json();
 
-    if (!res.ok) {
-      throw new Error("Failed to reject permit");
-    }
+    const counts = body.countsByStatus || {};
+    const approved = Number(counts.Approved || 0);
+    const inProgress = Number(counts["In Progress"] || 0);
+    const pending = Number(counts.Pending || 0);
+    const rejected = Number(counts.Rejected || 0);
 
-    const result = await res.json();
+    // analytics KPIs are now shown via charts; top cards are updated from /stats
 
-    // Update local data
-    const permitIndex = allPermits.findIndex((p) => p._id === permitId);
-    if (permitIndex !== -1) {
-      allPermits[permitIndex] = {
-        ...allPermits[permitIndex],
-        status: "Rejected",
-        preApprovedBy: currentUser?.id || "current-user",
-        preApprovedAt: new Date(),
-        preApproverComments: reason,
-      };
-    }
-
-    // Refresh tables
-    updatePermitTables();
-    updateStats(allPermits);
-
-    // Show success message
-    showNotification("Permit rejected successfully", "success");
-  } catch (error) {
-    console.error("Error rejecting permit:", error);
-    showNotification("Error rejecting permit", "error");
-  }
-}
-
-// Show notification
-function showNotification(message, type) {
-  if (typeof window.showToast === "function") {
-    const t =
-      type === "error" ? "error" : type === "success" ? "success" : "info";
-    window.showToast(t, message);
-    return;
-  }
-
-  // Fallback: alert
-  try {
-    alert(message);
-  } catch (e) {}
-}
-
-// Create toast container if it doesn't exist
-// createToastContainer removed — rely on shared global toast from `shared/toast.js`
-
-// Profile management functions
-function showUpdateProfileModal() {
-  if (currentUser) {
-    document.getElementById("profileUsername").value =
-      currentUser.username || "";
-    document.getElementById("profileEmailInput").value =
-      currentUser.email || "";
-    document.getElementById("profilePhoneInput").value =
-      currentUser.phone || "";
-  }
-
-  const modal = new bootstrap.Modal(document.getElementById("profileModal"));
-  modal.show();
-}
-
-function showUpdatePasswordModal() {
-  const modal = new bootstrap.Modal(document.getElementById("passwordModal"));
-  modal.show();
-}
-
-async function updateProfile() {
-  const username = document.getElementById("profileUsername").value;
-  const email = document.getElementById("profileEmailInput").value;
-  const phone = document.getElementById("profilePhoneInput").value;
-
-  try {
-    const res = await fetch(`${API_BASE}/api/profile`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({ username, email, phone }),
-    });
-
-    if (!res.ok) throw new Error("Failed to update profile");
-
-    const result = await res.json();
-
-    // Update current user data
-    if (currentUser) {
-      currentUser.username = username;
-      currentUser.email = email;
-      currentUser.phone = phone;
-      updateUserInterface();
-    }
-
-    showNotification("Profile updated successfully", "success");
-    bootstrap.Modal.getInstance(document.getElementById("profileModal")).hide();
-  } catch (error) {
-    console.error("Error updating profile:", error);
-    showNotification("Error updating profile", "error");
-  }
-}
-
-async function updatePassword() {
-  const currentPassword = document.getElementById("currentPassword").value;
-  const newPassword = document.getElementById("newPassword").value;
-  const confirmPassword = document.getElementById("confirmNewPassword").value;
-
-  if (newPassword !== confirmPassword) {
-    showNotification("New passwords do not match", "error");
-    return;
-  }
-
-  try {
-    const res = await fetch(`${API_BASE}/api/update-password`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({ currentPassword, newPassword }),
-    });
-
-    if (!res.ok) throw new Error("Failed to update password");
-
-    showNotification("Password updated successfully", "success");
-    bootstrap.Modal.getInstance(
-      document.getElementById("passwordModal"),
-    ).hide();
-
-    // Clear form
-    document.getElementById("passwordForm").reset();
-  } catch (error) {
-    console.error("Error updating password:", error);
-    showNotification("Error updating password", "error");
-  }
-}
-
-// Update user interface with current user data
-function updateUserInterface() {
-  if (currentUser) {
-    // Update profile section
-    const profileName = document.getElementById("profileName");
-    const profileEmail = document.getElementById("profileEmail");
-    const profilePhone = document.getElementById("profilePhone");
-    const profileInitials = document.getElementById("profileInitials");
-    const headerUsername = document.getElementById("headerUsername");
-    const dropdownUsername = document.getElementById("dropdownUsername");
-    const dropdownEmail = document.getElementById("dropdownEmail");
-
-    if (profileName)
-      profileName.textContent = currentUser.username || "Pre-Approver";
-    if (profileEmail)
-      profileEmail.textContent = currentUser.email || "preapprover@hia.gov.ae";
-    if (profilePhone)
-      profilePhone.textContent = currentUser.phone || "+971 50 123 4567";
-    if (headerUsername)
-      headerUsername.textContent = currentUser.username || "Pre-Approver";
-    if (dropdownUsername)
-      dropdownUsername.textContent = currentUser.username || "Pre-Approver";
-    if (dropdownEmail)
-      dropdownEmail.textContent =
-        currentUser.email || "preapprover@example.com";
-
-    if (profileInitials) {
-      const initials = (currentUser.username || "Pre Approver")
-        .split(" ")
-        .map((n) => n[0])
-        .join("")
-        .toUpperCase();
-      profileInitials.textContent = initials;
-    }
-
-    // Update last login
-    const lastLogin = document.getElementById("lastLogin");
-    if (lastLogin && currentUser.lastLogin) {
-      lastLogin.textContent = `Last Login: ${formatDate24(
-        new Date(currentUser.lastLogin),
-      )}`;
-    }
-  }
-}
-
-// Logout confirmation
-function confirmLogout() {
-  if (confirm("Are you sure you want to logout?")) {
-    logoutUser();
-  }
-}
-
-// Export functions
-function exportToCSV() {
-  const permits = allPermits.filter(
-    (p) => (p.status || "").toLowerCase() === "pending",
-  );
-  if (permits.length === 0) {
-    showNotification("No data to export", "error");
-    return;
-  }
-
-  const headers = [
-    "Permit ID",
-    "Title",
-    "Requester",
-    "Submitted Date",
-    "Priority",
-    "Status",
-  ];
-  const csvContent = [
-    headers.join(","),
-    ...permits.map((p) =>
-      [
-        p._id,
-        `"${p.permitTitle}"`,
-        p.requester?.username || "",
-        p.createdAt ? new Date(p.createdAt).toLocaleDateString() : "",
-        p.priority || "",
-        p.status || "",
-      ].join(","),
-    ),
-  ].join("\n");
-
-  const blob = new Blob([csvContent], { type: "text/csv" });
-  const url = window.URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = `preapprover-permits-${
-    new Date().toISOString().split("T")[0]
-  }.csv`;
-  a.click();
-  window.URL.revokeObjectURL(url);
-}
-
-function exportToExcel() {
-  const permits = allPermits.filter(
-    (p) => (p.status || "").toLowerCase() === "pending",
-  );
-  if (permits.length === 0) {
-    showNotification("No data to export", "error");
-    return;
-  }
-
-  const worksheet = XLSX.utils.json_to_sheet(
-    permits.map((p) => ({
-      "Permit ID": p._id,
-      Title: p.permitTitle,
-      Requester: p.requester?.username || "",
-      "Submitted Date": p.createdAt
-        ? new Date(p.createdAt).toLocaleDateString()
-        : "",
-      Priority: p.priority || "",
-      Status: p.status || "",
-    })),
-  );
-
-  const workbook = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(workbook, worksheet, "Permits");
-  XLSX.writeFile(
-    workbook,
-    `preapprover-permits-${new Date().toISOString().split("T")[0]}.xlsx`,
-  );
-}
-
-function printTable() {
-  const table = document.getElementById("pendingPermitsTable");
-  if (!table) return;
-
-  const printWindow = window.open("", "_blank");
-  printWindow.document.write(`
-        <html>
-        <head>
-            <title>Pre-Approver Permits</title>
-            <style>
-                table { border-collapse: collapse; width: 100%; }
-                th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-                th { background-color: #f2f2f2; }
-            </style>
-        </head>
-        <body>
-            <h2>Pre-Approver Permits - ${new Date().toLocaleDateString()}</h2>
-            ${table.outerHTML}
-        </body>
-        </html>
-    `);
-  printWindow.document.close();
-  printWindow.print();
-}
-
-// Search functionality
-function setupSearch() {
-  const searchInput = document.getElementById("searchInput");
-  if (searchInput) {
-    searchInput.addEventListener("input", (e) => {
-      const query = e.target.value.toLowerCase();
-      const filteredPermits = allPermits.filter(
-        (p) =>
-          (p.permitTitle || "").toLowerCase().includes(query) ||
-          (p.requester?.username || "").toLowerCase().includes(query) ||
-          (p._id || "").toLowerCase().includes(query),
-      );
-
-      // Update tables with filtered data
-      const pendingFiltered = filteredPermits.filter(
-        (p) => (p.status || "").toLowerCase() === "pending",
-      );
-      updateTableBody("pendingPermitsTable", pendingFiltered, "pending");
-    });
-  }
-}
-
-// Initialize dashboard
-async function initializeDashboard() {
-  try {
-    // Check session and get user data
-    const sessionData = await checkSession();
-    if (sessionData && sessionData.user) {
-      currentUser = sessionData.user;
-      updateUserInterface();
-    }
-
-    // Initialize idle timer
-    initIdleTimer();
-
-    // Fetch initial data
-    await fetchPermits();
-    fetchActivityLog();
-
-    // Set up search
-    setupSearch();
-
-    // Initialize sidebar
-    initializeSidebar();
-
-    // Set up modal event handlers
-    setupModalHandlers();
-  } catch (error) {
-    console.error("Failed to initialize dashboard:", error);
-
-    // For development: Don't redirect if backend is down
-    console.log("Backend server may be down - continuing with offline mode");
-
-    // Still initialize sidebar and basic functionality
-    try {
-      initializeSidebar();
-      setupModalHandlers();
-
-      // Show a notification that backend is offline
-      const offlineMsg = document.createElement("div");
-      offlineMsg.style.cssText = `
-        position: fixed; top: 10px; right: 10px; z-index: 9999;
-        background: orange; color: white; padding: 10px; border-radius: 5px;
-          `;
-      offlineMsg.textContent = "Backend server offline - limited functionality";
-      document.body.appendChild(offlineMsg);
-
-      setTimeout(() => offlineMsg.remove(), 5000);
-    } catch (e) {
-      console.error("Error initializing offline mode:", e);
-    }
-  }
-}
-
-// Setup modal event handlers
-function setupModalHandlers() {
-  // Approve modal confirm button
-  const confirmApprove = document.getElementById("confirmApprove");
-  if (confirmApprove) {
-    confirmApprove.addEventListener("click", () => {
-      const comments = document.getElementById("approveComments").value;
-      if (currentPermitId) {
-        preApprovePermit(currentPermitId, comments);
-        bootstrap.Modal.getInstance(
-          document.getElementById("approveModal"),
-        ).hide();
-        document.getElementById("approveComments").value = "";
-      }
-    });
-  }
-
-  // Reject modal confirm button
-  const confirmReject = document.getElementById("confirmReject");
-  if (confirmReject) {
-    confirmReject.addEventListener("click", () => {
-      const reason = document.getElementById("rejectReason").value;
-      if (reason.trim() && currentPermitId) {
-        rejectPermit(currentPermitId, reason);
-        bootstrap.Modal.getInstance(
-          document.getElementById("rejectModal"),
-        ).hide();
-        document.getElementById("rejectReason").value = "";
+    // Doughnut: status distribution
+    const statusCtx = document.getElementById("statusChart");
+    if (statusCtx) {
+      const ctx = statusCtx.getContext("2d");
+      const data = [approved, inProgress, pending, rejected];
+      const labels = ["Approved", "In Progress", "Pending", "Rejected"];
+      const colors = ["#34d399", "#60a5fa", "#fbbf24", "#f87171"];
+      if (statusChart) {
+        statusChart.data.datasets[0].data = data;
+        statusChart.update();
       } else {
-        showNotification("Please provide a reason for rejection", "error");
+        statusChart = new Chart(ctx, {
+          type: "doughnut",
+          data: {
+            labels,
+            datasets: [
+              {
+                data,
+                backgroundColor: colors,
+                borderWidth: 0,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: "60%",
+            plugins: {
+              legend: { position: "bottom" },
+              tooltip: { mode: "index", intersect: false },
+            },
+          },
+        });
       }
-    });
+    }
+
+    // Monthly line chart
+    const months = body.monthlyCounts || [];
+    const labels = months.map((m) => `${m.month}/${m.year}`);
+    const dataSet = months.map((m) => m.count || 0);
+    const monthlyCtxEl = document.getElementById("monthlyChart");
+    if (monthlyCtxEl) {
+      const ctx = monthlyCtxEl.getContext("2d");
+      if (monthlyChart) {
+        monthlyChart.data.labels = labels;
+        monthlyChart.data.datasets[0].data = dataSet;
+        monthlyChart.update();
+      } else {
+        monthlyChart = new Chart(ctx, {
+          type: "line",
+          data: {
+            labels,
+            datasets: [
+              {
+                label: "Permits",
+                data: dataSet,
+                borderColor: "#60a5fa",
+                backgroundColor: "rgba(96,165,250,0.12)",
+                fill: true,
+                tension: 0.35,
+                pointRadius: 4,
+                pointBackgroundColor: "#fff",
+                pointBorderColor: "#60a5fa",
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              x: { grid: { display: false } },
+              y: { beginAtZero: true, ticks: { precision: 0 } },
+            },
+            plugins: { legend: { display: false } },
+          },
+        });
+      }
+    }
+  } catch (err) {
+    console.error("preapprover: analytics fetch failed", err);
   }
 }
 
-// Make functions globally available
+function setupUI() {
+  const s = el("permitsSearchInput");
+  if (s) s.addEventListener("input", debounce(renderPermits, 180));
+  const f = el("permitsStatusFilter");
+  if (f) f.addEventListener("change", renderPermits);
+  // modal close buttons
+  document.addEventListener("click", (e) => {
+    if (
+      e.target.closest('[data-action="closePermitDetails"]') ||
+      e.target.closest('[data-action="hidePermitDetails"]')
+    )
+      closeModal();
+  });
+  // close on Escape
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") closeModal();
+  });
+  const appr = el("approveFromModal");
+  if (appr)
+    appr.addEventListener("click", async () => {
+      if (!currentPermitId) return;
+      const ok = await handlePermitAction(currentPermitId, "preapprove");
+      if (ok) closeModal();
+    });
+  const rej = el("rejectFromModal");
+  if (rej)
+    rej.addEventListener("click", async () => {
+      if (!currentPermitId) return;
+      const ok = await handlePermitAction(currentPermitId, "reject");
+      if (ok) closeModal();
+    });
+}
+
+async function init() {
+  try {
+    const session = await checkSession();
+    currentUser = session?.user || null;
+  } catch (e) {
+    currentUser = null;
+  }
+  initIdleTimer();
+  // Ensure toast helper is available before wiring UI so button handlers can show toasts
+  await ensureToasts();
+  setupUI();
+  await refreshAndRender();
+  if (pollId) clearInterval(pollId);
+  pollId = setInterval(refreshAndRender, 15000);
+}
+
+// exported for old handlers in markup
 window.viewPermitDetails = viewPermitDetails;
 window.handlePermitAction = handlePermitAction;
-window.showApproveModal = showApproveModal;
-window.showRejectModal = showRejectModal;
-window.showUpdateProfileModal = showUpdateProfileModal;
-window.showUpdatePasswordModal = showUpdatePasswordModal;
-window.updateProfile = updateProfile;
-window.updatePassword = updatePassword;
-window.confirmLogout = confirmLogout;
-window.exportToCSV = exportToCSV;
-window.exportToExcel = exportToExcel;
-window.printTable = printTable;
-
-// Initialize when DOM is loaded
-document.addEventListener("DOMContentLoaded", initializeDashboard);
+// expose init and auto-run on DOMContentLoaded
+if (typeof window !== "undefined") window.init = init;
+document.addEventListener("DOMContentLoaded", () => {
+  try {
+    if (typeof init === "function") init();
+  } catch (e) {
+    console.error("preapprover init error", e);
+  }
+});

@@ -30,7 +30,7 @@
                         <h2
                             class="text-xl font-bold text-[var(--text-primary)] flex items-center gap-2 whitespace-nowrap">
                             <i class="fas fa-clipboard-list text-hia-blue"></i>
-                            Submitted Permit Details
+                            Permit Details
                         </h2>
                         <div class="flex items-center gap-3">
                             <div class="text-sm text-[var(--text-secondary)] hidden sm:block mr-3">
@@ -64,6 +64,7 @@
                     </div>
                 </div>
 
+                <!-- permit modal removed (now loaded from shared/permit-modal.js) -->
                 <div id="submittedPermitsContent" class="overflow-x-hidden max-w-full">
 
                     <!-- Responsive grid view for desktop; table remains for mobile/layout fallback -->
@@ -138,12 +139,12 @@
                     <div id="permitAnalyticsContent" class="p-6">
                         <div class="grid grid-cols-1 md:grid-cols-5 gap-6 mb-6">
                             <div
-                                class="text-center p-4 bg-white dark:bg-gray-800/40 rounded-xl border border-[var(--input-border)]">
+                                class="text-center p-4 bg-white dark:bg-gray-700/40 rounded-xl border border-[var(--input-border)] kpi-tile text-blue-600 dark:text-blue-400">
                                 <div
                                     class="w-12 h-12 bg-blue-100 dark:bg-blue-800/50 rounded-full flex items-center justify-center mx-auto mb-3">
                                     <i class="fas fa-file-alt text-blue-600 dark:text-blue-400 text-xl"></i>
                                 </div>
-                                <div id="totalPermits" class="text-2xl font-bold text-blue-600 dark:text-blue-400 mb-1">
+                                <div id="totalPermits" class="text-2xl font-bold mb-1">
                                     0
                                 </div>
                                 <div class="text-xs text-[var(--text-secondary)] mt-1">Change: <span
@@ -158,13 +159,12 @@
                             </div>
 
                             <div
-                                class="text-center p-4 bg-white dark:bg-gray-800/40 rounded-xl border border-[var(--input-border)]">
+                                class="text-center p-4 bg-white dark:bg-gray-800/40 rounded-xl border border-[var(--input-border)] kpi-tile text-green-600 dark:text-green-400">
                                 <div
                                     class="w-12 h-12 bg-green-100 dark:bg-green-800/50 rounded-full flex items-center justify-center mx-auto mb-3">
                                     <i class="fas fa-check-circle text-green-600 dark:text-green-400 text-xl"></i>
                                 </div>
-                                <div id="approvedPermits"
-                                    class="text-2xl font-bold text-green-600 dark:text-green-400 mb-1">
+                                <div id="approvedPermits" class="text-2xl font-bold mb-1">
                                     0
                                 </div>
                                 <div class="text-xs text-[var(--text-secondary)] mt-1">Change: <span
@@ -179,13 +179,12 @@
                             </div>
 
                             <div
-                                class="text-center p-4 bg-white dark:bg-gray-800/40 rounded-xl border border-[var(--input-border)]">
+                                class="text-center p-4 bg-white dark:bg-gray-800/40 rounded-xl border border-[var(--input-border)] kpi-tile text-yellow-600 dark:text-yellow-400">
                                 <div
                                     class="w-12 h-12 bg-yellow-100 dark:bg-yellow-800/50 rounded-full flex items-center justify-center mx-auto mb-3">
                                     <i class="fas fa-clock text-yellow-600 dark:text-yellow-400 text-xl"></i>
                                 </div>
-                                <div id="pendingPermits"
-                                    class="text-2xl font-bold text-yellow-600 dark:text-yellow-400 mb-1">
+                                <div id="pendingPermits" class="text-2xl font-bold mb-1">
                                     0
                                 </div>
                                 <div class="text-xs text-[var(--text-secondary)] mt-1">Change: <span
@@ -201,13 +200,12 @@
                             </div>
 
                             <div
-                                class="text-center p-4 bg-white dark:bg-gray-800/40 rounded-xl border border-[var(--input-border)]">
+                                class="text-center p-4 bg-white dark:bg-gray-800/40 rounded-xl border border-[var(--input-border)] kpi-tile text-sky-600 dark:text-sky-400">
                                 <div
                                     class="w-12 h-12 bg-sky-100 dark:bg-sky-800/50 rounded-full flex items-center justify-center mx-auto mb-3">
                                     <i class="fas fa-spinner text-sky-600 dark:text-sky-400 text-xl"></i>
                                 </div>
-                                <div id="inProgressPermits"
-                                    class="text-2xl font-bold text-sky-600 dark:text-sky-400 mb-1">
+                                <div id="inProgressPermits" class="text-2xl font-bold mb-1">
                                     0
                                 </div>
                                 <div class="text-xs text-[var(--text-secondary)] mt-1">Change: <span
@@ -222,13 +220,12 @@
                             </div>
 
                             <div
-                                class="text-center p-4 bg-white dark:bg-gray-800/40 rounded-xl border border-[var(--input-border)]">
+                                class="text-center p-4 bg-white dark:bg-gray-800/40 rounded-xl border border-[var(--input-border)] kpi-tile text-red-600 dark:text-red-400">
                                 <div
                                     class="w-12 h-12 bg-red-100 dark:bg-red-800/50 rounded-full flex items-center justify-center mx-auto mb-3">
                                     <i class="fas fa-times-circle text-red-600 dark:text-red-400 text-xl"></i>
                                 </div>
-                                <div id="rejectedPermits"
-                                    class="text-2xl font-bold text-red-600 dark:text-red-400 mb-1">
+                                <div id="rejectedPermits" class="text-2xl font-bold mb-1">
                                     0
                                 </div>
                                 <div class="text-xs text-[var(--text-secondary)] mt-1">Change: <span
@@ -261,7 +258,7 @@
                                     </div>
                                 </div>
                                 <div
-                                    class="bg-white dark:bg-gray-800/40 rounded-xl p-4 border border-[var(--input-border)]">
+                                    class="bg-[var(--bg-surface)] dark:bg-gray-800/40 rounded-xl p-4 border border-[var(--input-border)]">
                                     <h4
                                         class="text-sm font-semibold text-[var(--text-primary)] mb-3 flex items-center gap-2">
                                         <i class="fas fa-chart-line text-hia-blue text-sm"></i>
@@ -389,6 +386,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.js"></script>
     <script type="module" src="../shared/session.js"></script>
+    <script type="module" src="../shared/permit-modal.js"></script>
     <script type="module" src="profile.js"></script>
     <script defer src="../shared/layout.mount.js" data-layout="../shared/layout.html"></script>
 </body>

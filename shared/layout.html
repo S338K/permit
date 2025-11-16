@@ -14,11 +14,11 @@
 <body class="transition-colors duration-300">
   <!-- Navigation Bar -->
   <nav
-    class="fixed top-0 inset-x-0 z-30 h-16 flex items-center border-b border-[var(--button-border)] bg-[var(--navbar-bg)] text-[var(--navbar-text)]">
+    class="fixed top-0 inset-x-0 z-30 h-16 flex items-center border-b border-[var(--button-border)] bg-[var(--navbar-bg)] text-navbar-text">
     <div class="flex items-center justify-between w-full">
       <!-- Left: Hamburger icon -->
       <button id="sidebar-hamburger"
-        class="p-2 rounded-lg text-[var(--navbar-text)] h-full flex items-center justify-center icon-btn bg-transparent hover:bg-transparent focus:bg-transparent"
+        class="p-2 rounded-lg text-navbar-text h-full flex items-center justify-center icon-btn bg-transparent hover:bg-transparent focus:bg-transparent"
         aria-label="Toggle sidebar">
         <span class="sr-only">Toggle sidebar</span>
         <span class="hamburger-icon" aria-hidden="true">
@@ -36,13 +36,13 @@
       <!-- Right: Desktop Navigation Icons -->
       <div class="flex items-center space-x-2 md:space-x-4 ml-auto">
         <button id="announcement-button" type="button" title="Announcements" data-admin-only
-          class="hidden h-9 w-9 md:h-10 md:w-10 flex items-center justify-center rounded-full text-[var(--navbar-text)] icon-btn hover-lite"
+          class="hidden h-9 w-9 md:h-10 md:w-10 flex items-center justify-center rounded-full text-navbar-text icon-btn hover-lite"
           aria-label="Manage announcements">
           <i class="fas fa-bullhorn text-xl md:text-2xl"></i>
         </button>
 
         <button id="theme-toggle" type="button" data-theme-toggle
-          class="flex h-9 w-9 md:h-10 md:w-10 items-center justify-center rounded-full text-[var(--navbar-text)] icon-btn hover-lite"
+          class="flex h-9 w-9 md:h-10 md:w-10 items-center justify-center rounded-full text-navbar-text icon-btn hover-lite"
           aria-label="Toggle theme">
 
           <i class="fas fa-sun icon-sun text-xl md:text-2xl"></i>
@@ -52,7 +52,7 @@
         <!-- Notification Bell with Badge and Dropdown -->
         <div class="relative" id="notification-container" data-role-visibility="Requester,PreApprover,Approver">
           <button id="notification-bell" type="button"
-            class="relative h-9 w-9 md:h-10 md:w-10 flex items-center justify-center rounded-full text-[var(--navbar-text)] icon-btn hover-lite"
+            class="relative h-9 w-9 md:h-10 md:w-10 flex items-center justify-center rounded-full text-navbar-text icon-btn hover-lite"
             aria-label="Notifications" aria-expanded="false" aria-haspopup="true">
             <i class="fas fa-bell text-xl md:text-2xl"></i>
             <span id="notification-badge"
@@ -61,19 +61,19 @@
 
           <!-- Notification Dropdown -->
           <div id="notification-dropdown"
-            class="hidden absolute right-0 mt-2 w-80 md:w-96 max-h-[70vh] bg-[var(--bg-surface)] text-[var(--text-primary)] rounded-lg shadow-2xl border border-[var(--input-border)] overflow-hidden z-50">
+            class="hidden absolute right-0 mt-2 w-80 md:w-96 max-h-[70vh] bg-[var(--bg-surface)] text-primary rounded-lg shadow-2xl border border-[var(--input-border)] overflow-hidden z-50">
             <div class="px-4 py-3 border-b border-[var(--input-border)] flex items-center justify-between">
-              <h3 class="text-sm font-semibold text-[var(--text-primary)]">
+              <h3 class="text-sm font-semibold text-primary">
                 Notifications
               </h3>
               <button id="mark-all-read" type="button"
-                class="text-xs text-[var(--text-primary)] opacity-80 hover:opacity-100 hover:underline">
+                class="text-xs text-primary opacity-70 hover:opacity-100 hover:underline">
                 Mark all as read
               </button>
             </div>
             <div id="notification-list" class="overflow-y-auto max-h-96">
               <!-- Notifications will be inserted here -->
-              <div class="px-4 py-8 text-center text-sm text-[var(--text-primary)]/70" id="notification-empty">
+              <div class="px-4 py-8 text-center text-sm text-primary opacity-70" id="notification-empty">
                 <i class="fas fa-bell-slash text-3xl mb-2 opacity-50"></i>
                 <p>No notifications</p>
               </div>
@@ -99,7 +99,7 @@
     <div class="p-4 space-y-4">
       <div class="rounded-lg border border-[var(--button-border)] bg-[var(--bg-surface)]">
         <button type="button"
-          class="accordion-toggle flex w-full items-center justify-between px-4 py-3 text-left text-[var(--text-primary)] font-semibold"
+          class="accordion-toggle flex w-full items-center justify-between px-4 py-3 text-left text-primary font-semibold"
           data-target="desktop-personal-section" aria-controls="desktop-personal-section" aria-expanded="false"
           data-accordion-group="desktop">
           <span>Personal Information</span>
@@ -111,7 +111,7 @@
 
         <div id="desktop-personal-section"
           class="accordion-content overflow-hidden transition-[max-height] duration-300 ease-in-out max-h-0">
-          <div class="px-4 pb-4 pt-1 text-sm text-[var(--text-primary)]/85">
+          <div class="px-4 pb-4 pt-1 text-sm text-primary opacity-80">
             <div class="space-y-2">
               <div
                 class="flex items-center gap-3 rounded-xl border border-[var(--button-border)] bg-[var(--bg-surface)] px-3 py-2 shadow-sm">
@@ -120,11 +120,11 @@
                   <i class="fas fa-id-card"></i>
                 </div>
                 <div class="min-w-0">
-                  <p class="text-[11px] uppercase tracking-wide text-[var(--text-primary)]/70">
+                  <p class="text-[11px] uppercase tracking-wide text-primary opacity-70">
                     Full Name
                   </p>
-                  <p class="text-sm font-medium text-[var(--text-primary)] truncate" data-user-field="fullName"
-                    data-placeholder=""></p>
+                  <p class="text-sm font-medium text-primary truncate" data-user-field="fullName" data-placeholder="">
+                  </p>
                 </div>
               </div>
 
@@ -135,11 +135,10 @@
                   <i class="fas fa-envelope"></i>
                 </div>
                 <div class="min-w-0">
-                  <p class="text-[11px] uppercase tracking-wide text-[var(--text-primary)]/70">
+                  <p class="text-[11px] uppercase tracking-wide text-primary opacity-70">
                     Email
                   </p>
-                  <p class="text-sm font-medium text-[var(--text-primary)] truncate" data-user-field="email"
-                    data-placeholder=""></p>
+                  <p class="text-sm font-medium text-primary truncate" data-user-field="email" data-placeholder=""></p>
                 </div>
               </div>
 
@@ -150,11 +149,11 @@
                   <i class="fas fa-building"></i>
                 </div>
                 <div class="min-w-0">
-                  <p class="text-[11px] uppercase tracking-wide text-[var(--text-primary)]/70">
+                  <p class="text-[11px] uppercase tracking-wide text-primary opacity-70">
                     Company
                   </p>
-                  <p class="text-sm font-medium text-[var(--text-primary)] truncate" data-user-field="company"
-                    data-placeholder=""></p>
+                  <p class="text-sm font-medium text-primary truncate" data-user-field="company" data-placeholder="">
+                  </p>
                 </div>
               </div>
 
@@ -165,11 +164,10 @@
                   <i class="fas fa-phone"></i>
                 </div>
                 <div class="min-w-0">
-                  <p class="text-[11px] uppercase tracking-wide text-[var(--text-primary)]/70">
+                  <p class="text-[11px] uppercase tracking-wide text-primary opacity-70">
                     Phone
                   </p>
-                  <p class="text-sm font-medium text-[var(--text-primary)] truncate" data-user-field="phone"
-                    data-placeholder=""></p>
+                  <p class="text-sm font-medium text-primary truncate" data-user-field="phone" data-placeholder=""></p>
                 </div>
               </div>
 
@@ -180,10 +178,10 @@
                   <i class="fas fa-calendar-alt"></i>
                 </div>
                 <div class="min-w-0">
-                  <p class="text-[11px] uppercase tracking-wide text-[var(--text-primary)]/70">
+                  <p class="text-[11px] uppercase tracking-wide text-primary opacity-70">
                     Member Since
                   </p>
-                  <p class="text-sm font-medium text-[var(--text-primary)] truncate" data-user-field="memberSince"
+                  <p class="text-sm font-medium text-primary truncate" data-user-field="memberSince"
                     data-placeholder=""></p>
                 </div>
               </div>
@@ -195,11 +193,11 @@
                   <i class="fas fa-clock"></i>
                 </div>
                 <div class="min-w-0">
-                  <p class="text-[11px] uppercase tracking-wide text-[var(--text-primary)]/70">
+                  <p class="text-[11px] uppercase tracking-wide text-primary opacity-70">
                     Last Login
                   </p>
-                  <p class="text-sm font-medium text-[var(--text-primary)] truncate" data-user-field="lastLogin"
-                    data-placeholder=""></p>
+                  <p class="text-sm font-medium text-primary truncate" data-user-field="lastLogin" data-placeholder="">
+                  </p>
                 </div>
               </div>
 
@@ -210,11 +208,11 @@
                   <i class="fas fa-globe"></i>
                 </div>
                 <div class="min-w-0">
-                  <p class="text-[11px] uppercase tracking-wide text-[var(--text-primary)]/70">
+                  <p class="text-[11px] uppercase tracking-wide text-primary opacity-70">
                     IP Address
                   </p>
-                  <p class="text-sm font-medium text-[var(--text-primary)] truncate" data-user-field="ipAddress"
-                    data-placeholder=""></p>
+                  <p class="text-sm font-medium text-primary truncate" data-user-field="ipAddress" data-placeholder="">
+                  </p>
                 </div>
               </div>
             </div>
@@ -224,19 +222,19 @@
 
       <div class="rounded-lg border border-[var(--button-border)] bg-[var(--bg-surface)]">
         <button type="button"
-          class="accordion-toggle flex w-full items-center justify-between px-4 py-3 text-left text-[var(--text-primary)] font-semibold"
+          class="accordion-toggle flex w-full items-center justify-between px-4 py-3 text-left text-primary font-semibold"
           data-target="desktop-actions-section" aria-controls="desktop-actions-section" aria-expanded="false"
           data-accordion-group="desktop">
           <span>Quick Actions</span>
           <span
-            class="accordion-icon flex items-center justify-center transition-transform duration-300 text-[var(--text-primary)]/60">
+            class="accordion-icon flex items-center justify-center transition-transform duration-300 text-primary opacity-60">
             <i class="fas fa-chevron-down"></i>
           </span>
         </button>
 
         <div id="desktop-actions-section"
           class="accordion-content overflow-hidden transition-[max-height] duration-300 ease-in-out max-h-0">
-          <div class="px-4 pb-4 pt-1 space-y-2 text-sm text-[var(--text-primary)]/85" data-quick-actions="desktop">
+          <div class="px-4 pb-4 pt-1 space-y-2 text-sm text-primary opacity-80" data-quick-actions="desktop">
             <a href="#" data-action="submit-new-request" data-role-visibility="Requester,Admin"
               class="flex items-center gap-3 px-3 py-2 rounded-lg hover-lite">
               <span class="text-green-500"><i class="fas fa-plus-circle"></i></span>
@@ -257,19 +255,19 @@
 
       <div class="rounded-lg border border-[var(--button-border)] bg-[var(--bg-surface)]">
         <button type="button"
-          class="accordion-toggle flex w-full items-center justify-between px-4 py-3 text-left text-[var(--text-primary)] font-semibold"
+          class="accordion-toggle flex w-full items-center justify-between px-4 py-3 text-left text-primary font-semibold"
           data-target="desktop-account-section" aria-controls="desktop-account-section" aria-expanded="false"
           data-accordion-group="desktop">
           <span>Account</span>
           <span
-            class="accordion-icon flex items-center justify-center transition-transform duration-300 text-[var(--text-primary)]/60">
+            class="accordion-icon flex items-center justify-center transition-transform duration-300 text-primary opacity-60">
             <i class="fas fa-chevron-down"></i>
           </span>
         </button>
 
         <div id="desktop-account-section"
           class="accordion-content overflow-hidden transition-[max-height] duration-300 ease-in-out max-h-0">
-          <div class="px-4 pb-4 pt-1 space-y-2 text-sm text-[var(--text-primary)]/85">
+          <div class="px-4 pb-4 pt-1 space-y-2 text-sm text-primary opacity-80">
             <a href="#" data-update-password-trigger class="flex items-center gap-3 px-3 py-2 rounded-lg hover-lite">
               <span class="text-yellow-500"><i class="fas fa-key"></i></span>
               <span>Update Password</span>
@@ -363,30 +361,30 @@
       class="relative mx-auto mt-32 w-[min(92vw,360px)] rounded-2xl bg-[var(--bg-surface)] shadow-2xl border border-[var(--input-border)] p-6 flex flex-col gap-4">
       <div class="flex items-start gap-3">
         <div
-          class="flex h-12 w-12 items-center justify-center rounded-full bg-[color:rgba(239,68,68,0.10)] text-[var(--danger-bg)]">
+          class="flex h-12 w-12 items-center justify-center rounded-full bg-[color:rgba(239,68,68,0.10)] text-error-color">
           <i class="fas fa-sign-out-alt text-xl"></i>
         </div>
 
         <div class="flex-1 space-y-2">
-          <h2 id="logout-modal-title" class="text-lg font-semibold text-[var(--text-primary)]">
+          <h2 id="logout-modal-title" class="text-lg font-semibold text-primary">
             Sign out?
           </h2>
-          <p class="text-sm text-[var(--text-primary)]/80">
+          <p class="text-sm text-primary opacity-80">
             You’re about to end this session. Any unsaved changes will be
             lost. Do you want to continue?
           </p>
-          <p data-logout-status class="hidden text-sm text-[var(--error-color)]"></p>
+          <p data-logout-status class="hidden text-sm text-error-color"></p>
         </div>
       </div>
 
       <div class="flex items-center justify-end gap-3">
         <button type="button" data-logout-cancel
-          class="px-4 py-2 rounded-lg border border-[var(--button-border)] bg-transparent text-[var(--text-primary)] hover:bg-[var(--bg-surface)]/10 transition-colors">
+          class="px-4 py-2 rounded-lg border border-[var(--button-border)] bg-transparent text-primary hover:bg-[var(--bg-surface)]/10 transition-colors">
           Stay Logged In
         </button>
 
         <button type="button" data-logout-confirm
-          class="px-4 py-2 rounded-lg border border-[var(--danger-border)] bg-[var(--danger-bg)] hover:bg-[var(--danger-hover-bg)] text-[var(--danger-text)] font-semibold transition-colors">
+          class="px-4 py-2 rounded-lg border border-[var(--danger-border)] bg-[var(--danger-bg)] hover:bg-[var(--danger-hover-bg)] text-button-text font-semibold transition-colors">
           Log Out
         </button>
       </div>
@@ -404,21 +402,21 @@
           <i class="fas fa-bullhorn text-xl"></i>
         </div>
         <div class="flex-1">
-          <h2 id="publish-confirm-title" class="text-lg font-semibold text-[var(--text-primary)]">
+          <h2 id="publish-confirm-title" class="text-lg font-semibold text-primary">
             Confirm publish change
           </h2>
-          <p id="publish-confirm-message" class="text-sm text-[var(--text-primary)]/80 mt-2">
+          <p id="publish-confirm-message" class="text-sm text-primary opacity-80 mt-2">
             Are you sure you want to publish/unpublish this announcement?
           </p>
         </div>
       </div>
       <div class="flex items-center justify-end gap-3 mt-4">
         <button id="publishCancelBtn"
-          class="px-4 py-2 rounded-lg border border-[var(--button-border)] bg-transparent text-[var(--text-primary)]">
+          class="px-4 py-2 rounded-lg border border-[var(--button-border)] bg-transparent text-primary">
           Cancel
         </button>
         <button id="publishConfirmBtn"
-          class="px-4 py-2 rounded-lg bg-[var(--button-bg)] text-[var(--button-text)] font-semibold">
+          class="px-4 py-2 rounded-lg bg-[var(--button-bg)] text-button-text font-semibold">
           Confirm
         </button>
       </div>
@@ -451,70 +449,70 @@
       <form id="registerUserForm" class="p-6 space-y-5">
         <!-- Full Name -->
         <div class="form-group">
-          <label for="register_fullName" class="block text-sm font-semibold text-[var(--text-primary)] mb-2">
+          <label for="register_fullName" class="block text-sm font-semibold text-primary mb-2">
             <i class="fas fa-user text-[#273172] mr-2"></i>
             Full Name <span class="text-red-500">*</span>
           </label>
           <input type="text" id="register_fullName" name="fullName" required placeholder="Enter full name"
-            class="w-full px-4 py-3 bg-[var(--input-bg)] border-2 border-[var(--input-border)] rounded-xl text-[var(--text-primary)] placeholder-gray-400 focus:border-[#273172] focus:outline-none focus:ring-2 focus:ring-[#273172]/20 transition-all duration-300" />
+            class="w-full px-4 py-3 bg-[var(--input-bg)] border-2 border-[var(--input-border)] rounded-xl text-primary placeholder-gray-400 focus:border-[#273172] focus:outline-none focus:ring-2 focus:ring-[#273172]/20 transition-all duration-300" />
           <span class="error-message text-red-500 text-xs mt-1 hidden"></span>
         </div>
 
         <!-- Email -->
         <div class="form-group">
-          <label for="register_email" class="block text-sm font-semibold text-[var(--text-primary)] mb-2">
+          <label for="register_email" class="block text-sm font-semibold text-primary mb-2">
             <i class="fas fa-envelope text-[#273172] mr-2"></i>
             Email Address <span class="text-red-500">*</span>
           </label>
           <input type="email" id="register_email" name="email" required placeholder="user@example.com"
-            class="w-full px-4 py-3 bg-[var(--input-bg)] border-2 border-[var(--input-border)] rounded-xl text-[var(--text-primary)] placeholder-gray-400 focus:border-[#273172] focus:outline-none focus:ring-2 focus:ring-[#273172]/20 transition-all duration-300" />
+            class="w-full px-4 py-3 bg-[var(--input-bg)] border-2 border-[var(--input-border)] rounded-xl text-primary placeholder-gray-400 focus:border-[#273172] focus:outline-none focus:ring-2 focus:ring-[#273172]/20 transition-all duration-300" />
           <span class="error-message text-red-500 text-xs mt-1 hidden"></span>
         </div>
 
         <!-- Phone Number -->
         <div class="form-group">
-          <label for="register_mobile" class="block text-sm font-semibold text-[var(--text-primary)] mb-2">
+          <label for="register_mobile" class="block text-sm font-semibold text-primary mb-2">
             <i class="fas fa-phone text-[#273172] mr-2"></i>
             Phone Number <span class="text-red-500">*</span>
           </label>
           <input type="tel" id="register_mobile" name="mobile" required placeholder="+974XXXXXXXX"
-            class="w-full px-4 py-3 bg-[var(--input-bg)] border-2 border-[var(--input-border)] rounded-xl text-[var(--text-primary)] placeholder-gray-400 focus:border-[#273172] focus:outline-none focus:ring-2 focus:ring-[#273172]/20 transition-all duration-300" />
+            class="w-full px-4 py-3 bg-[var(--input-bg)] border-2 border-[var(--input-border)] rounded-xl text-primary placeholder-gray-400 focus:border-[#273172] focus:outline-none focus:ring-2 focus:ring-[#273172]/20 transition-all duration-300" />
           <span class="error-message text-red-500 text-xs mt-1 hidden"></span>
         </div>
 
         <!-- Company -->
         <div class="form-group">
-          <label for="register_company" class="block text-sm font-semibold text-[var(--text-primary)] mb-2">
+          <label for="register_company" class="block text-sm font-semibold text-primary mb-2">
             <i class="fas fa-building text-[#273172] mr-2"></i>
             Company
           </label>
           <input type="text" id="register_company" name="company" placeholder="Company name (optional)"
-            class="w-full px-4 py-3 bg-[var(--input-bg)] border-2 border-[var(--input-border)] rounded-xl text-[var(--text-primary)] placeholder-gray-400 focus:border-[#273172] focus:outline-none focus:ring-2 focus:ring-[#273172]/20 transition-all duration-300" />
+            class="w-full px-4 py-3 bg-[var(--input-bg)] border-2 border-[var(--input-border)] rounded-xl text-primary placeholder-gray-400 focus:border-[#273172] focus:outline-none focus:ring-2 focus:ring-[#273172]/20 transition-all duration-300" />
         </div>
 
         <!-- Department -->
         <div class="form-group">
-          <label for="register_department" class="block text-sm font-semibold text-[var(--text-primary)] mb-2">
+          <label for="register_department" class="block text-sm font-semibold text-primary mb-2">
             <i class="fas fa-sitemap text-[#273172] mr-2"></i>
             Department
           </label>
           <input type="text" id="register_department" name="department" placeholder="Department (optional)"
-            class="w-full px-4 py-3 bg-[var(--input-bg)] border-2 border-[var(--input-border)] rounded-xl text-[var(--text-primary)] placeholder-gray-400 focus:border-[#273172] focus:outline-none focus:ring-2 focus:ring-[#273172]/20 transition-all duration-300" />
+            class="w-full px-4 py-3 bg-[var(--input-bg)] border-2 border-[var(--input-border)] rounded-xl text-primary placeholder-gray-400 focus:border-[#273172] focus:outline-none focus:ring-2 focus:ring-[#273172]/20 transition-all duration-300" />
         </div>
 
         <!-- Designation -->
         <div class="form-group">
-          <label for="register_designation" class="block text-sm font-semibold text-[var(--text-primary)] mb-2">
+          <label for="register_designation" class="block text-sm font-semibold text-primary mb-2">
             <i class="fas fa-id-badge text-[#273172] mr-2"></i>
             Designation
           </label>
           <input type="text" id="register_designation" name="designation" placeholder="Job title (optional)"
-            class="w-full px-4 py-3 bg-[var(--input-bg)] border-2 border-[var(--input-border)] rounded-xl text-[var(--text-primary)] placeholder-gray-400 focus:border-[#273172] focus:outline-none focus:ring-2 focus:ring-[#273172]/20 transition-all duration-300" />
+            class="w-full px-4 py-3 bg-[var(--input-bg)] border-2 border-[var(--input-border)] rounded-xl text-primary placeholder-gray-400 focus:border-[#273172] focus:outline-none focus:ring-2 focus:ring-[#273172]/20 transition-all duration-300" />
         </div>
 
         <!-- Role -->
         <div class="form-group">
-          <label for="register_role" class="block text-sm font-semibold text-[var(--text-primary)] mb-2">
+          <label for="register_role" class="block text-sm font-semibold text-primary mb-2">
             <i class="fas fa-user-tag text-[#273172] mr-2"></i>
             Role <span class="text-red-500">*</span>
           </label>
@@ -579,33 +577,33 @@
       class="relative mx-auto mt-32 w-[min(92vw,420px)] rounded-2xl bg-[var(--bg-surface)] shadow-2xl border border-[var(--input-border)] p-6 flex flex-col gap-4">
       <div class="flex items-start gap-3">
         <div
-          class="flex h-12 w-12 items-center justify-center rounded-full bg-[color:rgba(39,49,114,0.10)] text-[var(--page-color)]">
+          class="flex h-12 w-12 items-center justify-center rounded-full bg-[color:rgba(39,49,114,0.10)] text-page-color">
           <i class="fas fa-hourglass-half text-xl"></i>
         </div>
 
         <div class="flex-1 space-y-2">
-          <h2 id="idle-timeout-title" class="text-lg font-semibold text-[var(--text-primary)]">
+          <h2 id="idle-timeout-title" class="text-lg font-semibold text-primary">
             Session is about to expire
           </h2>
-          <p class="text-sm text-[var(--text-primary)]/80">
+          <p class="text-sm text-primary opacity-80">
             For your security, your session will end soon due to inactivity.
             Do you want to continue your session?
           </p>
-          <p class="text-sm text-[var(--text-primary)]/80">
+          <p class="text-sm text-primary opacity-80">
             Time remaining:
             <span data-idle-countdown class="font-semibold">120</span> seconds
           </p>
-          <p data-idle-status class="hidden text-sm text-[var(--error-color)]"></p>
+          <p data-idle-status class="hidden text-sm text-error-color"></p>
         </div>
       </div>
 
       <div class="flex items-center justify-end gap-3">
         <button type="button" data-idle-stay
-          class="px-4 py-2 rounded-lg border border-[var(--button-border)] bg-[var(--button-bg)] hover:bg-[var(--button-hover-bg)] text-[var(--button-text)] font-semibold transition-colors">
+          class="px-4 py-2 rounded-lg border border-[var(--button-border)] bg-[var(--button-bg)] hover:bg-[var(--button-hover-bg)] text-button-text font-semibold transition-colors">
           Continue Session
         </button>
         <button type="button" data-idle-logout
-          class="px-4 py-2 rounded-lg border border-[var(--danger-border)] bg-[var(--danger-bg)] hover:bg-[var(--danger-hover-bg)] text-[var(--danger-text)] font-semibold transition-colors">
+          class="px-4 py-2 rounded-lg border border-[var(--danger-border)] bg-[var(--danger-bg)] hover:bg-[var(--danger-hover-bg)] text-button-text font-semibold transition-colors">
           Log Out
         </button>
       </div>
@@ -624,30 +622,29 @@
       class="relative mx-auto my-16 w-[min(92vw,520px)] rounded-2xl bg-[var(--bg-surface)] shadow-2xl border border-[var(--input-border)] p-6">
       <div class="flex items-start gap-3 mb-4">
         <div
-          class="flex h-12 w-12 items-center justify-center rounded-full bg-[color:rgba(39,49,114,0.10)] text-[var(--page-color)]">
+          class="flex h-12 w-12 items-center justify-center rounded-full bg-[color:rgba(39,49,114,0.10)] text-page-color">
           <i class="fas fa-key text-xl"></i>
         </div>
         <div class="flex-1">
-          <h2 id="update-password-title" class="text-lg font-semibold text-[var(--text-primary)]">
+          <h2 id="update-password-title" class="text-lg font-semibold text-primary">
             Change Password
           </h2>
-          <p class="text-sm text-[var(--text-primary)]/70">
+          <p class="text-sm text-primary opacity-70">
             Verify your current password, then choose a new one that meets the
             complexity policy.
           </p>
         </div>
-        <button type="button" data-update-password-close
-          class="text-[var(--text-primary)] hover:text-[var(--button-bg)]">
+        <button type="button" data-update-password-close class="text-primary hover:text-button-text">
           <i class="fas fa-times text-xl"></i>
         </button>
       </div>
 
       <form id="updatePasswordFormShared" class="space-y-4">
         <div>
-          <label class="block text-sm font-medium text-[var(--text-primary)] mb-2">Current Password</label>
+          <label class="block text-sm font-medium text-primary mb-2">Current Password</label>
           <input type="password" id="currentPasswordShared" autocomplete="current-password"
-            class="w-full px-4 py-3 bg-[var(--input-bg)] border border-[var(--input-border)] rounded-lg text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--button-bg)]/50 focus:border-[var(--button-bg)] transition-all duration-200" />
-          <p id="currentPasswordHintShared" class="mt-2 text-xs text-[var(--text-primary)]/70">
+            class="w-full px-4 py-3 bg-[var(--input-bg)] border border-[var(--input-border)] rounded-lg text-primary focus:outline-none focus:ring-2 focus:ring-[var(--button-bg)]/50 focus:border-[var(--button-bg)] transition-all duration-200" />
+          <p id="currentPasswordHintShared" class="mt-2 text-xs text-primary opacity-70">
             Enter your current password to continue.
           </p>
           <p id="currentPasswordErrorShared" class="mt-2 text-sm text-red-500 hidden">
@@ -1057,7 +1054,7 @@
           Cancel
         </button>
         <button type="button" data-permit-submit
-          class="px-4 py-2 rounded-lg border border-[var(--button-border)] bg-[var(--button-bg)] hover:bg-[var(--button-hover-bg)] text-[var(--button-text)] font-semibold transition-colors">
+          class="px-4 py-2 rounded-lg border border-[var(--button-border)] bg-[var(--theme-submit-bg)] hover:bg-[var(--theme-submit-hover-bg)] text-[var(--theme-submit-text)] font-semibold transition-colors">
           Submit
         </button>
       </div>

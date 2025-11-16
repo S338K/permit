@@ -4,443 +4,341 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Dasher UI - Pre-Approver Dashboard</title>
+    <title>Pre-Approver Dashboard</title>
+    <link rel="icon" type="image/x-icon" href="../images/HIA_logo.png" />
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="../shared/theme.css" />
-    <link href="https://fonts.googleapis.com/css?family=Inter:400,500,600,700&display=swap" rel="stylesheet" />
-    <!-- Bootstrap 5 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
-    <!-- Font Awesome 5 -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet" />
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-    <!-- XLSX for Excel export -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <style>
+        /* Small helper for pre-approver specific tweaks */
+        .permits-grid article {
+            border-radius: 0.75rem;
+            padding: 1rem;
+            background: var(--bg-surface);
+            border: 1px solid var(--input-border);
+            box-shadow: 0 6px 18px rgba(16, 24, 40, 0.04);
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 999px;
+            font-size: 0.75rem;
+        }
+
+        .status-badge.pending {
+            background: #fbbf24;
+            color: #1f2937;
+        }
+
+        .status-badge.in-progress {
+            background: #60a5fa;
+            color: #0f172a;
+        }
+
+        .status-badge.approved {
+            background: #34d399;
+            color: #06313a;
+        }
+
+        .status-badge.rejected {
+            background: #f87171;
+            color: #641220;
+        }
+
+        /* Modal panel animation and subtle divider styles */
+        #permitDetailsModal {
+            transition: opacity .24s ease, visibility .24s ease;
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        #permitDetailsModal.modal-show {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+        }
+
+        #permitDetailsModal .modal-panel {
+            transform: translateY(12px) scale(.98);
+            opacity: 0;
+            transition: transform .28s cubic-bezier(.2, .8, .2, 1), opacity .28s ease;
+        }
+
+        #permitDetailsModal.modal-show .modal-panel {
+            transform: translateY(0) scale(1);
+            opacity: 1;
+        }
+
+        /* Section divider with entry animation */
+        .modal-section {
+            padding: 1rem 0;
+            border-top: 1px solid var(--input-border);
+            position: relative;
+        }
+
+        .modal-section:first-of-type {
+            border-top: none;
+            padding-top: 0;
+        }
+
+        .modal-divider {
+            height: 2px;
+            background: linear-gradient(90deg, rgba(0, 0, 0, 0.06), rgba(0, 0, 0, 0));
+            margin: .6rem 0;
+            transform-origin: left;
+            transform: scaleX(0);
+            transition: transform .28s ease;
+        }
+
+        #permitDetailsModal.modal-show .modal-divider {
+            transform: scaleX(1);
+        }
+
+        /* Responsive adjustments for modal */
+        @media (max-width: 640px) {
+            #permitDetailsModal .modal-panel {
+                width: 100%;
+                padding: 1rem;
+                border-radius: 0.75rem;
+            }
+        }
+
+        /* Blur the background via the overlay itself so modal stays crisp */
+        #permitDetailsModal {
+            filter: none !important;
+            /* ensure modal content is never blurred */
+            -webkit-backdrop-filter: blur(4px);
+            backdrop-filter: blur(4px);
+        }
+    </style>
 </head>
 
-<body class="dasher-bg">
-    <!-- Sidebar removed per requirement -->
-
-    <div class="kai-main">
-        <!-- Header/navbar removed per requirement -->
-
-        <main class="kai-content">
-            <!-- Dashboard Cards Row - Pre-Approver Specific Stats -->
-            <div class="row g-4 mb-4">
-                <!-- Total Permits -->
-                <div class="col-12 col-sm-6 col-md-4">
-                    <div class="card card-stats card-round h-100 shadow-sm">
-                        <div class="card-body d-flex align-items-center gap-3">
-                            <div class="icon-big text-center rounded-3 d-flex align-items-center justify-content-center"
-                                style="background: #1769ff; width: 80px; height: 80px">
-                                <i class="fas fa-file-alt fa-2x text-white"></i>
-                            </div>
-                            <div>
-                                <p class="card-category mb-1 text-muted">Total Permits</p>
-                                <h4 id="totalPermitsCount" class="card-title mb-0 fw-bold" style="color: #2d3651">
-                                    0
-                                </h4>
-                            </div>
+<body class="bg-[var(--bg-surface)] text-primary font-system min-h-screen transition-all duration-300">
+    <main class="w-full max-w-full px-4 py-8">
+        <div class="flex flex-col items-stretch gap-6 mb-8">
+            <!-- KPI Cards (Pre-Approver) -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="p-4 rounded-2xl bg-[var(--bg-surface)] border border-[var(--input-border)] shadow-sm">
+                    <div class="flex items-center gap-3">
+                        <div class="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center">
+                            <i class="fas fa-file-alt text-hia-blue"></i>
+                        </div>
+                        <div>
+                            <div class="text-sm text-secondary kpi-label">Total Permits</div>
+                            <div id="totalPermitsCount" class="text-xl font-bold">0</div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Pending Review -->
-                <div class="col-12 col-sm-6 col-md-4">
-                    <div class="card card-stats card-round h-100 shadow-sm">
-                        <div class="card-body d-flex align-items-center gap-3">
-                            <div class="icon-big text-center rounded-3 d-flex align-items-center justify-content-center"
-                                style="background: #f59e0b; width: 80px; height: 80px">
-                                <i class="fas fa-clock fa-2x text-white"></i>
-                            </div>
-                            <div>
-                                <p class="card-category mb-1 text-muted">Pending Review</p>
-                                <h4 id="pendingReviewCount" class="card-title mb-0 fw-bold" style="color: #2d3651">
-                                    0
-                                </h4>
-                            </div>
+                <div class="p-4 rounded-2xl bg-[var(--bg-surface)] border border-[var(--input-border)] shadow-sm">
+                    <div class="flex items-center gap-3">
+                        <div class="w-12 h-12 rounded-full bg-yellow-50 flex items-center justify-center">
+                            <i class="fas fa-clock text-yellow-600"></i>
+                        </div>
+                        <div>
+                            <div class="text-sm text-secondary kpi-label">Pending Review</div>
+                            <div id="pendingReviewCount" class="text-xl font-bold">0</div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Pre-Approved -->
-                <div class="col-12 col-sm-6 col-md-4">
-                    <div class="card card-stats card-round h-100 shadow-sm">
-                        <div class="card-body d-flex align-items-center gap-3">
-                            <div class="icon-big text-center rounded-3 d-flex align-items-center justify-content-center"
-                                style="background: #22c55e; width: 80px; height: 80px">
-                                <i class="fas fa-check-circle fa-2x text-white"></i>
-                            </div>
-                            <div>
-                                <p class="card-category mb-1 text-muted">Pre-Approved</p>
-                                <h4 id="preApprovedCount" class="card-title mb-0 fw-bold" style="color: #2d3651">
-                                    0
-                                </h4>
-                            </div>
+                <div class="p-4 rounded-2xl bg-[var(--bg-surface)] border border-[var(--input-border)] shadow-sm">
+                    <div class="flex items-center gap-3">
+                        <div class="w-12 h-12 rounded-full bg-green-50 flex items-center justify-center">
+                            <i class="fas fa-check-circle text-green-600"></i>
+                        </div>
+                        <div>
+                            <div class="text-sm text-secondary kpi-label">Pre-Approved</div>
+                            <div id="preApprovedCount" class="text-xl font-bold">0</div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Rejected by Me -->
-                <div class="col-12 col-sm-6 col-md-4">
-                    <div class="card card-stats card-round h-100 shadow-sm">
-                        <div class="card-body d-flex align-items-center gap-3">
-                            <div class="icon-big text-center rounded-3 d-flex align-items-center justify-content-center"
-                                style="background: #ef4444; width: 80px; height: 80px">
-                                <i class="fas fa-times-circle fa-2x text-white"></i>
-                            </div>
-                            <div>
-                                <p class="card-category mb-1 text-muted">Rejected by Me</p>
-                                <h4 id="rejectedByMeCount" class="card-title mb-0 fw-bold" style="color: #2d3651">
-                                    0
-                                </h4>
-                            </div>
+                <div class="p-4 rounded-2xl bg-[var(--bg-surface)] border border-[var(--input-border)] shadow-sm">
+                    <div class="flex items-center gap-3">
+                        <div class="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center">
+                            <i class="fas fa-times-circle text-red-600"></i>
                         </div>
-                    </div>
-                </div>
-
-                <!-- Approval Rate -->
-                <div class="col-12 col-sm-6 col-md-4">
-                    <div class="card card-stats card-round h-100 shadow-sm">
-                        <div class="card-body d-flex align-items-center gap-3">
-                            <div class="icon-big text-center rounded-3 d-flex align-items-center justify-content-center"
-                                style="background: #8b5cf6; width: 80px; height: 80px">
-                                <i class="fas fa-percentage fa-2x text-white"></i>
-                            </div>
-                            <div>
-                                <p class="card-category mb-1 text-muted">Approval Rate</p>
-                                <h4 id="approvalRate" class="card-title mb-0 fw-bold" style="color: #2d3651">
-                                    0%
-                                </h4>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- In Progress -->
-                <div class="col-12 col-sm-6 col-md-4">
-                    <div class="card card-stats card-round h-100 shadow-sm">
-                        <div class="card-body d-flex align-items-center gap-3">
-                            <div class="icon-big text-center rounded-3 d-flex align-items-center justify-content-center"
-                                style="background: #06b6d4; width: 80px; height: 80px">
-                                <i class="fas fa-spinner fa-2x text-white"></i>
-                            </div>
-                            <div>
-                                <p class="card-category mb-1 text-muted">In Progress</p>
-                                <h4 id="inProgressCount" class="card-title mb-0 fw-bold" style="color: #2d3651">
-                                    0
-                                </h4>
-                            </div>
+                        <div>
+                            <div class="text-sm text-secondary kpi-label">Rejected by Me</div>
+                            <div id="rejectedByMeCount" class="text-xl font-bold">0</div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Main Content Row -->
-            <div class="row g-4">
-                <!-- Pending Permits Table -->
-                <div class="col-12">
-                    <div class="card">
-                        <div class="card-header">
-                            <div class="card-head-row">
-                                <div class="card-title">
-                                    <h5 class="mb-0 fw-bold">Permits Awaiting Pre-Approval</h5>
-                                    <small class="text-muted">Review and process pending permit applications</small>
-                                </div>
-                                <div class="card-tools">
-                                    <div class="dropdown">
-                                        <button class="btn btn-success btn-sm dropdown-toggle me-2" type="button"
-                                            id="exportDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                                            <i class="fas fa-download me-1"></i>Export
-                                        </button>
-                                        <ul class="dropdown-menu" aria-labelledby="exportDropdown">
-                                            <li>
-                                                <a class="dropdown-item" href="#" onclick="exportToCSV()"><i
-                                                        class="fas fa-file-csv me-2"></i>Export to
-                                                    CSV</a>
-                                            </li>
-                                            <li>
-                                                <a class="dropdown-item" href="#" onclick="exportToExcel()"><i
-                                                        class="fas fa-file-excel me-2"></i>Export to
-                                                    Excel</a>
-                                            </li>
-                                        </ul>
-                                    </div>
-                                    <button class="btn btn-info btn-sm" onclick="printTable()">
-                                        <i class="fas fa-print me-1"></i>Print
-                                    </button>
-                                </div>
+            <!-- Permits list: grid + table fallback -->
+            <section
+                class="analytics-card w-full bg-[var(--bg-surface)] rounded-2xl shadow-lg border border-[var(--input-border)]"
+                id="permitsCard">
+                <div
+                    class="bg-gradient-to-r from-hia-blue/10 to-hia-light-blue/10 px-6 py-4 border-b border-[var(--input-border)]">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-xl font-bold flex items-center gap-2 text-hia-blue"><i
+                                class="fas fa-clipboard-list text-hia-blue"></i> Pending Permits</h3>
+                        <div class="flex items-center gap-3">
+                            <div class="hidden sm:block text-sm text-secondary mr-3">Showing <span
+                                    id="permitsShowingCount" class="font-semibold text-primary">0</span>
+                                of <span id="permitsTotalCount" class="font-semibold text-primary">0</span> permits
                             </div>
-                        </div>
-                        <div class="card-body">
-                            <div class="table-responsive">
-                                <table id="pendingPermitsTable" class="table table-hover">
-                                    <thead class="table-light">
-                                        <tr>
-                                            <th class="text-center table-header-dynamic" data-field="serialNo">
-                                                <div class="header-content">
-                                                    <i class="fas fa-hashtag me-2"></i>
-                                                    <span>Permit ID</span>
-                                                </div>
-                                            </th>
-                                            <th class="text-center table-header-dynamic" data-field="permitTitle">
-                                                <div class="header-content">
-                                                    <i class="fas fa-file-contract me-2"></i>
-                                                    <span>Permit Title</span>
-                                                </div>
-                                            </th>
-                                            <th class="text-center table-header-dynamic" data-field="requester">
-                                                <div class="header-content">
-                                                    <i class="fas fa-user me-2"></i>
-                                                    <span>Requester</span>
-                                                </div>
-                                            </th>
-                                            <th class="text-center table-header-dynamic" data-field="submittedDateTime">
-                                                <div class="header-content">
-                                                    <i class="fas fa-calendar-alt me-2"></i>
-                                                    <span>Submitted Date & Time</span>
-                                                </div>
-                                            </th>
-                                            <th class="text-center table-header-dynamic" data-field="priority">
-                                                <div class="header-content">
-                                                    <i class="fas fa-exclamation-triangle me-2"></i>
-                                                    <span>Priority</span>
-                                                </div>
-                                            </th>
-                                            <th class="text-center table-header-dynamic" data-field="actions">
-                                                <div class="header-content">
-                                                    <i class="fas fa-cogs me-2"></i>
-                                                    <span>Actions</span>
-                                                </div>
-                                            </th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <!-- Table data will be populated by JavaScript -->
-                                    </tbody>
-                                </table>
+                            <div class="relative hidden sm:block max-w-sm w-[300px]">
+                                <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-secondary"
+                                    aria-hidden="true"></i>
+                                <input id="permitsSearchInput" type="text"
+                                    placeholder="Search permits by title, id or requester..."
+                                    class="w-full pl-10 pr-4 py-2.5 bg-[var(--input-bg)] border border-[var(--input-border)] rounded-lg text-sm focus:ring-2 focus:ring-hia-blue"
+                                    aria-controls="permitsTable" />
+                            </div>
+                            <div class="hidden sm:flex">
+                                <select id="permitsStatusFilter"
+                                    class="px-4 py-2.5 bg-[var(--input-bg)] border border-[var(--input-border)] rounded-lg text-sm"
+                                    aria-controls="permitsTable">
+                                    <option value="">All Status</option>
+                                    <option value="Pending">Pending</option>
+                                    <option value="In Progress">In Progress</option>
+                                    <option value="Approved">Approved</option>
+                                    <option value="Rejected">Rejected</option>
+                                </select>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- My Pre-Approved Permits -->
-                <div class="col-12">
-                    <div class="card">
-                        <div class="card-header">
-                            <div class="card-head-row">
-                                <div class="card-title">
-                                    <h5 class="mb-0 fw-bold">My Pre-Approved Permits</h5>
-                                    <small class="text-muted">Permits I have pre-approved, awaiting final
-                                        approval</small>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="card-body">
-                            <div class="table-responsive">
-                                <table id="preApprovedPermitsTable" class="table table-hover">
-                                    <thead class="table-light">
-                                        <tr>
-                                            <th class="text-center">Permit ID</th>
-                                            <th class="text-center">Permit Title</th>
-                                            <th class="text-center">Requester</th>
-                                            <th class="text-center">Pre-Approved Date</th>
-                                            <th class="text-center">My Comments</th>
-                                            <th class="text-center">Final Status</th>
-                                            <th class="text-center">Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <!-- Table data will be populated by JavaScript -->
-                                    </tbody>
-                                </table>
-                            </div>
+                <div id="permitsContent" class="p-6">
+                    <!-- Grid (desktop) -->
+                    <div id="permitsGrid"
+                        class="permits-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
+                        <!-- cards injected by JS -->
+                    </div>
+
+                    <!-- Table fallback -->
+                    <div class="overflow-x-auto max-w-full">
+                        <table id="permitsTable" class="min-w-max w-full max-w-full table-auto">
+                            <thead class="bg-[var(--bg-surface)]">
+                                <tr class="border-b border-[var(--input-border)]">
+                                    <th class="px-6 py-4 text-left text-sm font-semibold">#</th>
+                                    <th data-sort="submitted"
+                                        class="px-6 py-4 text-left text-sm font-semibold cursor-pointer">Submitted On <i
+                                            class="fas fa-sort text-secondary text-xs ml-2"></i></th>
+                                    <th data-sort="title"
+                                        class="px-6 py-4 text-left text-sm font-semibold cursor-pointer">Permit Title <i
+                                            class="fas fa-sort text-secondary text-xs ml-2"></i></th>
+                                    <th data-sort="status"
+                                        class="px-6 py-4 text-left text-sm font-semibold cursor-pointer">Status <i
+                                            class="fas fa-sort text-secondary text-xs ml-2"></i></th>
+                                    <th data-sort="requester"
+                                        class="px-6 py-4 text-left text-sm font-semibold cursor-pointer">Requester</th>
+                                    <th class="px-6 py-4 text-left text-sm font-semibold">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="permitsTableBody" class="divide-y divide-[var(--input-border)]">
+                                <!-- rows injected by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Pagination -->
+                    <div class="mt-4 flex items-center justify-between">
+                        <div id="permitsPagination" class="flex gap-1"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Approved Permits (by me) -->
+            <section
+                class="analytics-card w-full bg-[var(--bg-surface)] rounded-2xl shadow-lg border border-[var(--input-border)] mt-6"
+                id="approvedPermitsCard">
+                <div
+                    class="bg-gradient-to-r from-hia-blue/10 to-hia-light-blue/10 px-6 py-4 border-b border-[var(--input-border)]">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-xl font-bold flex items-center gap-2 text-hia-blue"><i
+                                class="fas fa-check-circle text-green-600"></i> Approved Permits (By Me)</h3>
+                        <div class="flex items-center gap-3">
+                            <div class="hidden sm:block text-sm text-secondary mr-3">Showing <span
+                                    id="approvedShowingCount" class="font-semibold text-primary">0</span>
+                                permits</div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Activity Log -->
-                <div class="col-12">
-                    <div class="card">
-                        <div class="card-header">
-                            <h5 class="mb-0 fw-bold">Recent Activity</h5>
+                <div id="approvedContent" class="p-6">
+                    <!-- Grid -->
+                    <div id="approvedPermitsGrid"
+                        class="permits-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
+                        <!-- cards injected by JS -->
+                    </div>
+
+                    <!-- table fallback removed; cards only -->
+                </div>
+            </section>
+
+            <!-- Analytics / Charts (optional) -->
+            <section
+                class="analytics-card w-full bg-[var(--bg-surface)] rounded-2xl shadow-lg border border-[var(--input-border)] overflow-hidden">
+                <div
+                    class="bg-gradient-to-r from-hia-blue/10 to-hia-light-blue/10 px-6 py-4 border-b border-[var(--input-border)]">
+                    <h3 class="text-lg font-bold text-hia-blue">Permit Analytics</h3>
+                </div>
+                <div class="p-6">
+                    <!-- Charts -->
+                    <div class="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div class="p-4 rounded-xl border border-[var(--input-border)] bg-[var(--bg-surface)]">
+                            <div class="text-sm text-secondary mb-2">Status Distribution</div>
+                            <div class="chart-area" style="height:220px; position:relative;">
+                                <canvas id="statusChart"></canvas>
+                            </div>
                         </div>
-                        <div class="card-body">
-                            <div id="activityLog" class="activity-timeline">
-                                <!-- Activity items will be populated by JavaScript -->
+                        <div class="p-4 rounded-xl border border-[var(--input-border)] bg-[var(--bg-surface)]">
+                            <div class="text-sm text-secondary mb-2">Monthly Permits (6 months)</div>
+                            <div class="chart-area" style="height:220px; position:relative;">
+                                <canvas id="monthlyChart"></canvas>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        </main>
-    </div>
+            </section>
 
-    <!-- Modals -->
-
-    <!-- Permit Details Modal -->
-    <div class="modal fade" id="permitDetailsModal" tabindex="-1" aria-labelledby="permitDetailsModalLabel"
-        aria-hidden="true">
-        <div class="modal-dialog modal-xl">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="permitDetailsModalLabel">
-                        Permit Details
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body" id="permitDetailsContent">
-                    <!-- Content will be populated by JavaScript -->
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                        Close
-                    </button>
-                    <button type="button" class="btn btn-danger" id="rejectFromModal" onclick="showRejectModal()">
-                        Reject
-                    </button>
-                    <button type="button" class="btn btn-success" id="approveFromModal" onclick="showApproveModal()">
-                        Pre-Approve
-                    </button>
-                </div>
-            </div>
         </div>
-    </div>
+    </main>
 
-    <!-- Approve Modal -->
-    <div class="modal fade" id="approveModal" tabindex="-1" aria-labelledby="approveModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="approveModalLabel">
-                        Pre-Approve Permit
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label for="approveComments" class="form-label">Comments (Optional)</label>
-                        <textarea class="form-control" id="approveComments" rows="3"
-                            placeholder="Add your comments for this pre-approval..."></textarea>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                        Cancel
-                    </button>
-                    <button type="button" class="btn btn-success" id="confirmApprove">
-                        Pre-Approve
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
+    <!-- Permit modal removed from page; using shared/permit-modal.js -->
 
-    <!-- Reject Modal -->
-    <div class="modal fade" id="rejectModal" tabindex="-1" aria-labelledby="rejectModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="rejectModalLabel">Reject Permit</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label for="rejectReason" class="form-label">Reason for Rejection *</label>
-                        <textarea class="form-control" id="rejectReason" rows="3"
-                            placeholder="Please provide a reason for rejecting this permit..." required></textarea>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                        Cancel
-                    </button>
-                    <button type="button" class="btn btn-danger" id="confirmReject">
-                        Reject
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.js"></script>
+    <script>
+        // Make this page full-width like the profile page.
+        function markAsPreapproverPage() {
+            try {
+                const layoutWrapper = document.querySelector('[data-layout-wrapper]');
+                if (layoutWrapper) {
+                    layoutWrapper.classList.remove('container', 'mx-auto');
+                    layoutWrapper.classList.add('w-full', 'px-0');
+                }
 
-    <!-- Profile Update Modal -->
-    <div class="modal fade" id="profileModal" tabindex="-1" aria-labelledby="profileModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="profileModalLabel">Update Profile</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="profileForm">
-                        <div class="mb-3">
-                            <label for="profileUsername" class="form-label">Username</label>
-                            <input type="text" class="form-control" id="profileUsername" required />
-                        </div>
-                        <div class="mb-3">
-                            <label for="profileEmailInput" class="form-label">Email</label>
-                            <input type="email" class="form-control" id="profileEmailInput" required />
-                        </div>
-                        <div class="mb-3">
-                            <label for="profilePhoneInput" class="form-label">Phone</label>
-                            <input type="tel" class="form-control" id="profilePhoneInput" />
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                        Cancel
-                    </button>
-                    <button type="button" class="btn btn-primary" onclick="updateProfile()">
-                        Update Profile
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
+                const mainContent = document.getElementById('main-content');
+                if (mainContent) {
+                    mainContent.classList.remove('admin-full-width');
+                }
 
-    <!-- Password Update Modal -->
-    <div class="modal fade" id="passwordModal" tabindex="-1" aria-labelledby="passwordModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="passwordModalLabel">Update Password</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="passwordForm">
-                        <div class="mb-3">
-                            <label for="currentPassword" class="form-label">Current Password</label>
-                            <input type="password" class="form-control" id="currentPassword" required />
-                        </div>
-                        <div class="mb-3">
-                            <label for="newPassword" class="form-label">New Password</label>
-                            <input type="password" class="form-control" id="newPassword" required />
-                        </div>
-                        <div class="mb-3">
-                            <label for="confirmNewPassword" class="form-label">Confirm New Password</label>
-                            <input type="password" class="form-control" id="confirmNewPassword" required />
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                        Cancel
-                    </button>
-                    <button type="button" class="btn btn-primary" onclick="updatePassword()">
-                        Update Password
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
+                const pageMain = document.querySelector('main');
+                if (pageMain) pageMain.classList.add('w-full');
+            } catch (e) {
+                console.warn('markAsPreapproverPage failed', e);
+            }
+        }
 
-    <!-- Scripts -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', markAsPreapproverPage);
+        } else {
+            markAsPreapproverPage();
+        }
+        window.addEventListener('layout:mounted', markAsPreapproverPage);
+    </script>
+    <script type="module" src="../shared/session.js"></script>
+    <script type="module" src="../shared/permit-modal.js"></script>
     <script type="module" src="preapprover.js"></script>
+    <script defer src="../shared/layout.mount.js" data-layout="../shared/layout.html"></script>
 </body>
-<script type="module" src="../shared/session.js"></script>
-<script src="../shared/toast.js" defer></script>
-<script defer src="../shared/layout.mount.js" data-layout="../shared/layout.html"></script>
 
 </html>
