@@ -11,7 +11,7 @@ function detectApiBase() {
     const host = window.location.hostname;
     const port = window.location.port;
     if ((host === "127.0.0.1" || host === "localhost") && port === "5500")
-      return "http://127.0.0.1:5000";
+      return "http://127.0.0.1:5000", "http://127.0.0.1:5500";
     if (host === "127.0.0.1" || host === "localhost")
       return `http://${host}:${port}`;
     return DEFAULT_PROD;
