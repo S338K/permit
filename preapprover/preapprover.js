@@ -2,7 +2,6 @@ import { checkSession, initIdleTimer } from "../shared/session.js";
 import { formatDate24 } from "../date-utils.js";
 import { API_BASE } from "../config.js";
 
-// Lightweight pre-approver client module
 let allPermits = [];
 let currentUser = null;
 let currentPermitId = null;
@@ -34,7 +33,6 @@ function setText(id, val) {
       : String(val || "");
 }
 
-// Fetch pending/submitted permits for pre-approver
 async function fetchPermits() {
   try {
     const res = await fetch(
@@ -60,7 +58,6 @@ async function fetchPermits() {
   }
 }
 
-// Ensure shared toast helper is loaded (layout may load it later)
 function ensureToasts(timeout = 3000) {
   return new Promise((resolve) => {
     if (typeof window !== "undefined" && typeof window.showToast === "function")
@@ -104,8 +101,6 @@ async function fetchApprovedPermits() {
     });
     if (!res.ok) throw new Error("fetch approved failed");
     const body = await res.json();
-    // API may return { preApproved: [...], approved: [...], rejected: [...] }
-    // Prefer `preApproved` (permits pre-approved by the current user). Fall back to `approved`.
     if (Array.isArray(body.preApproved) && body.preApproved.length) {
       approvedPermits = body.preApproved;
     } else if (Array.isArray(body.approved) && body.approved.length) {
@@ -120,7 +115,6 @@ async function fetchApprovedPermits() {
 }
 
 function renderStats() {
-  // Legacy client-side stats renderer retained for fallback. Prefer server stats.
   const total = allPermits.length;
   const pending = allPermits.filter(
     (p) => ((p.status || "") + "").toLowerCase() === "pending"
@@ -153,9 +147,7 @@ async function fetchStats() {
     setText("preApprovedCount", approved);
     setText("rejectedByMeCount", rejected);
     setText("totalPermitsCount", total);
-  } catch (err) {
-    // ignore - keep client-side counts
-  }
+  } catch (err) {}
 }
 
 function escapeHtml(s) {
@@ -178,7 +170,6 @@ function createPermitCard(p, idx) {
   hdr.innerHTML = `<div>#${idx}</div><div class="permit-submitted text-xs text-secondary">${
     p.createdAt ? formatDate24(p.createdAt) : "—"
   }</div>`;
-  // Build card contents (title, requester, status, actions)
   const title = document.createElement("h3");
   title.className = "text-sm font-semibold mb-1";
   title.textContent = p.permitTitle || "Untitled permit";
@@ -199,7 +190,6 @@ function createPermitCard(p, idx) {
 
   meta.appendChild(status);
 
-  // Actions: only provide 'View' here. Approve/Reject handled from modal where comments are required.
   const actions = document.createElement("div");
   actions.className = "mt-3 flex gap-2";
   const view = document.createElement("button");
@@ -261,8 +251,6 @@ function renderPermits() {
     return okSearch && okStatus;
   });
 
-  // Only show newly submitted permits (submitted/pending).
-  // Do not show "in progress" or "approved" permits in this list.
   list = list.filter((p) => {
     const s = ((p.status || "") + "").toLowerCase();
     return s === "submitted" || s === "pending";
@@ -304,6 +292,7 @@ function openModal() {
   setTimeout(() => m.classList.add("modal-show"), 20);
   setTimeout(() => enableModalFocusTrap(m), 100);
 }
+
 function closeModal() {
   const m = el("permitDetailsModal");
   if (!m) return;
@@ -317,7 +306,6 @@ function closeModal() {
   }, 280);
 }
 
-// Focus trap utilities for modal accessibility
 let _lastFocusedBeforeModal = null;
 let _modalKeyHandler = null;
 function enableModalFocusTrap(modalEl) {
@@ -373,7 +361,6 @@ async function viewPermitDetails(id) {
   const content = el("permitDetailsContent");
   if (!content) return;
 
-  // Fetch full permit details from API
   try {
     const res = await fetch(`${API_BASE}/api/permits/${id}`, {
       credentials: "include",
@@ -381,7 +368,6 @@ async function viewPermitDetails(id) {
     if (!res.ok) throw new Error("failed to fetch permit");
     const p = await res.json();
 
-    // Build modern modal form (readonly fields + comments textarea + actions)
     const filesHtml = (p.files || [])
       .map(
         (f) =>
@@ -396,14 +382,12 @@ async function viewPermitDetails(id) {
     const submittedLocal = p.createdAt
       ? new Date(p.createdAt).toLocaleString()
       : "-";
-    // Display start/end in user's local timezone for readability
     const startDisplay = p.startDateTime
       ? new Date(p.startDateTime).toLocaleString()
       : "-";
     const endDisplay = p.endDateTime
       ? new Date(p.endDateTime).toLocaleString()
       : "-";
-    // Values for editable inputs (ISO local format) — only used when editable
     const startInputValue = p.startDateTime
       ? new Date(p.startDateTime).toISOString().slice(0, 16)
       : "";
@@ -414,17 +398,6 @@ async function viewPermitDetails(id) {
     function renderRequester(r) {
       if (!r)
         return '<div class="text-sm text-secondary">No requester data</div>';
-      const addr = r.officeAddress
-        ? `${escapeHtml(r.officeAddress.buildingNo || "")} ${escapeHtml(
-            r.officeAddress.floorNo || ""
-          )} ${escapeHtml(r.officeAddress.streetNo || "")} ${escapeHtml(
-            r.officeAddress.zone || ""
-          )} ${escapeHtml(r.officeAddress.city || "")} ${escapeHtml(
-            r.officeAddress.country || ""
-          )} ${escapeHtml(r.officeAddress.poBox || "")}`
-            .replace(/\s+/g, " ")
-            .trim()
-        : "";
       return `
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
@@ -444,13 +417,10 @@ async function viewPermitDetails(id) {
                 <div class="mt-1 text-sm">${escapeHtml(r.company || "-")}</div>
                 <div class="text-xs text-secondary mt-2">Role</div>
                 <div class="mt-1 text-sm">${escapeHtml(r.role || "-")}</div>
-                <div class="text-xs text-secondary mt-2">Office Address</div>
-                <div class="mt-1 text-sm">${escapeHtml(addr || "-")}</div>
               </div>
             </div>`;
     }
 
-    // Work details mapping — show important fields stored in DB
     const workFields = [
       ["Permit Title", p.permitTitle],
       ["Permit Number", p.permitNumber],
@@ -478,7 +448,6 @@ async function viewPermitDetails(id) {
       )
       .join("");
 
-    // Build comments / approver-hierarchy section depending on readonly state
     const isReadOnlyModal = ["In Progress", "Approved"].includes(p.status);
     const preApproverName = p.preApprovedBy
       ? p.preApprovedBy.fullName || p.preApprovedBy.username || "-"
@@ -742,8 +711,6 @@ async function viewPermitDetails(id) {
             ${commentsSection}
           </form>
         `;
-
-    // Initialize datetime pickers and wire Save
     const startInput = document.getElementById("editStartDateTime");
     const endInput = document.getElementById("editEndDateTime");
     let startPicker = null;
@@ -769,7 +736,6 @@ async function viewPermitDetails(id) {
             }
           },
           onOpen: () => {
-            // ensure minDate stays current if user opens later
             startPicker.set("minDate", new Date());
           },
         });
@@ -851,7 +817,6 @@ async function viewPermitDetails(id) {
       });
     }
 
-    // Hide Pre-Approve / Reject footer buttons for read-only (pre-approved/approved) permits
     const isReadOnly = ["In Progress", "Approved"].includes(p.status);
     const approveBtn = document.getElementById("approveFromModal");
     const rejectBtn = document.getElementById("rejectFromModal");
@@ -866,7 +831,6 @@ async function viewPermitDetails(id) {
   }
 }
 
-// Submit pre-approver actions; keep modal open on validation failure
 async function handlePermitAction(id, action) {
   if (!id) return false;
   try {
@@ -928,9 +892,6 @@ async function fetchAnalytics() {
     const pending = Number(counts.Pending || 0);
     const rejected = Number(counts.Rejected || 0);
 
-    // analytics KPIs are now shown via charts; top cards are updated from /stats
-
-    // Doughnut: status distribution
     const statusCtx = document.getElementById("statusChart");
     if (statusCtx) {
       const ctx = statusCtx.getContext("2d");
@@ -1018,7 +979,6 @@ function setupUI() {
   if (s) s.addEventListener("input", debounce(renderPermits, 180));
   const f = el("permitsStatusFilter");
   if (f) f.addEventListener("change", renderPermits);
-  // modal close buttons
   document.addEventListener("click", (e) => {
     if (
       e.target.closest('[data-action="closePermitDetails"]') ||
@@ -1026,7 +986,6 @@ function setupUI() {
     )
       closeModal();
   });
-  // close on Escape
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") closeModal();
   });
@@ -1054,7 +1013,6 @@ async function init() {
     currentUser = null;
   }
   initIdleTimer();
-  // Ensure toast helper is available before wiring UI so button handlers can show toasts
   await ensureToasts();
   setupUI();
   await refreshAndRender();
@@ -1062,10 +1020,8 @@ async function init() {
   pollId = setInterval(refreshAndRender, 15000);
 }
 
-// exported for old handlers in markup
 window.viewPermitDetails = viewPermitDetails;
 window.handlePermitAction = handlePermitAction;
-// expose init and auto-run on DOMContentLoaded
 if (typeof window !== "undefined") window.init = init;
 document.addEventListener("DOMContentLoaded", () => {
   try {

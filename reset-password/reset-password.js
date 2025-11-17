@@ -5,10 +5,8 @@ const newPasswordInput = document.getElementById("newPassword");
 const confirmPasswordInput = document.getElementById("confirmPassword");
 const strengthText = document.getElementById("strengthText");
 
-// Regex for strong password: min 8 chars, uppercase, lowercase, number, special char
 const strongPasswordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
 
-// Password strength checker
 newPasswordInput.addEventListener("input", () => {
   const val = newPasswordInput.value;
   let strength = "";

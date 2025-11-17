@@ -118,7 +118,7 @@
 <body class="bg-[var(--bg-surface)] text-primary font-system min-h-screen transition-all duration-300">
     <main class="w-full max-w-full px-4 py-8">
         <div class="flex flex-col items-stretch gap-6 mb-8">
-            <!-- KPI Cards (Pre-Approver) -->
+
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div class="p-4 rounded-2xl bg-[var(--bg-surface)] border border-[var(--input-border)] shadow-sm">
                     <div class="flex items-center gap-3">
@@ -169,7 +169,7 @@
                 </div>
             </div>
 
-            <!-- Permits list: grid + table fallback -->
+
             <section
                 class="analytics-card w-full bg-[var(--bg-surface)] rounded-2xl shadow-lg border border-[var(--input-border)]"
                 id="permitsCard">
@@ -207,13 +207,12 @@
                 </div>
 
                 <div id="permitsContent" class="p-6">
-                    <!-- Grid (desktop) -->
                     <div id="permitsGrid"
                         class="permits-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
-                        <!-- cards injected by JS -->
+
                     </div>
 
-                    <!-- Table fallback -->
+
                     <div class="overflow-x-auto max-w-full">
                         <table id="permitsTable" class="min-w-max w-full max-w-full table-auto">
                             <thead class="bg-[var(--bg-surface)]">
@@ -234,19 +233,18 @@
                                 </tr>
                             </thead>
                             <tbody id="permitsTableBody" class="divide-y divide-[var(--input-border)]">
-                                <!-- rows injected by JS -->
                             </tbody>
                         </table>
                     </div>
 
-                    <!-- Pagination -->
+
                     <div class="mt-4 flex items-center justify-between">
                         <div id="permitsPagination" class="flex gap-1"></div>
                     </div>
                 </div>
             </section>
 
-            <!-- Approved Permits (by me) -->
+
             <section
                 class="analytics-card w-full bg-[var(--bg-surface)] rounded-2xl shadow-lg border border-[var(--input-border)] mt-6"
                 id="approvedPermitsCard">
@@ -264,17 +262,17 @@
                 </div>
 
                 <div id="approvedContent" class="p-6">
-                    <!-- Grid -->
+
                     <div id="approvedPermitsGrid"
                         class="permits-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
-                        <!-- cards injected by JS -->
+
                     </div>
 
-                    <!-- table fallback removed; cards only -->
+
                 </div>
             </section>
 
-            <!-- Analytics / Charts (optional) -->
+
             <section
                 class="analytics-card w-full bg-[var(--bg-surface)] rounded-2xl shadow-lg border border-[var(--input-border)] overflow-hidden">
                 <div
@@ -282,7 +280,7 @@
                     <h3 class="text-lg font-bold text-hia-blue">Permit Analytics</h3>
                 </div>
                 <div class="p-6">
-                    <!-- Charts -->
+
                     <div class="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
                         <div class="p-4 rounded-xl border border-[var(--input-border)] bg-[var(--bg-surface)]">
                             <div class="text-sm text-secondary mb-2">Status Distribution</div>
@@ -303,7 +301,7 @@
         </div>
     </main>
 
-    <!-- Permit modal removed from page; using shared/permit-modal.js -->
+
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.js"></script>
     <script>

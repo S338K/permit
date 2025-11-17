@@ -10,22 +10,7 @@ const logger = require('../logger');
 // ----- REGISTER -----
 router.post('/register', async (req, res) => {
   try {
-    const {
-      username,
-      company,
-      email,
-      phone,
-      mobile,
-      password,
-      role,
-      buildingNo,
-      floorNo,
-      streetNo,
-      zone,
-      city,
-      country,
-      poBox,
-    } = req.body;
+    const { username, company, email, phone, mobile, password, role } = req.body;
 
     if (!username || !email || !password) {
       return res.status(400).json({ message: 'All fields are required' });
@@ -35,15 +20,13 @@ router.post('/register', async (req, res) => {
     const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
     const alphaRe = /^[A-Za-z\s]+$/;
     const numericRe = /^\d+$/;
-    // Require Qatar country code +974 followed by at least 8 digits (e.g. +97412345678)
     const phoneRe = /^\+974\d{8,}$/;
-    // Require min 8 chars, at least one lowercase, one uppercase, one digit and one special char
     const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/;
 
     if (!passwordRegex.test(password)) {
       return res.status(400).json({
         message:
-          'Password must be at least 8 characters long and include upper and lower case letters, a number, and a special character.',
+          'Password must be minimum 8 characters and contain upper, lower case letters, a number and special characters.',
       });
     }
 
@@ -52,11 +35,11 @@ router.post('/register', async (req, res) => {
       typeof req.body.confirmPassword === 'undefined' ||
       String(req.body.confirmPassword || '').trim() === ''
     ) {
-      return res.status(400).json({ message: 'confirmPassword is required.' });
+      return res.status(400).json({ message: 'Confirm Password is required.' });
     }
     const confirm = String(req.body.confirmPassword || '');
     if (confirm !== String(password || '')) {
-      return res.status(400).json({ message: 'Password and confirm password do not match.' });
+      return res.status(400).json({ message: 'Password and Confirm Password do not match.' });
     }
 
     if (!emailRe.test(email)) {
@@ -71,14 +54,14 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ message: 'Company name should contain letters only.' });
     }
 
-    // Ensure email is unique across all account collections (Admin, Approver, User)
+    // Ensure email is unique across all account collections
     const emailExists =
       (await Admin.findOne({ email })) ||
       (await Approver.findOne({ email })) ||
       (await User.findOne({ email }));
-    if (emailExists) return res.status(409).json({ message: 'Email is already in use' });
+    if (emailExists) return res.status(409).json({ message: 'Email id is already in use.' });
 
-    // Accept either `phone` or `mobile` from different frontends/forms and validate
+    // Ensure phone number is provided and valid
     let phoneVal = (phone && phone.trim()) || (mobile && mobile.trim()) || '';
     if (!phoneVal) {
       return res.status(400).json({ message: 'Phone number is required.' });
@@ -100,24 +83,7 @@ router.post('/register', async (req, res) => {
       company: company || '',
       role: role || 'Requester',
       lastLogin: null,
-      officeAddress: {
-        buildingNo: buildingNo || '',
-        floorNo: floorNo || '',
-        streetNo: streetNo || '',
-        zone: zone || '',
-        city: city || '',
-        country: country || '',
-        poBox: poBox || '',
-      },
     });
-
-    // Validate numeric address fields if provided
-    const numericFields = { buildingNo, floorNo, streetNo, zone, poBox };
-    for (const [k, v] of Object.entries(numericFields)) {
-      if (v && String(v).trim() && !numericRe.test(String(v).trim())) {
-        return res.status(400).json({ message: `${k} should contain numbers only.` });
-      }
-    }
 
     // Validate city/country (alpha)
     if (city && city.trim() && !alphaRe.test(city.trim())) {
@@ -145,7 +111,6 @@ router.post('/register', async (req, res) => {
         phone: newUser.phone,
         role: newUser.role,
         lastLogin: newUser.lastLogin,
-        officeAddress: newUser.officeAddress,
       },
     });
   } catch (err) {
@@ -389,7 +354,6 @@ router.get('/profile', async (req, res) => {
     }
 
     if (!user) {
-      // if user not found in expected collection, try a broad search (safety)
       const Admin = require('../models/admin');
       const Approver = require('../models/approver');
       user =
@@ -406,12 +370,10 @@ router.get('/profile', async (req, res) => {
     }
 
     // Provide client IP (prefer common proxy headers, then socket remote address)
-    // Order: X-Forwarded-For (first entry), CF-Connecting-IP, X-Real-IP, socket.remoteAddress, req.ip
     let clientIp = null;
     try {
       const xff = req.headers['x-forwarded-for'];
       if (xff) {
-        // may contain a list of IPs
         clientIp = String(xff).split(',')[0].trim();
       }
       if (!clientIp && req.headers['cf-connecting-ip']) clientIp = req.headers['cf-connecting-ip'];
@@ -421,7 +383,6 @@ router.get('/profile', async (req, res) => {
     } catch (e) {
       clientIp = req.ip || null;
     }
-    // Build a safe user payload to avoid leaking sensitive fields
     const safeUser = user.toObject ? user.toObject() : { ...user };
     safeUser.profileUpdatedAt = safeUser.profileUpdatedAt
       ? safeUser.profileUpdatedAt.toISOString()
@@ -430,7 +391,6 @@ router.get('/profile', async (req, res) => {
       ? safeUser.passwordUpdatedAt.toISOString()
       : null;
 
-    // Log client IP and source for debugging (helps confirm the running server has this code)
     try {
       const ipSource = req.headers['x-forwarded-for']
         ? 'x-forwarded-for'
@@ -445,7 +405,7 @@ router.get('/profile', async (req, res) => {
                 : 'unknown';
       logger.debug({ clientIp, ipSource }, 'Profile response - client IP detected');
     } catch (e) {
-      // ignore logging errors
+      // ignore
     }
 
     res.json({
@@ -459,9 +419,8 @@ router.get('/profile', async (req, res) => {
   }
 });
 
-// ----- LOGOUT -----
+// LOGOUT (Support both session-based and token-based logouts)
 router.post('/logout', async (req, res) => {
-  // Support both session-based and token-based logouts.
   const sessionId = req.sessionID;
   const role = req.session && req.session.userRole;
   const userId = req.session && req.session.userId;
@@ -481,7 +440,8 @@ router.post('/logout', async (req, res) => {
         sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
         secure: process.env.NODE_ENV === 'production',
       });
-      // best-effort: clear activeSessionId on the account if it matches this session
+
+      // Clear activeSessionId on the account if it matches this session
       try {
         if (userId && role) {
           if (role === 'Admin') {
@@ -527,6 +487,7 @@ router.post('/logout', async (req, res) => {
       } catch (e) {
         logger.warn('Failed to clear activeSession on logout:', e && e.message);
       }
+
       // Also clear persisted refreshTokenId server-side if present (best-effort)
       try {
         if (userId && role) {
@@ -564,18 +525,17 @@ router.post('/logout', async (req, res) => {
             await AccountModel.updateOne({ _id: id }, { $unset: { refreshTokenId: 1 } });
           }
         } catch (_) {
-          /* ignore invalid token */
+          // ignore invalid token
         }
       }
     } catch (e) {
-      /* ignore */
+      // ignore
     }
     return res.json({ message: 'Logged out (token-only) — refresh cookie cleared' });
   }
 });
 
-// ----- REFRESH TOKEN -----
-// Exchange a valid refresh cookie for a new short-lived access token.
+// REFRESH TOKEN
 router.post('/refresh-token', async (req, res) => {
   try {
     const cookie = req.cookies && req.cookies.refreshToken;
@@ -768,12 +728,12 @@ router.put('/update-password', async (req, res) => {
       return res.status(400).json({ message: 'Current password and new password are required' });
     }
 
-    // Password validation: 8+ chars, at least 1 upper, 1 lower, 1 digit, 1 special
+    // Password validation
     const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d]).{8,}$/;
     if (!passwordRegex.test(newPassword)) {
       return res.status(400).json({
         message:
-          'Password must be at least 8 characters with 1 uppercase, 1 lowercase, 1 number, and 1 special character',
+          'Password must have minimum 8 characters and contain lower, upper case letter, a number, and special characters',
       });
     }
 
@@ -821,7 +781,7 @@ router.put('/update-password', async (req, res) => {
 
     logger.info({ userId: account._id }, 'Password updated successfully');
     res.json({
-      message: 'Password updated successfully',
+      message: 'Password has been successfully updated',
       passwordUpdatedAt: account.passwordUpdatedAt,
     });
   } catch (err) {
@@ -844,18 +804,16 @@ router.put('/update-profile', async (req, res) => {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    // Only allow phone updates from self-service for non-admins; admins may change username/email/company
     if (req.session.userRole === 'Admin') {
-      // If admin provided username/email, validate
       if (!username || !email) {
-        return res.status(400).json({ message: 'Username and email are required' });
+        return res.status(400).json({ message: 'Username and email id are required' });
       }
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(email)) return res.status(400).json({ message: 'Invalid email format' });
       if (email !== user.email) {
         const existingUser = await User.findOne({ email, _id: { $ne: user._id } });
         if (existingUser)
-          return res.status(409).json({ message: 'Email is already in use by another account' });
+          return res.status(409).json({ message: 'Email id is already in use by another account' });
       }
       user.username = username;
       user.email = email;
@@ -873,10 +831,10 @@ router.put('/update-profile', async (req, res) => {
 
     await user.save();
 
-    logger.info({ userId: user._id }, 'Profile updated successfully');
+    logger.info({ userId: user._id }, 'Profile has been successfully updated');
 
     res.json({
-      message: 'Profile updated successfully',
+      message: 'Profile has been successfully updated',
       user: {
         id: user._id,
         username: user.username,

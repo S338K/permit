@@ -10,12 +10,10 @@ function detectApiBase() {
 
     const host = window.location.hostname;
     const port = window.location.port;
-    // If running from static file server (e.g. 5500), use backend at 5000
     if ((host === "127.0.0.1" || host === "localhost") && port === "5500")
       return "http://127.0.0.1:5000";
     if (host === "127.0.0.1" || host === "localhost")
       return `http://${host}:${port}`;
-    // file:// or unknown hosts fall back to production
     return DEFAULT_PROD;
   } catch (e) {
     return DEFAULT_PROD;

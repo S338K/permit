@@ -89,66 +89,6 @@ const userSchema = new mongoose.Schema(
     // per-tab authentication. Stored as a short identifier so refresh tokens
     // can be revoked when a user logs out or an admin invalidates sessions.
     refreshTokenId: { type: String, index: true },
-
-    // 🔹 New Office Address subdocument
-    officeAddress: {
-      buildingNo: {
-        type: String,
-        trim: true,
-        validate: {
-          validator: (v) => !v || /^\d{1,2}$/.test(v),
-          message: 'Building No. should be 1–2 digits.',
-        },
-      },
-      floorNo: {
-        type: String,
-        trim: true,
-        validate: {
-          validator: (v) => !v || /^\d{1,2}$/.test(v),
-          message: 'Floor No. should be 1–2 digits.',
-        },
-      },
-      streetNo: {
-        type: String,
-        trim: true,
-        validate: {
-          validator: (v) => !v || /^\d{1,3}$/.test(v),
-          message: 'Street No. should be 1–3 digits.',
-        },
-      },
-      zone: {
-        type: String,
-        trim: true,
-        validate: {
-          validator: (v) => !v || /^\d{1,2}$/.test(v),
-          message: 'Zone should be 1–2 digits.',
-        },
-      },
-      city: {
-        type: String,
-        trim: true,
-        validate: {
-          validator: (v) => !v || /^[A-Za-z\s]+$/.test(v),
-          message: 'City should contain letters only.',
-        },
-      },
-      country: {
-        type: String,
-        trim: true,
-        validate: {
-          validator: (v) => !v || /^[A-Za-z\s]+$/.test(v),
-          message: 'Country should contain letters only.',
-        },
-      },
-      poBox: {
-        type: String,
-        trim: true,
-        validate: {
-          validator: (v) => !v || /^\d{1,6}$/.test(v),
-          message: 'P.O. Box should be 1–6 digits.',
-        },
-      },
-    },
   },
   { timestamps: true }
 );

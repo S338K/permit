@@ -1,8 +1,6 @@
-// use shared/layout.js for theme toggle and other shared utilities
-
 import { API_BASE } from "../config.js";
 
-// simple HTML escape helper
+// escapeHtml: simple HTML escape helper
 function escapeHtml(str) {
   if (str === null || str === undefined) return "";
   return String(str)
@@ -13,11 +11,8 @@ function escapeHtml(str) {
     .replace(/'/g, "&#039;");
 }
 
-// strip HTML tags and decode entities safely using a detached DOM node
+// stripHtmlTags: strip HTML tags and sanitize text
 function stripHtmlTags(input) {
-  // Robust sanitizer: parse HTML, remove dangerous elements/attributes,
-  // then return safe plain text. This approach is resilient to future
-  // message content that may include markup or entities.
   try {
     if (input === null || input === undefined) return "";
     const raw = String(input);
@@ -36,7 +31,7 @@ function stripHtmlTags(input) {
         doc.body,
         NodeFilter.SHOW_ELEMENT,
         null,
-        false,
+        false
       );
       while (walker.nextNode()) {
         const el = walker.currentNode;
@@ -143,6 +138,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const MARQUEE_CHAR_MULTIPLIER = 0.28; // seconds per character
   // Controller for single-container sequential marquee (allows canceling previous runs)
   let marqueeSequenceController = null;
+  // fetchAnnouncementOrWeather: fetch announcements/weather and render marquee
   async function fetchAnnouncementOrWeather() {
     const marqueeEl = document.getElementById("announcement-marquee");
     if (!marqueeEl) return;
@@ -196,14 +192,14 @@ document.addEventListener("DOMContentLoaded", () => {
           wjson && (wjson.temperature || wjson.temp || wjson.temperature === 0)
             ? `${wjson.temperature}°C`
             : wjson && wjson.temperature
-              ? `${wjson.temperature}`
-              : "N/A";
+            ? `${wjson.temperature}`
+            : "N/A";
         const condition =
           wjson && wjson.condition
             ? wjson.condition
             : wjson && wjson.detailsLine
-              ? ""
-              : "N/A";
+            ? ""
+            : "N/A";
         const humidity =
           wjson && (wjson.humidity || wjson.humidity === 0)
             ? `${wjson.humidity}%`
@@ -229,6 +225,7 @@ document.addEventListener("DOMContentLoaded", () => {
     renderMarqueeText("");
   }
 
+  // renderMarqueeMultiple: show multiple marquee messages sequentially
   function renderMarqueeMultiple(texts) {
     // Single-container sequential loop implementation. Shows one message at a time
     // (no overlap). Each message animates once, then the next starts after gapDelay.
@@ -323,7 +320,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const len = combined && combined.length ? combined.length : 20;
       const duration = Math.max(
         MARQUEE_MIN_DURATION,
-        Math.min(MARQUEE_MAX_DURATION, len * MARQUEE_CHAR_MULTIPLIER),
+        Math.min(MARQUEE_MAX_DURATION, len * MARQUEE_CHAR_MULTIPLIER)
       );
 
       inner.style.animationTimingFunction = "linear";
@@ -364,9 +361,7 @@ document.addEventListener("DOMContentLoaded", () => {
     showAtIndex(0);
   }
 
-  // More robust Arabic detection: treat as Arabic if any Arabic character exists.
-  // This avoids false-negatives when messages include punctuation or short English
-  // fragments alongside Arabic text.
+  // containsArabic: detect presence of Arabic characters
   function containsArabic(s) {
     try {
       if (!s || typeof s !== "string") return false;
@@ -376,6 +371,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  // renderMarqueeText: render a single marquee message into the container
   function renderMarqueeText(text) {
     const container = document.getElementById("announcement-marquee");
     if (!container) return;
@@ -418,7 +414,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const len = combined && combined.length ? combined.length : 20;
     const duration = Math.max(
       MARQUEE_MIN_DURATION,
-      Math.min(MARQUEE_MAX_DURATION, len * MARQUEE_CHAR_MULTIPLIER),
+      Math.min(MARQUEE_MAX_DURATION, len * MARQUEE_CHAR_MULTIPLIER)
     );
     inner.style.animationTimingFunction = "linear";
     inner.style.animationDuration = duration + "s";
@@ -493,13 +489,16 @@ document.addEventListener("DOMContentLoaded", () => {
     if (el && el.remove) el.remove();
   };
 
+  // validateEmail: basic email format check
   function validateEmail(v) {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
   }
+  // validatePassword: ensure password length >= 8
   function validatePassword(v) {
     return v.trim().length >= 8;
   }
 
+  // validateField: validate specific input element by id
   function validateField(el) {
     if (!el) return true;
     if (el.id === "email") {
@@ -568,7 +567,7 @@ document.addEventListener("DOMContentLoaded", () => {
               const name =
                 (data.user && (data.user.displayName || data.user.username)) ||
                 "this account";
-              msgEl.textContent = `You're already signed in as ${name} on another device or browser. Continue here to sign out there and use this device instead?`;
+              msgEl.textContent = `You're already signed in as ${name} on another device or browser. Continue here to sign out there and proceed with this login.`;
             }
             const closeModal = () => {
               if (modal) modal.classList.add("hidden");
@@ -598,7 +597,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     "error",
                     forced.data && forced.data.message
                       ? forced.data.message
-                      : "Unable to switch this account here.",
+                      : "Unable to switch this account here."
                   );
                   btnYes.disabled = false;
                   return;
@@ -627,18 +626,18 @@ document.addEventListener("DOMContentLoaded", () => {
           loginBtn.disabled = false;
           loginBtn.innerHTML = originalButtonHTML;
           window._loginSubmitting = false;
-          // If server returned a message, show it. For 5xx show a generic friendly message.
+
           if (res.status >= 500) {
             showToast(
               "error",
-              "Server error while signing in. Please try again later.",
+              "Server error while signing in. Please try again later."
             );
           } else {
             showToast(
               "error",
               data && data.message
                 ? data.message
-                : "Sign in failed. Please check your credentials.",
+                : "Sign in failed. Please check your credentials."
             );
           }
           return;
@@ -662,7 +661,7 @@ document.addEventListener("DOMContentLoaded", () => {
       window.open(
         "../forgot-password/forgot-password.html",
         "ForgotPassword",
-        "width=500,height=600,top=100,left=100,resizable=yes,scrollbars=yes",
+        "width=500,height=600,top=100,left=100,resizable=yes,scrollbars=yes"
       );
     });
 
@@ -678,11 +677,12 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+  // finalizeSuccess: handle post-login success flow and redirect
   function finalizeSuccess(data) {
     try {
       sessionStorage.setItem(
         "previousLogin",
-        (data && data.user && data.user.lastLogin) || "",
+        (data && data.user && data.user.lastLogin) || ""
       );
     } catch (_) {}
     // store per-tab access token (if provided) so this tab uses token auth
@@ -726,6 +726,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // ----- Fix for sticky header overlap -----
   // Measure the sticky header height and reserve top padding so the
   // login card (and other content) isn't hidden under the header.
+  // ensureHeaderSpacing: reserve top padding for sticky header
   (function ensureHeaderSpacing() {
     const header = document.getElementById("page-header");
     if (!header) return;
@@ -736,7 +737,7 @@ document.addEventListener("DOMContentLoaded", () => {
         // set a CSS var so theme rules can use it
         document.documentElement.style.setProperty(
           "--page-header-height",
-          h + "px",
+          h + "px"
         );
         // add a helper class so theme.css applies padding-top
         document.body.classList.add("has-sticky-header");
@@ -756,6 +757,7 @@ document.addEventListener("DOMContentLoaded", () => {
   })();
 
   // ----- Sign-up modal open/close wiring -----
+  // wireSignupModal: open/close wiring for signup modal and focus trap
   (function wireSignupModal() {
     const modal = document.getElementById("signupModal");
     const openBtn = document.getElementById("openSignupModal");
@@ -770,7 +772,7 @@ document.addEventListener("DOMContentLoaded", () => {
         'a[href], area[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled]), iframe, [tabindex]:not([tabindex="-1"])';
       const prevActive = document.activeElement;
       const nodes = Array.from(root.querySelectorAll(focusableSelector)).filter(
-        (n) => n.offsetParent !== null,
+        (n) => n.offsetParent !== null
       );
       if (!nodes.length)
         return () => {

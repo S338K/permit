@@ -1,12 +1,10 @@
-// Shared toast helper used across pages (login and pages using shared layout)
-// Exposes window.showToast(type, message, opts?) and window.dismissToast(el)
+// showToast / dismissToast: lightweight toast UI helpers
 (function () {
   if (typeof window !== "undefined" && typeof window.showToast === "function") {
-    // already present, do nothing
     return;
   }
 
-  // Track the currently displayed toast to ensure only one is visible at a time
+  // track currently visible toast
   let currentToast = null;
 
   function ensureToastContainer() {
@@ -28,13 +26,10 @@
       c.style.pointerEvents = "none";
       document.body.appendChild(c);
     } else {
-      // If container already exists, force top-center placement and clear conflicting offsets
       try {
         c.style.position = "fixed";
-        // force top/left placement (override any CSS class positioning such as top-4/right-4)
         c.style.top = "24px";
         c.style.left = "50%";
-        // clear right/bottom which may be set by classes
         c.style.right = "";
         c.style.bottom = "";
         c.style.transform = "translateX(-50%)";
@@ -42,9 +37,7 @@
         c.style.display = "flex";
         c.style.flexDirection = "column";
         c.style.gap = "8px";
-        // center children horizontally
         c.style.alignItems = "center";
-        // container should not block pointer events; individual toasts receive pointer events
         c.style.pointerEvents = "none";
       } catch (e) {}
     }
@@ -84,8 +77,8 @@
               type === "success"
                 ? '<i class="fas fa-check-circle"></i>'
                 : type === "info"
-                  ? '<i class="fas fa-info-circle"></i>'
-                  : '<i class="fas fa-exclamation-circle"></i>'
+                ? '<i class="fas fa-info-circle"></i>'
+                : '<i class="fas fa-exclamation-circle"></i>'
             }</div>
             <div class="toast-body">${String(message)}</div>
             <button class="toast-close" aria-label="Dismiss">&times;</button>

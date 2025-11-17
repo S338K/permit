@@ -7,26 +7,21 @@
     <title>Approver Dashboard</title>
     <link rel="stylesheet" href="../shared/theme.css">
     <link href="https://fonts.googleapis.com/css?family=Inter:400,500,600,700&display=swap" rel="stylesheet">
-    <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Font Awesome 5 -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
-    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-    <!-- XLSX for Excel export -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
 
 <body class="dasher-bg">
-    <!-- Sidebar removed per requirement -->
+
     <div class="kai-main">
-        <!-- Header/navbar removed per requirement -->
+
 
 
         <main class="kai-content">
-            <!-- Dashboard Cards Row - Permit Stats and Percentages -->
+
             <div class="row g-4 mb-4">
-                <!-- Total Permits -->
                 <div class="col-12 col-sm-6 col-md-4">
                     <div class="card card-stats card-round h-100 shadow-sm">
                         <div class="card-body d-flex align-items-center gap-3">
@@ -41,7 +36,7 @@
                         </div>
                     </div>
                 </div>
-                <!-- Approved Permits -->
+
                 <div class="col-12 col-sm-6 col-md-4">
                     <div class="card card-stats card-round h-100 shadow-sm">
                         <div class="card-body d-flex align-items-center gap-3">
@@ -56,7 +51,7 @@
                         </div>
                     </div>
                 </div>
-                <!-- Approved % -->
+
                 <div class="col-12 col-sm-6 col-md-4">
                     <div class="card card-stats card-round h-100 shadow-sm">
                         <div class="card-body d-flex align-items-center gap-3">
@@ -71,7 +66,7 @@
                         </div>
                     </div>
                 </div>
-                <!-- Rejected Permits -->
+
                 <div class="col-12 col-sm-6 col-md-4">
                     <div class="card card-stats card-round h-100 shadow-sm">
                         <div class="card-body d-flex align-items-center gap-3">
@@ -86,7 +81,7 @@
                         </div>
                     </div>
                 </div>
-                <!-- Rejected % -->
+
                 <div class="col-12 col-sm-6 col-md-4">
                     <div class="card card-stats card-round h-100 shadow-sm">
                         <div class="card-body d-flex align-items-center gap-3">
@@ -101,7 +96,7 @@
                         </div>
                     </div>
                 </div>
-                <!-- Pending Permits -->
+
                 <div class="col-12 col-sm-6 col-md-4">
                     <div class="card card-stats card-round h-100 shadow-sm">
                         <div class="card-body d-flex align-items-center gap-3">
@@ -116,7 +111,7 @@
                         </div>
                     </div>
                 </div>
-                <!-- Pending % -->
+
                 <div class="col-12 col-sm-6 col-md-4">
                     <div class="card card-stats card-round h-100 shadow-sm">
                         <div class="card-body d-flex align-items-center gap-3">
@@ -131,7 +126,7 @@
                         </div>
                     </div>
                 </div>
-                <!-- Returned for Info -->
+
                 <div class="col-12 col-sm-6 col-md-4">
                     <div class="card card-stats card-round h-100 shadow-sm">
                         <div class="card-body d-flex align-items-center gap-3">
@@ -146,7 +141,7 @@
                         </div>
                     </div>
                 </div>
-                <!-- Returned % -->
+
                 <div class="col-12 col-sm-6 col-md-4">
                     <div class="card card-stats card-round h-100 shadow-sm">
                         <div class="card-body d-flex align-items-center gap-3">
@@ -163,13 +158,11 @@
                 </div>
             </div>
 
-            <!-- Task Progress Widget (Horizontal) -->
             <div class="row mt-4 mb-4">
                 <div class="col-12">
                     <div class="card card-round shadow-sm">
                         <div class="card-body">
                             <div class="task-progress-container">
-                                <!-- Progress Info Section -->
                                 <div class="progress-info-section">
                                     <h5 class="card-title mb-2 fw-bold text-dark">Task Progress</h5>
                                     <h2 id="taskProgressPercentage" class="progress-percentage mb-2 fw-bold text-dark">
@@ -189,7 +182,6 @@
                                     </div>
                                 </div>
 
-                                <!-- Task Status Items -->
                                 <div class="task-status-grid">
                                     <div class="task-status-item">
                                         <div class="task-icon"
@@ -230,9 +222,9 @@
                 </div>
             </div>
 
-            <!-- Permit Lists -->
+
             <div class="row mb-4 g-3">
-                <!-- Approved Permits -->
+
                 <div class="col-12 col-md-6">
                     <div class="card card-round shadow-sm mini-permit-card">
                         <div class="card-header border-bottom">
@@ -250,7 +242,7 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <!-- Data will be populated dynamically -->
+
                                     </tbody>
                                 </table>
                             </div>
@@ -258,7 +250,7 @@
                     </div>
                 </div>
 
-                <!-- Rejected Permits -->
+
                 <div class="col-12 col-md-6">
                     <div class="card card-round shadow-sm mini-permit-card">
                         <div class="card-header border-bottom">
@@ -276,7 +268,7 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <!-- Data will be populated dynamically -->
+
                                     </tbody>
                                 </table>
                             </div>
@@ -285,7 +277,7 @@
                 </div>
             </div>
 
-            <!-- Statistics and Widgets Row -->
+
             <div class="row mt-4">
                 <div class="col-12">
                     <div class="card card-round mb-3">
@@ -359,7 +351,7 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <!-- Data will be populated dynamically from database -->
+
 
 
 
@@ -374,11 +366,11 @@
                     </div>
                 </div>
 
-                <!-- Approved and Rejected Permits tables removed as per request -->
+
         </main>
     </div>
 
-    <!-- Permit Details Modal -->
+
     <div class="modal fade" id="permitDetailsModal" tabindex="-1" aria-labelledby="permitDetailsModalLabel"
         aria-hidden="true">
         <div class="modal-dialog modal-xl">
@@ -391,7 +383,7 @@
                 </div>
                 <div class="modal-body">
                     <form id="permitDetailsForm">
-                        <!-- Requester Details -->
+
                         <fieldset class="mb-4 border rounded p-3">
                             <legend class="w-auto px-2">Requester Details</legend>
                             <div class="row g-3">
@@ -418,7 +410,7 @@
                                 </div>
                             </div>
                         </fieldset>
-                        <!-- Work Details -->
+
                         <fieldset class="mb-4 border rounded p-3">
                             <legend class="w-auto px-2">Work Details</legend>
                             <div class="row g-3">
@@ -472,7 +464,6 @@
                                 </div>
                             </div>
                         </fieldset>
-                        <!-- Required Documents -->
                         <fieldset class="mb-4 border rounded p-3">
                             <legend class="w-auto px-2">Required Documents</legend>
                             <div class="row g-3">
@@ -520,7 +511,6 @@
                                 </div>
                             </div>
                         </fieldset>
-                        <!-- Date & Time -->
                         <fieldset class="mb-4 border rounded p-3">
                             <legend class="w-auto px-2">Date & Time</legend>
                             <div class="row g-3">
@@ -534,7 +524,6 @@
                                 </div>
                             </div>
                         </fieldset>
-                        <!-- Signature -->
                         <fieldset class="mb-4 border rounded p-3">
                             <legend class="w-auto px-2">Signature</legend>
                             <div class="row g-3">
@@ -556,7 +545,6 @@
                                 </div>
                             </div>
                         </fieldset>
-                        <!-- Comments (required for Approve/Reject) -->
                         <fieldset class="mb-4 border rounded p-3">
                             <legend class="w-auto px-2">Approval Comments <span class="text-danger">*</span></legend>
                             <textarea class="form-control" id="modal_approvalComments" rows="3" required
@@ -574,7 +562,6 @@
         </div>
     </div>
 
-    <!-- Update Password Modal -->
     <div class="modal fade" id="updatePasswordModal" tabindex="-1" aria-labelledby="updatePasswordModalLabel"
         aria-hidden="true">
         <div class="modal-dialog">
@@ -635,7 +622,6 @@
         </div>
     </div>
 
-    <!-- Update Profile Modal -->
     <div class="modal fade" id="updateProfileModal" tabindex="-1" aria-labelledby="updateProfileModalLabel"
         aria-hidden="true">
         <div class="modal-dialog">
@@ -690,7 +676,6 @@
 
 
     <script type="module" src="approver.js"></script>
-    <!-- Bootstrap 5 JS Bundle (with Popper) -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 <script type="module" src="../shared/session.js"></script>

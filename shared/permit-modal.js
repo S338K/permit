@@ -1,10 +1,5 @@
 import { API_BASE } from "../config.js";
 
-// Shared permit details modal: append the canonical pre-approver modal shell
-// to the document and expose `window.viewPermitDetails(id)` for pages that
-// want a single, consistent modal UI. The pre-approver page (`preapprover.js`)
-// defines its own `viewPermitDetails` and will override this if loaded after.
-
 const _tmpl = `
 <div id="permitDetailsModal" class="modal fixed inset-0 bg-[var(--overlay-bg)] hidden z-50 items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="permitDetailsTitle" aria-hidden="true">
   <div class="modal-panel bg-[var(--bg-surface)] rounded-2xl shadow-2xl border border-[var(--input-border)] w-full max-w-4xl max-h-[90vh] overflow-y-auto">
@@ -24,6 +19,7 @@ const _tmpl = `
 </div>
 `;
 
+// escapeHtml: escape text for safe HTML insertion
 function escapeHtml(s) {
   return String(s || "")
     .replace(/&/g, "&amp;")
@@ -32,18 +28,15 @@ function escapeHtml(s) {
     .replace(/\"/g, "&quot;")
     .replace(/'/g, "&#39;");
 }
-
 function appendTemplateIfMissing() {
   if (document.getElementById("permitDetailsModal")) return;
   const wrapper = document.createElement("div");
   wrapper.innerHTML = _tmpl;
   document.body.appendChild(wrapper.firstElementChild);
 }
-
 function injectModalStyles() {
   if (document.getElementById("shared-permit-modal-styles")) return;
   const css = `
-  /* Shared permit modal animations */
   #permitDetailsModal {
     transition: opacity .24s ease, visibility .24s ease;
     opacity: 0;
@@ -80,7 +73,6 @@ function openModalShell() {
   document.body.classList.add("modal-open");
   setTimeout(() => m.classList.add("modal-show"), 20);
 }
-
 function closeModalShell() {
   const m = document.getElementById("permitDetailsModal");
   if (!m) return;
@@ -94,9 +86,7 @@ function closeModalShell() {
     if (content) content.innerHTML = "";
   }, 280);
 }
-
-// The shared fetch+render is similar to the pre-approver's view function so
-// the UI (approver hierarchy, comments, date/time editors, files) matches.
+// fetchAndShowPermit: fetch permit details and render into modal
 async function fetchAndShowPermit(id) {
   if (!id) return;
   const content = document.getElementById("permitDetailsContent");
@@ -129,17 +119,6 @@ async function fetchAndShowPermit(id) {
     function renderRequester(r) {
       if (!r)
         return '<div class="text-sm text-secondary">No requester data</div>';
-      const addr = r.officeAddress
-        ? `${escapeHtml(r.officeAddress.buildingNo || "")} ${escapeHtml(
-            r.officeAddress.floorNo || ""
-          )} ${escapeHtml(r.officeAddress.streetNo || "")} ${escapeHtml(
-            r.officeAddress.zone || ""
-          )} ${escapeHtml(r.officeAddress.city || "")} ${escapeHtml(
-            r.officeAddress.country || ""
-          )} ${escapeHtml(r.officeAddress.poBox || "")}`
-            .replace(/\s+/g, " ")
-            .trim()
-        : "";
       return `
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
@@ -159,8 +138,6 @@ async function fetchAndShowPermit(id) {
             <div class="mt-1 text-sm">${escapeHtml(r.company || "-")}</div>
             <div class="text-xs text-secondary mt-2">Role</div>
             <div class="mt-1 text-sm">${escapeHtml(r.role || "-")}</div>
-            <div class="text-xs text-secondary mt-2">Office Address</div>
-            <div class="mt-1 text-sm">${escapeHtml(addr || "-")}</div>
           </div>
         </div>`;
     }

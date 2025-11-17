@@ -1,12 +1,15 @@
 {
-    "editor.fontSize": 16,
-    "workbench.colorTheme": "Default Dark Modern",
-    "window.autoDetectColorScheme": false,
-    "editor.formatOnSave": true,
-    "files.autoSave": "afterDelay",
-    "chat.agent.maxRequests": 250,
-    "chat.agentSessionsViewLocation": "view",
-    "chat.allowAnonymousAccess": true,
-    "chat.fontSize": 14,
-    "githubPullRequests.experimental.useQuickChat": false
+  "editor.fontSize": 16,
+  "workbench.colorTheme": "Default Dark Modern",
+  "window.autoDetectColorScheme": false,
+  "editor.formatOnSave": true,
+  "files.autoSave": "afterDelay",
+  "liveServer.settings.port": 5000,
+  "liveServer.settings.wait": 500,
+  "chat.agent.maxRequests": 250,
+  "chat.agentSessionsViewLocation": "view",
+  "chat.allowAnonymousAccess": true,
+  "chat.fontSize": 14,
+  "githubPullRequests.experimental.useQuickChat": false,
+  "github.copilot.inlineSuggest.enabled": true
 }

@@ -1,15 +1,16 @@
-// Shared validators used by signup and layout modal
-// Plain functions attached to window.PTW_VALIDATORS for non-module scripts.
 (function () {
-  function validateName(value) {
+  function validateName(name) {
     return /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]{2,50}$/.test(String(value || "").trim());
   }
+  // validateCompany: validate company name
   function validateCompany(value) {
     return /^[A-Za-zÁÉÍÓÚáéíóúÑñ0-9\s]{2,50}$/.test(String(value || "").trim());
   }
+  // validateEmail: basic email format check
   function validateEmail(value) {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value || "").trim());
   }
+  // validatePhone: basic phone number check (Qatar +974 expected)
   function validatePhone(value) {
     try {
       const cleaned = String(value || "").replace(/[\s\-()]/g, "");
@@ -18,6 +19,7 @@
       return false;
     }
   }
+  // validatePassword: strong password policy and checks against name/email
   function validatePassword(value, name, email) {
     const strongPattern =
       /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/;
@@ -29,41 +31,22 @@
       lower.includes(
         String(email || "")
           .split("@")[0]
-          .toLowerCase(),
+          .toLowerCase()
       )
     )
       return false;
     return true;
   }
+  // validateConfirmPassword: ensure passwords match
   function validateConfirmPassword(pass, confirm) {
     return (
       String(pass || "") === String(confirm || "") &&
       String(confirm || "").length > 0
     );
   }
+  // validateTerms: checkbox must be truthy
   function validateTerms(checked) {
     return !!checked;
-  }
-  function validateBuildingNo(v) {
-    return /^\d{1,2}$/.test(String(v || ""));
-  }
-  function validateFloorNo(v) {
-    return /^\d{1,2}$/.test(String(v || ""));
-  }
-  function validateStreetNo(v) {
-    return /^\d{1,3}$/.test(String(v || ""));
-  }
-  function validateZone(v) {
-    return /^\d{1,2}$/.test(String(v || ""));
-  }
-  function validateCity(v) {
-    return /^[A-Za-z\s]+$/.test(String(v || "").trim());
-  }
-  function validateCountry(v) {
-    return /^[A-Za-z\s]+$/.test(String(v || "").trim());
-  }
-  function validatePoBox(v) {
-    return /^\d{1,6}$/.test(String(v || ""));
   }
 
   // Attach to window for non-module consumers
@@ -78,16 +61,7 @@
         validatePassword,
         validateConfirmPassword,
         validateTerms,
-        validateBuildingNo,
-        validateFloorNo,
-        validateStreetNo,
-        validateZone,
-        validateCity,
-        validateCountry,
-        validatePoBox,
       });
     }
-  } catch (_) {
-    /* ignore */
-  }
+  } catch (_) {}
 })();

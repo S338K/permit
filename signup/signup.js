@@ -1,4 +1,3 @@
-// Public signup page logic (theme toggling delegated to shared/theme-toggle.js)
 (function () {
   const form = document.getElementById("publicSignupForm");
   const btn = document.getElementById("createAccountBtn");
@@ -7,7 +6,6 @@
     if (typeof window.showToast === "function") {
       window.showToast(type, message);
     } else {
-      // Fallback if toast not loaded
       alert(message);
     }
   }
@@ -61,7 +59,7 @@
     if (!passwordRe.test(password)) {
       showToast(
         "error",
-        "Password must be at least 8 characters with uppercase, lowercase, number, and special character",
+        "Password must be at least 8 characters with uppercase, lowercase, number, and special character"
       );
       return false;
     }
@@ -84,11 +82,9 @@
     e.preventDefault();
     if (!validate()) return;
 
-    // prevent double submissions
     if (window._signupSubmitting) return;
     window._signupSubmitting = true;
 
-    // Prevent submission if async checks flagged duplicates
     if (window._signupEmailExists) {
       showToast("error", "Email is already in use");
       window._signupSubmitting = false;
@@ -127,7 +123,7 @@
       if (res.ok) {
         showToast(
           "success",
-          data.message || "Registration successful! Redirecting to login...",
+          data.message || "Registration successful! Redirecting to login..."
         );
         setTimeout(() => {
           window.location.href = "../login/index.html";
@@ -135,16 +131,14 @@
       } else {
         showToast(
           "error",
-          data.message ||
-            data.error ||
-            "Registration failed. Please try again.",
+          data.message || data.error || "Registration failed. Please try again."
         );
       }
     } catch (err) {
       console.error(err);
       showToast(
         "error",
-        "Network error. Please check your connection and try again.",
+        "Network error. Please check your connection and try again."
       );
     } finally {
       btn.disabled = false;
@@ -155,12 +149,9 @@
   }
 
   form.addEventListener("submit", submit);
-  // Theme already initialized by shared/theme-toggle.js
-  // --- Async uniqueness checks ---
   const emailEl = document.getElementById("email");
   const phoneEl = document.getElementById("phone");
 
-  // small debounce helper to avoid rapid API calls
   function debounce(fn, wait) {
     let t = null;
     return function (...args) {
@@ -185,7 +176,7 @@
         return;
       }
       const res = await fetch(
-        `/api/check-email?email=${encodeURIComponent(v)}`,
+        `/api/check-email?email=${encodeURIComponent(v)}`
       );
       if (!res.ok) return;
       const j = await res.json();
@@ -198,7 +189,6 @@
         if (emailEl) emailEl.classList.remove("border-red-500");
       }
     } catch (e) {
-      // ignore transient errors
       console.warn("checkEmailUnique error", e);
     }
   }
@@ -212,7 +202,7 @@
         return;
       }
       const res = await fetch(
-        `/api/check-phone?phone=${encodeURIComponent(v)}`,
+        `/api/check-phone?phone=${encodeURIComponent(v)}`
       );
       if (!res.ok) return;
       const j = await res.json();

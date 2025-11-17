@@ -1,12 +1,3 @@
-// hia-charts.js
-// Chart utilities for HIA dashboards
-
-/**
- * Create a simple bar chart
- * @param {HTMLElement} container - Container element
- * @param {Array} data - Chart data
- * @param {Object} options - Chart options
- */
 function createBarChart(container, data, options = {}) {
   if (!container || !data) return;
 
@@ -20,7 +11,6 @@ function createBarChart(container, data, options = {}) {
 
   const config = { ...defaults, ...options };
 
-  // Create SVG
   const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
   svg.setAttribute("width", config.width);
   svg.setAttribute("height", config.height);
@@ -29,15 +19,12 @@ function createBarChart(container, data, options = {}) {
   container.innerHTML = "";
   container.appendChild(svg);
 
-  // Calculate dimensions
   const margin = { top: 20, right: 20, bottom: 40, left: 40 };
   const chartWidth = config.width - margin.left - margin.right;
   const chartHeight = config.height - margin.top - margin.bottom;
 
-  // Find max value for scaling
   const maxValue = Math.max(...data.map((d) => d.value));
 
-  // Create bars
   data.forEach((item, index) => {
     const barHeight = (item.value / maxValue) * chartHeight;
     const barWidth = (chartWidth / data.length) * 0.8;
@@ -47,7 +34,6 @@ function createBarChart(container, data, options = {}) {
       (chartWidth / data.length) * 0.1;
     const y = margin.top + chartHeight - barHeight;
 
-    // Create bar
     const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
     rect.setAttribute("x", x);
     rect.setAttribute("y", y);
@@ -56,7 +42,6 @@ function createBarChart(container, data, options = {}) {
     rect.setAttribute("fill", config.barColor);
     svg.appendChild(rect);
 
-    // Add label
     const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
     text.setAttribute("x", x + barWidth / 2);
     text.setAttribute("y", config.height - margin.bottom + 15);
@@ -68,12 +53,6 @@ function createBarChart(container, data, options = {}) {
   });
 }
 
-/**
- * Create a simple pie chart
- * @param {HTMLElement} container - Container element
- * @param {Array} data - Chart data
- * @param {Object} options - Chart options
- */
 function createPieChart(container, data, options = {}) {
   if (!container || !data) return;
 
@@ -88,7 +67,6 @@ function createPieChart(container, data, options = {}) {
   const centerX = config.width / 2;
   const centerY = config.height / 2;
 
-  // Create SVG
   const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
   svg.setAttribute("width", config.width);
   svg.setAttribute("height", config.height);
@@ -97,10 +75,8 @@ function createPieChart(container, data, options = {}) {
   container.innerHTML = "";
   container.appendChild(svg);
 
-  // Calculate total
   const total = data.reduce((sum, item) => sum + item.value, 0);
 
-  // Create pie slices
   let currentAngle = 0;
   data.forEach((item, index) => {
     const sliceAngle = (item.value / total) * 2 * Math.PI;
@@ -129,7 +105,6 @@ function createPieChart(container, data, options = {}) {
   });
 }
 
-// Export functions
 if (typeof module !== "undefined" && module.exports) {
   module.exports = { createBarChart, createPieChart };
 } else if (typeof window !== "undefined") {

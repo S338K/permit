@@ -1,9 +1,6 @@
-// Client-side layout mounter
-// Usage (example from a page inside a subfolder, e.g. approver/approver.html):
-//   <script defer src="../shared/layout.mount.js" data-layout="../shared/layout.html"></script>
-// This will fetch the shared layout, inject it, and move the page's existing
-// content into the <div data-layout-slot> inside the layout.
+// layout.mount: inject shared layout and head assets into the current page
 (function () {
+  // ready: run fn when DOM is ready
   function ready(fn) {
     if (document.readyState === "loading") {
       document.addEventListener("DOMContentLoaded", fn, { once: true });
@@ -11,7 +8,7 @@
       fn();
     }
   }
-
+  // toAbsUrl: resolve a URL against a base
   function toAbsUrl(url, base) {
     try {
       return new URL(url, base).toString();
@@ -20,29 +17,26 @@
     }
   }
 
+  // dedupeAndAppendHeadNodes: append layout head nodes to document head avoiding duplicates
   function dedupeAndAppendHeadNodes(nodes, layoutBaseUrl) {
     const head = document.head || document.getElementsByTagName("head")[0];
     nodes.forEach((node) => {
       const clone = node.cloneNode(true);
 
-      // Resolve relative URLs against the layout file location
       if (clone.tagName === "LINK" && clone.href) {
         clone.href = toAbsUrl(clone.getAttribute("href"), layoutBaseUrl);
-        // Skip if a stylesheet with same href already exists
         const exists = Array.from(
-          document.querySelectorAll('link[rel="stylesheet"]'),
+          document.querySelectorAll('link[rel="stylesheet"]')
         ).some((l) => l.href === clone.href);
         if (exists) return;
       }
 
       if (clone.tagName === "SCRIPT" && clone.src) {
         clone.src = toAbsUrl(clone.getAttribute("src"), layoutBaseUrl);
-        // Skip if a script with same src already exists
         const exists = Array.from(document.scripts).some(
-          (s) => s.src === clone.src,
+          (s) => s.src === clone.src
         );
         if (exists) return;
-        // Always defer for predictable execution order
         clone.defer = true;
       }
 
@@ -70,7 +64,7 @@
       (n) => {
         // keep everything except the current mount script tag itself
         return !(n === currentScript);
-      },
+      }
     );
 
     let text;
@@ -89,14 +83,13 @@
 
     // Bring over head assets (stylesheets and scripts), avoiding duplicates
     const headNodes = Array.from(layoutDoc.head.children).filter(
-      (n) => n.tagName === "LINK" || n.tagName === "SCRIPT",
+      (n) => n.tagName === "LINK" || n.tagName === "SCRIPT"
     );
     dedupeAndAppendHeadNodes(headNodes, layoutBaseUrl);
 
     // Prepare the new body from the layout and resolve any relative asset URLs inside it
     const newBody = layoutDoc.body.cloneNode(true);
 
-    // Resolve src/href on elements within the body that rely on the layout's relative paths
     newBody.querySelectorAll("[src]").forEach((el) => {
       const val = el.getAttribute("src");
       if (val && !/^https?:/i.test(val)) {
@@ -119,9 +112,7 @@
       slot.replaceChildren(...originalBodyChildren);
     }
 
-    // Ensure layout.js actually executes. Script elements cloned from parsed HTML
-    // typically won't run when inserted via DOM manipulation. Remove any existing
-    // <script src="layout.js"> from the injected body, then append a fresh one.
+    // ensure layout.js executes by injecting a fresh script tag
     const expectedLayoutJs = toAbsUrl("layout.js", layoutBaseUrl);
     Array.from(document.querySelectorAll("script[src]")).forEach((scr) => {
       const srcAbs = toAbsUrl(scr.getAttribute("src"), layoutBaseUrl);
@@ -134,9 +125,9 @@
       }
     });
 
-    // Avoid double-loading if the host page already included the same script explicitly
+    // avoid double-loading if host already included layout.js
     const alreadyLoaded = Array.from(document.scripts).some(
-      (s) => s.src === expectedLayoutJs,
+      (s) => s.src === expectedLayoutJs
     );
     if (!alreadyLoaded) {
       const s = document.createElement("script");
@@ -146,24 +137,20 @@
       document.body.appendChild(s);
     }
 
-    // Also execute any other script[src] from the layout body (e.g., toast.js, flatpickr)
-    // by re-injecting fresh script tags so they actually run after DOM replacement.
+    // execute other layout body script[src] tags by re-injecting them
     try {
       const bodyScripts = Array.from(
-        layoutDoc.body.querySelectorAll("script[src]"),
+        layoutDoc.body.querySelectorAll("script[src]")
       );
       bodyScripts.forEach((scr) => {
         const srcAbs = toAbsUrl(scr.getAttribute("src"), layoutBaseUrl);
         if (!srcAbs || srcAbs === expectedLayoutJs) return; // layout.js handled above
-        // Remove any existing tag with same src to avoid duplicates
         Array.from(document.querySelectorAll("script[src]")).forEach((s) => {
           const sAbs = toAbsUrl(s.getAttribute("src"), layoutBaseUrl);
           if (sAbs === srcAbs) {
             try {
               s.remove();
-            } catch (e) {
-              /* ignore */
-            }
+            } catch (e) {}
           }
         });
         const fresh = document.createElement("script");
@@ -172,11 +159,9 @@
         fresh.setAttribute("data-injected-by", "layout.mount");
         document.body.appendChild(fresh);
       });
-    } catch (e) {
-      /* ignore */
-    }
+    } catch (e) {}
 
-    // Signal completion
+    // signal completion
     try {
       window.dispatchEvent(new CustomEvent("layout:mounted"));
     } catch (e) {}

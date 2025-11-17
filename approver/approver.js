@@ -6,25 +6,21 @@ let allPermits = [];
 let allActivities = [];
 let currentUser = null;
 
+// showNotification: display a user-facing notification (toast/alert)
 function showNotification(message, type = "info") {
   if (typeof window.showToast === "function") {
-    // map local types to shared toast types
     const t =
       type === "error" ? "error" : type === "success" ? "success" : "info";
     window.showToast(t, message);
     return;
   }
 
-  // Fallback: simple alert
   try {
     alert(message);
-  } catch (e) {
-    /* ignore */
-  }
+  } catch (e) {}
 }
 
-// createToastContainer removed — use shared `shared/toast.js` global container
-
+// updateStats: compute and update permit statistics in the UI
 function updateStats(permits) {
   let approved = 0,
     rejected = 0,
@@ -55,7 +51,7 @@ function updateStats(permits) {
   const approvedElement = document.getElementById("approvedPermitsCount");
   const rejectedElement = document.getElementById("rejectedPermitsCount");
   const returnedForInfoElement = document.getElementById(
-    "returnedForInfoCount",
+    "returnedForInfoCount"
   );
 
   const approvedPercentageElement =
@@ -72,7 +68,6 @@ function updateStats(permits) {
   if (rejectedElement) rejectedElement.textContent = rejected;
   if (returnedForInfoElement)
     returnedForInfoElement.textContent = returnedForInfo;
-
   if (approvedPercentageElement)
     approvedPercentageElement.textContent = approvedPercentage + "%";
   if (rejectedPercentageElement)
@@ -85,6 +80,7 @@ function updateStats(permits) {
   updateTaskProgress(approved, inProgress, pending);
 }
 
+// updateTaskProgress: update task progress UI bars and counters
 function updateTaskProgress(completed, inProgress, upcoming) {
   const totalTasks = completed + inProgress + upcoming;
   const progressPercentage =
@@ -101,7 +97,7 @@ function updateTaskProgress(completed, inProgress, upcoming) {
   if (pendingElement) pendingElement.textContent = upcoming;
 
   const progressBarContainer = document.querySelector(
-    ".progress-bar-container .progress",
+    ".progress-bar-container .progress"
   );
   if (progressBarContainer) {
     const progressBars = progressBarContainer.querySelectorAll(".progress-bar");
@@ -116,10 +112,12 @@ function updateTaskProgress(completed, inProgress, upcoming) {
   }
 }
 
+// renderPermits: render permit list into the page
 function renderPermits(permits) {
   console.debug("renderPermits called with", permits.length, "permits");
 }
 
+// renderActivityLog: render a simple activity list
 function renderActivityLog(activities) {
   const log = document.getElementById("activityLog");
   if (!log) return;
@@ -133,6 +131,7 @@ function renderActivityLog(activities) {
   });
 }
 
+// filterPermits: return permits matching the query
 function filterPermits(query) {
   query = query.trim().toLowerCase();
   return allPermits.filter(
@@ -140,10 +139,11 @@ function filterPermits(query) {
       (p.permitTitle || "").toLowerCase().includes(query) ||
       (p.companyName || "").toLowerCase().includes(query) ||
       (p.status || "").toLowerCase().includes(query) ||
-      (p._id || "").toLowerCase().includes(query),
+      (p._id || "").toLowerCase().includes(query)
   );
 }
 
+// fetchPermits: load permits from API and refresh UI
 async function fetchPermits() {
   allPermits = [];
   try {
@@ -158,7 +158,7 @@ async function fetchPermits() {
     allPermits = [];
     showNotification(
       "Could not load permits from server. Showing empty list.",
-      "error",
+      "error"
     );
   }
 
@@ -167,6 +167,7 @@ async function fetchPermits() {
   updatePermitTables();
 }
 
+// updatePermitTables: split permits into pending/approved/rejected and populate tables
 function updatePermitTables() {
   const pendingPermits = allPermits.filter((p) => p.status === "Pending");
   const approvedPermits = allPermits.filter((p) => p.status === "Approved");
@@ -195,6 +196,7 @@ function populateTableBody(tableId, permits, type) {
   });
 }
 
+// createPermitRow: build a table row element for a permit
 function createPermitRow(permit, type, index = 0) {
   const row = document.createElement("tr");
 
@@ -297,6 +299,7 @@ async function fetchActivityLog() {
 }
 
 async function fetchUserProfile() {
+  // fetchUserProfile: load current user profile from API
   try {
     const response = await fetch(`${API_BASE}/api/profile`, {
       credentials: "include",
@@ -454,7 +457,7 @@ function sortTable(columnIndex) {
 
 function validatePasswordStrength(password) {
   const strongRegex = new RegExp(
-    "^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])(?=.{8,})",
+    "^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])(?=.{8,})"
   );
   return strongRegex.test(password);
 }
@@ -533,7 +536,7 @@ async function updatePassword(event) {
   if (!validatePasswordStrength(newPassword)) {
     showNotification(
       "Password must be at least 8 characters long and include uppercase, lowercase, number, and special character.",
-      "error",
+      "error"
     );
     return;
   }
@@ -612,25 +615,25 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (printBtn) printBtn.addEventListener("click", printTable);
 
   const toggleCurrentPasswordBtn = document.getElementById(
-    "toggleCurrentPassword",
+    "toggleCurrentPassword"
   );
   if (toggleCurrentPasswordBtn)
     toggleCurrentPasswordBtn.addEventListener("click", () =>
-      togglePassword("toggleCurrentPassword", "currentPassword"),
+      togglePassword("toggleCurrentPassword", "currentPassword")
     );
 
   const toggleNewPasswordBtn = document.getElementById("toggleNewPassword");
   if (toggleNewPasswordBtn)
     toggleNewPasswordBtn.addEventListener("click", () =>
-      togglePassword("toggleNewPassword", "newPassword"),
+      togglePassword("toggleNewPassword", "newPassword")
     );
 
   const toggleConfirmPasswordBtn = document.getElementById(
-    "toggleConfirmPassword",
+    "toggleConfirmPassword"
   );
   if (toggleConfirmPasswordBtn)
     toggleConfirmPasswordBtn.addEventListener("click", () =>
-      togglePassword("toggleConfirmPassword", "confirmPassword"),
+      togglePassword("toggleConfirmPassword", "confirmPassword")
     );
 
   const updateProfileForm = document.getElementById("updateProfileForm");

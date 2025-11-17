@@ -128,7 +128,6 @@ router.get('/dashboard/me', async (req, res) => {
         prevLogin: payload.prevLogin || '',
         profileUpdatedAt: payload.profileUpdatedAt || '',
         passwordUpdatedAt: payload.passwordUpdatedAt || '',
-        officeAddress: payload.officeAddress || null,
         status: payload.userStatus || payload.status || '',
         ipAddress: clientIp || '',
       },

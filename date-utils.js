@@ -1,5 +1,3 @@
-// date-utils.js
-// Shared date formatting helpers for the frontend
 export function formatDate24(d) {
   if (!d) return "";
   const date = d instanceof Date ? d : new Date(d);
@@ -31,7 +29,7 @@ export function formatLastLogin(d) {
     date.getMonth() === yesterday.getMonth() &&
     date.getDate() === yesterday.getDate();
 
-  const time = date.toLocaleTimeString(undefined, { hour12: false }); // HH:MM:SS
+  const time = date.toLocaleTimeString(undefined, { hour12: false });
 
   if (isSameDay) return `${time} on Today`;
   if (isYesterday) return `${time} on Yesterday`;

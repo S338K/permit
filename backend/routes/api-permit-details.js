@@ -39,7 +39,7 @@ router.get('/permits/:id', async (req, res) => {
     const permit = await Permit.findById(id)
       .populate({
         path: 'requester',
-        select: 'fullName username email phone company role officeAddress lastLogin prevLogin',
+        select: 'fullName username email phone company role lastLogin prevLogin',
       })
       .populate({ path: 'preApprovedBy', select: 'fullName username email role' })
       .populate({ path: 'approvedBy', select: 'fullName username email role' });

@@ -12,7 +12,7 @@ router.get('/system-message', async (req, res) => {
     const msg = await SystemMessage.findOne({}, {}, { sort: { updatedAt: -1 } });
     res.json({ message: msg ? msg.message : '' });
   } catch (err) {
-    res.status(500).json({ message: 'Unable to fetch system message', error: err.message });
+    res.status(500).json({ message: 'Unable to fetch announcement message', error: err.message });
   }
 });
 
@@ -100,7 +100,7 @@ router.post('/system-message', async (req, res) => {
   }
 });
 
-// Admin: list all system messages (including inactive)
+// List all system messages (including inactive)
 router.get('/admin/system-messages', async (req, res) => {
   try {
     if (!req.session || !req.session.userId || req.session.userRole !== 'Admin') {
@@ -127,7 +127,7 @@ router.get('/admin/system-messages', async (req, res) => {
   }
 });
 
-// Admin: update a system message
+// Update a system message
 router.put('/system-message/:id', async (req, res) => {
   try {
     if (!req.session || !req.session.userId || req.session.userRole !== 'Admin') {
@@ -186,7 +186,7 @@ router.put('/system-message/:id', async (req, res) => {
   }
 });
 
-// Admin: delete a system message
+// Delete a system message
 router.delete('/system-message/:id', async (req, res) => {
   try {
     if (!req.session || !req.session.userId || req.session.userRole !== 'Admin') {
@@ -202,13 +202,13 @@ router.delete('/system-message/:id', async (req, res) => {
   }
 });
 
-// ✅ Mount new route modules
-router.use('/', require('./auth')); // /register, /login, /logout, /profile, /forgot-password, /reset-password
+// Mount new route modules
+router.use('/', require('./auth'));
 
 // Enforce single active session after auth routes are mounted
 router.use(enforceActiveSession);
-router.use('/', require('./permit')); // /permit, /permit/:id, /permit (POST), /permit/:id/status, /permit/:id/pdf
-router.use('/', require('./api-permit-details')); // /api/permits/:id (admin/approver full details)
+router.use('/', require('./permit'));
+router.use('/', require('./api-permit-details'));
 router.use('/', require('./notifications'));
 router.use('/', require('./profile'));
 router.use('/', require('./lookups'));
@@ -216,10 +216,10 @@ router.use('/', require('./lookups'));
 // ===== KEEP SESSION ALIVE =====
 router.get('/ping', (req, res) => {
   if (req.session && req.session.userId) {
-    req.session.touch(); // refresh expiry
+    req.session.touch();
     return res.json({ message: 'Session is alive' });
   }
-  res.status(401).json({ message: 'Session expired' });
+  res.status(401).json({ message: 'Session has expired' });
 });
 
 // ===== WEATHER ROUTE =====
@@ -271,8 +271,6 @@ router.get('/weather', async (req, res) => {
       .json({ message: 'Unable to fetch weather', error: err.response?.data || err.message });
   }
 });
-
-// Translation endpoints removed — translation is no longer provided by the backend
 
 // ===== DASHBOARD STATISTICS =====
 router.get('/dashboard/stats', async (req, res) => {
@@ -430,7 +428,6 @@ router.get('/debug/permits', async (req, res) => {
 });
 
 // ===== DEV-ONLY: inspect session & headers =====
-// Returns useful info for debugging credentialed requests. Disabled in production.
 router.get('/debug/session', (req, res) => {
   if (process.env.NODE_ENV === 'production') {
     return res.status(404).json({ message: 'Not found' });
@@ -458,37 +455,7 @@ router.get('/debug/session', (req, res) => {
   }
 });
 
-// GET /api/images - List available images for background carousel (excludes logos)
-router.get('/images', (req, res) => {
-  const fs = require('fs');
-  const path = require('path');
-
-  try {
-    const imagesDir = path.join(__dirname, '../..', 'images');
-
-    if (!fs.existsSync(imagesDir)) {
-      return res.json([]);
-    }
-
-    const files = fs.readdirSync(imagesDir);
-
-    // Filter for image files and exclude logo images
-    const imageFiles = files.filter((file) => {
-      const ext = path.extname(file).toLowerCase();
-      const isImage = ['.jpg', '.jpeg', '.png', '.gif', '.webp'].includes(ext);
-      const isNotLogo = !file.toLowerCase().includes('logo');
-      return isImage && isNotLogo;
-    });
-
-    res.json(imageFiles);
-  } catch (err) {
-    console.error('Error reading images directory:', err);
-    res.status(500).json({ error: 'Failed to read images directory' });
-  }
-});
-
-// ===== Quick uniqueness check endpoints for client-side validation =====
-// GET /api/check-email?email=...
+// Quick uniqueness check endpoints for client-side validation
 router.get('/check-email', async (req, res) => {
   try {
     const Admin = require('../models/admin');
@@ -497,7 +464,7 @@ router.get('/check-email', async (req, res) => {
     const email = String(req.query.email || '')
       .trim()
       .toLowerCase();
-    if (!email) return res.status(400).json({ message: 'Email required' });
+    if (!email) return res.status(400).json({ message: 'Email id is required' });
     const exists =
       (await Admin.findOne({ email })) ||
       (await Approver.findOne({ email })) ||
@@ -505,11 +472,11 @@ router.get('/check-email', async (req, res) => {
     return res.json({ exists: !!exists });
   } catch (err) {
     console.error('check-email error', err);
-    return res.status(500).json({ message: 'Error checking email' });
+    return res.status(500).json({ message: 'Error checking email id' });
   }
 });
 
-// GET /api/check-phone?phone=...
+// Check-phone?phone=...
 router.get('/check-phone', async (req, res) => {
   try {
     const Admin = require('../models/admin');

@@ -12,11 +12,10 @@
 </head>
 
 <body class="transition-colors duration-300">
-  <!-- Navigation Bar -->
   <nav
     class="fixed top-0 inset-x-0 z-30 h-16 flex items-center border-b border-[var(--button-border)] bg-[var(--navbar-bg)] text-navbar-text">
     <div class="flex items-center justify-between w-full">
-      <!-- Left: Hamburger icon -->
+
       <button id="sidebar-hamburger"
         class="p-2 rounded-lg text-navbar-text h-full flex items-center justify-center icon-btn bg-transparent hover:bg-transparent focus:bg-transparent"
         aria-label="Toggle sidebar">
@@ -28,12 +27,12 @@
         </span>
       </button>
 
-      <!-- Logo (hidden on authenticated pages; visible on login/signup standalone pages) -->
+
       <div class="flex items-center pl-2 shrink-0 w-24 sm:w-28 md:w-24 lg:w-32">
         <img id="nav-logo" src="../images/HIA_logo.png" alt="HIA Logo" class="h-10 w-auto hidden" aria-hidden="true" />
       </div>
 
-      <!-- Right: Desktop Navigation Icons -->
+
       <div class="flex items-center space-x-2 md:space-x-4 ml-auto">
         <button id="announcement-button" type="button" title="Announcements" data-admin-only
           class="hidden h-9 w-9 md:h-10 md:w-10 flex items-center justify-center rounded-full text-navbar-text icon-btn hover-lite"
@@ -49,7 +48,7 @@
           <i class="fas fa-moon icon-moon text-xl md:text-2xl"></i>
         </button>
 
-        <!-- Notification Bell with Badge and Dropdown -->
+
         <div class="relative" id="notification-container" data-role-visibility="Requester,PreApprover,Approver">
           <button id="notification-bell" type="button"
             class="relative h-9 w-9 md:h-10 md:w-10 flex items-center justify-center rounded-full text-navbar-text icon-btn hover-lite"
@@ -59,7 +58,7 @@
               class="hidden absolute top-0 right-0 h-5 w-5 rounded-full bg-red-500 text-white text-xs font-bold flex items-center justify-center">0</span>
           </button>
 
-          <!-- Notification Dropdown -->
+
           <div id="notification-dropdown"
             class="hidden absolute right-0 mt-2 w-80 md:w-96 max-h-[70vh] bg-[var(--bg-surface)] text-primary rounded-lg shadow-2xl border border-[var(--input-border)] overflow-hidden z-50">
             <div class="px-4 py-3 border-b border-[var(--input-border)] flex items-center justify-between">
@@ -72,7 +71,7 @@
               </button>
             </div>
             <div id="notification-list" class="overflow-y-auto max-h-96">
-              <!-- Notifications will be inserted here -->
+
               <div class="px-4 py-8 text-center text-sm text-primary opacity-70" id="notification-empty">
                 <i class="fas fa-bell-slash text-3xl mb-2 opacity-50"></i>
                 <p>No notifications</p>
@@ -90,10 +89,10 @@
     </div>
   </nav>
 
-  <!-- Overlay used for desktop and mobile sidebars -->
+
   <div id="sidebar-overlay"></div>
 
-  <!-- Sidebar for desktop view (below navbar) -->
+
   <aside id="desktop-sidebar"
     class="hidden md:block fixed left-0 top-16 h-[calc(100vh-64px)] w-[350px] border-r border-[var(--button-border)] shadow-2xl z-40 transform -translate-x-full transition-transform duration-300 rounded-tr-xl">
     <div class="p-4 space-y-4">
@@ -278,7 +277,7 @@
     </div>
   </aside>
 
-  <!-- Mobile Menu -->
+
   <div id="mobile-menu"
     class="md:hidden hidden fixed top-16 left-0 w-full max-h-[calc(100vh-64px)] overflow-y-auto bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 shadow-lg z-40">
     <div class="flex flex-col space-y-4 px-3 py-4">
@@ -348,12 +347,12 @@
     </div>
   </div>
 
-  <!-- Main content slot -->
+
   <main id="main-content" class="container mx-auto px-4 py-8 mt-10 transition-all duration-300" data-layout-wrapper>
     <div data-layout-slot class="h-full w-full"></div>
   </main>
 
-  <!-- Logout confirmation modal -->
+
   <div id="logout-confirm-modal" class="fixed inset-0 z-50 hidden" role="dialog" aria-modal="true"
     aria-labelledby="logout-modal-title">
     <div class="absolute inset-0 bg-[var(--overlay-bg)] backdrop-blur-sm" data-logout-overlay></div>
@@ -391,7 +390,7 @@
     </div>
   </div>
 
-  <!-- Publish/Unpublish confirmation modal (shared) -->
+
   <div id="publish-confirm-modal" class="fixed inset-0 z-50 hidden" role="dialog" aria-modal="true"
     aria-labelledby="publish-confirm-title">
     <div class="absolute inset-0 bg-[var(--overlay-bg)] backdrop-blur-sm"></div>
@@ -423,13 +422,13 @@
     </div>
   </div>
 
-  <!-- Register New User Modal (Admin Only) -->
+
   <div id="register-user-modal" class="fixed inset-0 z-[1003] hidden" role="dialog" aria-modal="true"
     aria-labelledby="register-user-title">
     <div class="absolute inset-0 bg-[var(--overlay-bg)] backdrop-blur-sm" data-register-overlay></div>
     <div
       class="relative mx-auto my-8 w-[min(92vw,600px)] max-h-[90vh] overflow-y-auto rounded-2xl bg-[var(--bg-surface)] shadow-2xl border border-[var(--input-border)]">
-      <!-- Header -->
+
       <div
         class="sticky top-0 bg-gradient-to-r from-[#273172] to-[#3a449e] px-6 py-4 flex items-center justify-between border-b border-[var(--input-border)] z-10">
         <div class="flex items-center gap-3">
@@ -445,9 +444,9 @@
         </button>
       </div>
 
-      <!-- Form Content -->
+
       <form id="registerUserForm" class="p-6 space-y-5">
-        <!-- Full Name -->
+
         <div class="form-group">
           <label for="register_fullName" class="block text-sm font-semibold text-primary mb-2">
             <i class="fas fa-user text-[#273172] mr-2"></i>
@@ -458,7 +457,7 @@
           <span class="error-message text-red-500 text-xs mt-1 hidden"></span>
         </div>
 
-        <!-- Email -->
+
         <div class="form-group">
           <label for="register_email" class="block text-sm font-semibold text-primary mb-2">
             <i class="fas fa-envelope text-[#273172] mr-2"></i>
@@ -469,7 +468,7 @@
           <span class="error-message text-red-500 text-xs mt-1 hidden"></span>
         </div>
 
-        <!-- Phone Number -->
+
         <div class="form-group">
           <label for="register_mobile" class="block text-sm font-semibold text-primary mb-2">
             <i class="fas fa-phone text-[#273172] mr-2"></i>
@@ -480,7 +479,7 @@
           <span class="error-message text-red-500 text-xs mt-1 hidden"></span>
         </div>
 
-        <!-- Company -->
+
         <div class="form-group">
           <label for="register_company" class="block text-sm font-semibold text-primary mb-2">
             <i class="fas fa-building text-[#273172] mr-2"></i>
@@ -490,7 +489,7 @@
             class="w-full px-4 py-3 bg-[var(--input-bg)] border-2 border-[var(--input-border)] rounded-xl text-primary placeholder-gray-400 focus:border-[#273172] focus:outline-none focus:ring-2 focus:ring-[#273172]/20 transition-all duration-300" />
         </div>
 
-        <!-- Department -->
+
         <div class="form-group">
           <label for="register_department" class="block text-sm font-semibold text-primary mb-2">
             <i class="fas fa-sitemap text-[#273172] mr-2"></i>
@@ -500,7 +499,7 @@
             class="w-full px-4 py-3 bg-[var(--input-bg)] border-2 border-[var(--input-border)] rounded-xl text-primary placeholder-gray-400 focus:border-[#273172] focus:outline-none focus:ring-2 focus:ring-[#273172]/20 transition-all duration-300" />
         </div>
 
-        <!-- Designation -->
+
         <div class="form-group">
           <label for="register_designation" class="block text-sm font-semibold text-primary mb-2">
             <i class="fas fa-id-badge text-[#273172] mr-2"></i>
@@ -510,7 +509,7 @@
             class="w-full px-4 py-3 bg-[var(--input-bg)] border-2 border-[var(--input-border)] rounded-xl text-primary placeholder-gray-400 focus:border-[#273172] focus:outline-none focus:ring-2 focus:ring-[#273172]/20 transition-all duration-300" />
         </div>
 
-        <!-- Role -->
+
         <div class="form-group">
           <label for="register_role" class="block text-sm font-semibold text-primary mb-2">
             <i class="fas fa-user-tag text-[#273172] mr-2"></i>
@@ -527,7 +526,7 @@
           <span class="error-message text-red-500 text-xs mt-1 hidden"></span>
         </div>
 
-        <!-- Password -->
+
         <div class="form-group">
           <label for="register_password" class="block text-sm font-semibold text-[var(--text-primary)] mb-2">
             <i class="fas fa-lock text-[#273172] mr-2"></i>
@@ -539,7 +538,7 @@
           <span class="error-message text-red-500 text-xs mt-1 hidden"></span>
         </div>
 
-        <!-- Confirm Password -->
+
         <div class="form-group">
           <label for="register_confirmPassword" class="block text-sm font-semibold text-[var(--text-primary)] mb-2">
             <i class="fas fa-lock text-[#273172] mr-2"></i>
@@ -551,7 +550,7 @@
           <span class="error-message text-red-500 text-xs mt-1 hidden"></span>
         </div>
 
-        <!-- Footer Buttons -->
+
         <div class="flex items-center justify-end gap-3 pt-4 border-t border-[var(--input-border)]">
           <button type="button" data-register-cancel
             class="px-6 py-3 rounded-lg border border-[var(--button-border)] bg-transparent text-[var(--text-primary)] hover:bg-[var(--bg-surface)]/10 transition-colors font-semibold">
@@ -566,10 +565,8 @@
       </form>
     </div>
   </div>
-  <!-- Signup modal fragment removed per project cleanup (signup moved/archived or deleted).
-       If you need to restore this modal later, use the standalone signup module and ensure wiring
-       is added intentionally in layout.js. -->
-  <!-- Idle timeout warning modal -->
+
+
   <div id="idle-timeout-modal" class="fixed inset-0 z-50 hidden" role="dialog" aria-modal="true"
     aria-labelledby="idle-timeout-title">
     <div class="absolute inset-0 bg-[var(--overlay-bg)] backdrop-blur-sm" data-idle-overlay></div>
@@ -610,11 +607,8 @@
     </div>
   </div>
 
-  <!-- Global toast container (shared across all pages using this layout) -->
   <div id="toastContainer" aria-live="polite" class="fixed z-50 flex flex-col gap-2 items-center pointer-events-none">
   </div>
-
-  <!-- Update Password Modal (shared) -->
   <div id="update-password-modal" class="fixed inset-0 z-[1000] hidden" role="dialog" aria-modal="true"
     aria-labelledby="update-password-title">
     <div class="absolute inset-0 bg-[var(--overlay-bg)] backdrop-blur-sm" data-update-password-overlay></div>
@@ -691,7 +685,6 @@
     </div>
   </div>
 
-  <!-- Submit New Request (Permit) Modal -->
   <div id="permit-form-modal" class="fixed inset-0 z-[1000] hidden" role="dialog" aria-modal="true"
     aria-labelledby="permit-modal-title">
     <div class="absolute inset-0 bg-[var(--overlay-bg)] backdrop-blur-sm" data-permit-overlay></div>
@@ -706,7 +699,7 @@
         </button>
       </div>
       <div class="px-6 py-4 overflow-y-auto" id="permit-modal-body">
-        <!-- Modal-embedded Permit Form (built by referring to permitform.html/js) -->
+
         <form id="permitForm" method="POST" enctype="multipart/form-data" novalidate>
           <div class="space-y-6">
             <div>
@@ -716,7 +709,7 @@
               </p>
             </div>
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
-              <!-- Requester Details -->
+
               <section
                 class="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm p-6 space-y-4 h-full">
                 <fieldset>
@@ -760,7 +753,7 @@
                 </fieldset>
               </section>
 
-              <!-- Work Details -->
+
               <section
                 class="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm p-6 space-y-4 h-full">
                 <fieldset>
@@ -775,7 +768,7 @@
                     </div>
                   </div>
 
-                  <!-- Terminal -->
+
                   <div class="form-group">
                     <div class="md-input">
                       <label for="terminal">Terminal</label>
@@ -787,7 +780,7 @@
                     </div>
                   </div>
 
-                  <!-- Facility -->
+
                   <div id="facilityContainer" class="form-group hidden">
                     <div class="md-input">
                       <label for="facility">Facility</label>
@@ -799,7 +792,7 @@
                     </div>
                   </div>
 
-                  <!-- Specify Terminal -->
+
                   <div id="specifyTerminalContainer" class="form-group hidden">
                     <div class="md-input">
                       <label for="specifyTerminal">Specify Terminal</label>
@@ -807,7 +800,7 @@
                     </div>
                   </div>
 
-                  <!-- Specify Facility -->
+
                   <div id="specifyFacilityContainer" class="form-group hidden">
                     <div class="md-input">
                       <label for="specifyFacility">Specify Facility</label>
@@ -815,7 +808,7 @@
                     </div>
                   </div>
 
-                  <!-- Impact on Operation -->
+
                   <div class="form-group">
                     <div class="md-input">
                       <label for="impact">Impact on Operation</label>
@@ -829,7 +822,7 @@
                     </div>
                   </div>
 
-                  <!-- Level of Impact -->
+
                   <div id="levelOfImpactContainer" class="form-group hidden">
                     <div class="md-input">
                       <label for="levelOfImpact">Level of Impact</label>
@@ -845,7 +838,7 @@
                     </div>
                   </div>
 
-                  <!-- Type of Affected Equipment -->
+
                   <div id="equipmentType" class="form-group hidden">
                     <div class="md-input">
                       <label for="equipmentTypeInput">Type of Affected Equipment</label>
@@ -857,7 +850,7 @@
                     </div>
                   </div>
 
-                  <!-- Affected Equipment Details -->
+
                   <div id="impactDetails" class="form-group hidden">
                     <div class="md-input">
                       <label for="impactDetailsInput">Affected Equipment Details</label>
@@ -865,7 +858,7 @@
                     </div>
                   </div>
 
-                  <!-- Nature of Work -->
+
                   <div class="form-group">
                     <div class="md-input">
                       <label for="natureOfWork">Nature of Work</label>
@@ -877,7 +870,7 @@
                     </div>
                   </div>
 
-                  <!-- Work Description -->
+
                   <div class="form-group">
                     <div class="md-input">
                       <label for="workDescription">Work Description</label>
@@ -887,7 +880,7 @@
                 </fieldset>
               </section>
 
-              <!-- Required Documents -->
+
               <section
                 class="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm p-6 space-y-4 lg:col-span-2 h-full">
                 <fieldset>
@@ -960,19 +953,19 @@
                     <div id="fileUploadSection" class="hidden">
                       <div
                         class="form-group file-upload border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4">
-                        <!-- Clickable custom icon -->
+
                         <label for="fileUpload" class="upload-icon inline-flex items-center gap-2 cursor-pointer">
                           <i class="fas fa-folder-open text-[28px] mr-2"></i>
                           <span class="text-sm">Upload the files</span>
                         </label>
 
-                        <!-- Hidden native file input -->
+
                         <input type="file" id="fileUpload" name="files" multiple hidden />
 
-                        <!-- Error message -->
+
                         <p id="fileTypeMessage" class="upload-msg text-sm text-red-500 mt-2"></p>
 
-                        <!-- File list -->
+
                         <ul id="uploadedFiles" class="pl-5 text-sm mt-2 space-y-1"></ul>
                       </div>
                     </div>
@@ -980,7 +973,7 @@
                 </fieldset>
               </section>
 
-              <!-- Date & Time -->
+
               <section
                 class="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm p-6 space-y-4 lg:col-span-2 h-full">
                 <fieldset>
@@ -1002,7 +995,7 @@
                 </fieldset>
               </section>
 
-              <!-- Conditions -->
+
               <section
                 class="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm p-6 space-y-4 lg:col-span-2 h-full">
                 <fieldset>
@@ -1061,7 +1054,7 @@
     </div>
   </div>
 
-  <!-- Notification Detail Modal -->
+
   <div id="notification-detail-modal" class="fixed inset-0 z-[1001] hidden" role="dialog" aria-modal="true"
     aria-labelledby="notification-detail-title">
     <div class="absolute inset-0 bg-[var(--overlay-bg)] backdrop-blur-sm" data-notification-detail-overlay></div>
@@ -1090,7 +1083,7 @@
         </div>
 
         <div id="notification-detail-metadata" class="pt-4 border-t border-gray-200 dark:border-gray-700">
-          <!-- Dynamic metadata will be inserted here -->
+
         </div>
       </div>
 
@@ -1107,7 +1100,7 @@
     </div>
   </div>
 
-  <!-- Download Report Modal -->
+
   <div id="download-report-modal" class="fixed inset-0 z-[1002] hidden" role="dialog" aria-modal="true">
     <div class="absolute inset-0 bg-[var(--overlay-bg)] backdrop-blur-sm" data-report-overlay></div>
     <div
@@ -1149,9 +1142,9 @@
     </div>
   </div>
 
-  <!-- Shared toast helper -->
+
   <script src="../shared/toast.js" defer></script>
-  <!-- Flatpickr JS -->
+
   <script src="https://cdn.jsdelivr.net/npm/flatpickr" defer></script>
   <script src="validators.js" defer></script>
   <script src="../shared/layout.js" defer></script>

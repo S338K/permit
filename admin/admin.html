@@ -1,4 +1,3 @@
-<!-- System Message removed from admin page (will be configured later) -->
 <!DOCTYPE html>
 <html lang="en">
 
@@ -6,9 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard - HIA Baggage Handling System</title>
-    <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="../images/HIA_logo.png">
-    <!-- Explicit API base meta for admin page (fallback resolution) -->
+    <meta name="api-base" content="http://localhost:5000" />
     <meta name="api-base" content="http://localhost:5000" />
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="../shared/theme.css" />
@@ -40,7 +38,7 @@
                 </div>
                 <div id="usersSection" class="panel">
                     <div id="usersContent" class="p-6 hidden">
-                        <!-- Search and Filter Bar -->
+
                         <div class="mb-4 flex flex-col sm:flex-row gap-3 items-center justify-between">
                             <div class="relative flex-1 max-w-md">
                                 <i
@@ -67,7 +65,7 @@
                             </div>
                         </div>
 
-                        <!-- Modern Table -->
+
                         <div class="overflow-x-auto rounded-lg border border-[var(--input-border)] shadow-sm">
                             <table id="usersTable" class="min-w-full w-full text-sm">
                                 <thead
@@ -120,12 +118,11 @@
                                 </thead>
                                 <tbody id="usersTableBody"
                                     class="bg-[var(--bg-surface)] divide-y divide-[var(--input-border)]">
-                                    <!-- Data will be populated dynamically by admin.js -->
                                 </tbody>
                             </table>
                         </div>
 
-                        <!-- Pagination -->
+
                         <div class="mt-4 flex flex-col sm:flex-row items-center justify-between gap-3">
                             <div class="text-sm text-[var(--text-secondary)]">
                                 Showing <span id="usersShowingCount"
@@ -134,7 +131,7 @@
                                 users
                             </div>
                             <div id="usersPagination" class="flex gap-1">
-                                <!-- Pagination buttons will be generated here -->
+
                             </div>
                         </div>
                     </div>
@@ -142,7 +139,7 @@
             </div>
         </section>
 
-        <!-- Submitted Permit Details section -->
+
         <section class="mt-6">
             <div
                 class="section-card bg-[var(--bg-surface)] rounded-2xl shadow-lg border border-[var(--input-border)] overflow-hidden">
@@ -162,7 +159,7 @@
                 </div>
                 <div id="permitsSection" class="panel">
                     <div id="permitsContent" class="p-6 hidden">
-                        <!-- Search and Filter Bar -->
+
                         <div class="mb-4 flex flex-col sm:flex-row gap-3 items-center justify-between">
                             <div class="relative flex-1 max-w-md">
                                 <i
@@ -183,7 +180,7 @@
                             </div>
                         </div>
 
-                        <!-- Modern Table -->
+
                         <div class="overflow-x-auto rounded-lg border border-[var(--input-border)] shadow-sm">
                             <table id="permitsTable" class="w-full text-sm">
                                 <thead
@@ -234,7 +231,7 @@
                             </table>
                         </div>
 
-                        <!-- Pagination -->
+
                         <div class="mt-4 flex flex-col sm:flex-row items-center justify-between gap-3">
                             <div class="text-sm text-[var(--text-secondary)]">
                                 Showing <span id="permitsShowingCount"
@@ -243,7 +240,7 @@
                                 permits
                             </div>
                             <div id="permitsPagination" class="flex gap-1">
-                                <!-- Pagination buttons will be generated here -->
+
                             </div>
                         </div>
                     </div>
@@ -251,15 +248,15 @@
             </div>
         </section>
 
-        <!-- Permit Detail Modal (Admin View) -->
+
         <div id="permit-detail-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4">
-            <!-- Backdrop -->
+
             <div class="fixed inset-0 bg-[var(--overlay-bg)] backdrop-blur-sm" data-permit-modal-overlay></div>
 
-            <!-- Modal Panel -->
+
             <div
                 class="relative w-full max-w-5xl max-h-[90vh] flex flex-col rounded-2xl border border-[var(--input-border)] bg-[var(--bg-surface)] shadow-2xl overflow-hidden">
-                <!-- Header -->
+
                 <div
                     class="flex items-start justify-between gap-4 px-6 py-4 border-b border-[var(--input-border)] section-header-gradient">
                     <div class="flex items-start gap-3">
@@ -273,7 +270,7 @@
                                 Permit Details
                             </h2>
                             <p id="permitModalSubtitle" class="text-xs sm:text-sm text-[var(--text-secondary)]">
-                                <!-- Filled dynamically: Permit number • Status -->
+
                             </p>
                         </div>
                     </div>
@@ -283,12 +280,12 @@
                     </button>
                 </div>
 
-                <!-- Body -->
+
                 <div class="px-6 py-4 overflow-y-auto space-y-4 text-sm">
-                    <!-- Hidden id field -->
+
                     <input type="hidden" id="permitModalId" />
 
-                    <!-- Permit core details -->
+
                     <section
                         class="rounded-xl border border-[var(--input-border)] bg-[var(--input-bg)]/40 p-4 space-y-3">
                         <div class="flex items-center justify-between gap-3">
@@ -301,7 +298,6 @@
                             </h3>
                             <span id="permitModalStatusBadge"
                                 class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold">
-                                <!-- status pill -->
                             </span>
                         </div>
                         <div class="grid gap-3 sm:grid-cols-2 md:grid-cols-3">
@@ -339,7 +335,6 @@
                         </div>
                     </section>
 
-                    <!-- Pre-Approver details -->
                     <section class="rounded-xl border border-indigo-500/30 bg-indigo-500/5 p-4 space-y-3">
                         <div class="flex items-center justify-between gap-3">
                             <h3 class="text-sm font-semibold text-[var(--text-primary)] flex items-center gap-2">
@@ -370,7 +365,6 @@
                         </div>
                     </section>
 
-                    <!-- Approver details -->
                     <section class="rounded-xl border border-emerald-500/30 bg-emerald-500/5 p-4 space-y-3">
                         <div class="flex items-center justify-between gap-3">
                             <h3 class="text-sm font-semibold text-[var(--text-primary)] flex items-center gap-2">
@@ -404,9 +398,7 @@
             </div>
         </div>
 
-        <!-- Statistics section: split into two collapsible panels -->
         <section class="mt-10">
-            <!-- User Statistics header -->
             <div
                 class="section-card bg-[var(--bg-surface)] rounded-2xl shadow-lg border border-[var(--input-border)] overflow-hidden">
                 <div class="section-header-gradient px-6 py-4 border-b border-[var(--input-border)] rounded-t-2xl">
@@ -427,7 +419,7 @@
                     <div id="userStatsContent" class="p-6 mb-6 hidden">
                         <div
                             class="mt-4 stats-grid grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-4">
-                            <!-- Total Users -->
+
                             <div
                                 class="text-center p-4 bg-white dark:bg-gray-800/40 rounded-xl border border-[var(--input-border)]">
                                 <div
@@ -440,7 +432,7 @@
                                 <div class="text-sm text-blue-700 dark:text-blue-300 font-medium">Total Users</div>
                             </div>
 
-                            <!-- Active Users -->
+
                             <div
                                 class="text-center p-4 bg-white dark:bg-gray-800/40 rounded-xl border border-[var(--input-border)]">
                                 <div
@@ -453,7 +445,7 @@
                                 <div class="text-sm text-green-700 dark:text-green-300 font-medium">Active Users</div>
                             </div>
 
-                            <!-- Inactive Users -->
+
                             <div
                                 class="text-center p-4 bg-white dark:bg-gray-800/40 rounded-xl border border-[var(--input-border)]">
                                 <div
@@ -466,7 +458,7 @@
                                 </div>
                             </div>
 
-                            <!-- Admins -->
+
                             <div
                                 class="text-center p-4 bg-white dark:bg-gray-800/40 rounded-xl border border-[var(--input-border)]">
                                 <div
@@ -479,7 +471,7 @@
                                 <div class="text-sm text-sky-700 dark:text-sky-300 font-medium">Admins</div>
                             </div>
 
-                            <!-- Approvers -->
+
                             <div
                                 class="text-center p-4 bg-white dark:bg-gray-800/40 rounded-xl border border-[var(--input-border)]">
                                 <div
@@ -492,7 +484,7 @@
                                 <div class="text-sm text-purple-700 dark:text-purple-300 font-medium">Approvers</div>
                             </div>
 
-                            <!-- Pre-Approvers -->
+
                             <div
                                 class="text-center p-4 bg-white dark:bg-gray-800/40 rounded-xl border border-[var(--input-border)]">
                                 <div
@@ -506,7 +498,7 @@
                                 </div>
                             </div>
 
-                            <!-- Requesters -->
+
                             <div
                                 class="text-center p-4 bg-white dark:bg-gray-800/40 rounded-xl border border-[var(--input-border)]">
                                 <div
@@ -521,7 +513,6 @@
                             </div>
                         </div>
 
-                        <!-- User charts: Roles, Status, Type -->
                         <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div
                                 class="bg-[var(--bg-surface)] rounded-xl p-4 shadow border border-[var(--input-border)] md:col-span-1">
@@ -545,7 +536,6 @@
         </section>
 
         <section class="mt-6">
-            <!-- Permit Statistics header -->
             <div
                 class="section-card bg-[var(--bg-surface)] rounded-2xl shadow-lg border border-[var(--input-border)] overflow-hidden">
                 <div class="section-header-gradient px-6 py-4 border-b border-[var(--input-border)] rounded-t-2xl">
@@ -566,7 +556,7 @@
                     <div id="permitStatsContent" class="p-6 mb-8 hidden">
                         <div
                             class="mt-4 stats-grid grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-4">
-                            <!-- Pending -->
+
                             <div
                                 class="text-center p-4 bg-white dark:bg-gray-800/40 rounded-xl border border-[var(--input-border)]">
                                 <div
@@ -579,7 +569,7 @@
                                 <div class="text-sm text-yellow-700 dark:text-yellow-300 font-medium">Pending</div>
                             </div>
 
-                            <!-- In Progress -->
+
                             <div
                                 class="text-center p-4 bg-white dark:bg-gray-800/40 rounded-xl border border-[var(--input-border)]">
                                 <div
@@ -592,7 +582,7 @@
                                 <div class="text-sm text-sky-700 dark:text-sky-300 font-medium">In Progress</div>
                             </div>
 
-                            <!-- Approved -->
+
                             <div
                                 class="text-center p-4 bg-white dark:bg-gray-800/40 rounded-xl border border-[var(--input-border)]">
                                 <div
@@ -606,7 +596,7 @@
                                 <div class="text-sm text-green-700 dark:text-green-300 font-medium">Approved</div>
                             </div>
 
-                            <!-- Rejected -->
+
                             <div
                                 class="text-center p-4 bg-white dark:bg-gray-800/40 rounded-xl border border-[var(--input-border)]">
                                 <div
@@ -620,7 +610,7 @@
                             </div>
                         </div>
 
-                        <!-- Permit charts: Monthly/Permit status -->
+
                         <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div
                                 class="bg-[var(--bg-surface)] rounded-xl p-4 shadow border border-[var(--input-border)]">
@@ -643,7 +633,6 @@
             </div>
         </section>
 
-        <!-- View Permit Details Modal (Admin) -->
         <div id="viewPermitModal" class="fixed inset-0 bg-black/50 hidden z-50 flex items-center justify-center p-4">
             <div
                 class="bg-[var(--bg-surface)] rounded-2xl shadow-2xl border border-[var(--input-border)] w-full max-w-3xl max-h-[90vh] overflow-y-auto">
@@ -744,13 +733,12 @@
             </div>
         </div>
 
-        <!-- Announcement Modal (Admin) -->
         <div id="announcement-modal" class="fixed inset-0 z-50 hidden" role="dialog" aria-modal="true"
             aria-labelledby="announcement-modal-title">
             <div
                 class="relative mx-auto my-8 w-[min(98vw,1400px)] max-h-[90vh] rounded-3xl bg-[var(--bg-surface)] shadow-2xl border border-[var(--input-border)] overflow-hidden flex flex-col">
 
-                <!-- Header -->
+
                 <div
                     class="flex items-center justify-between px-8 py-5 border-b border-[var(--input-border)] section-header-gradient">
                     <div class="flex items-center gap-3">
@@ -766,17 +754,17 @@
                     </button>
                 </div>
 
-                <!-- Content -->
+
                 <div class="flex-1 overflow-y-auto p-8">
                     <div class="grid grid-cols-1 lg:grid-cols-5 gap-8 announcement-modal">
 
-                        <!-- Form Section (3 columns) -->
+
                         <div class="lg:col-span-3">
                             <div class="bg-[var(--input-bg)]/30 rounded-2xl p-6 border border-[var(--input-border)]">
                                 <form id="announcementForm" class="space-y-5">
                                     <input type="hidden" id="announcement_id" />
 
-                                    <!-- Title -->
+
                                     <div class="space-y-2">
                                         <label
                                             class="flex items-center gap-2 text-sm font-semibold text-[var(--text-primary)]">
@@ -788,7 +776,7 @@
                                             placeholder="Enter announcement title (optional)" />
                                     </div>
 
-                                    <!-- Message -->
+
                                     <div class="space-y-2">
                                         <label
                                             class="flex items-center gap-2 text-sm font-semibold text-[var(--text-primary)]">
@@ -801,7 +789,7 @@
                                         <textarea id="announcement_message" rows="4" class="hidden"></textarea>
                                     </div>
 
-                                    <!-- Schedule -->
+
                                     <div class="space-y-2">
                                         <label
                                             class="flex items-center gap-2 text-sm font-semibold text-[var(--text-primary)]">
@@ -828,7 +816,7 @@
                                         </div>
                                     </div>
 
-                                    <!-- Actions -->
+
                                     <div
                                         class="flex items-center justify-between pt-4 border-t border-[var(--input-border)]">
                                         <label class="inline-flex items-center gap-2.5 cursor-pointer">
@@ -846,7 +834,6 @@
                             </div>
                         </div>
 
-                        <!-- Existing Announcements (2 columns) -->
                         <div class="lg:col-span-2">
                             <div
                                 class="bg-[var(--input-bg)]/30 rounded-2xl p-6 border border-[var(--input-border)] h-full flex flex-col">
@@ -880,17 +867,13 @@
 
         <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.js"></script>
 
-        <!-- User Detail Modal -->
         <div id="user-detail-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4" role="dialog"
             aria-modal="true" aria-labelledby="userModalTitle">
-            <!-- Backdrop overlay with blur -->
             <div class="fixed inset-0 bg-[var(--overlay-bg)] backdrop-blur-sm transition-opacity"
                 data-user-modal-overlay></div>
 
-            <!-- Modal Container -->
             <div
                 class="relative w-full max-w-4xl max-h-[90vh] flex flex-col bg-[var(--bg-surface)] rounded-2xl shadow-2xl border border-[var(--input-border)] overflow-hidden animate-modal-in">
-                <!-- Header -->
                 <div class="px-6 py-4 border-b border-[var(--input-border)] section-header-gradient flex-shrink-0">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center gap-3 flex-1 min-w-0">
@@ -910,13 +893,12 @@
                     </div>
                 </div>
 
-                <!-- Body - Scrollable -->
                 <div class="flex-1 overflow-y-auto px-6 py-6" id="userModalBody">
                     <input type="hidden" id="userModalId" />
 
-                    <!-- Static View -->
+
                     <div id="userModalFields" class="space-y-6">
-                        <!-- Personal Information Card -->
+
                         <div class="stat-card-blue rounded-xl p-5 border">
                             <h3 class="text-sm font-bold text-[var(--text-primary)] mb-4 flex items-center gap-2">
                                 <i class="fas fa-user text-blue-500"></i>
@@ -949,7 +931,7 @@
                             </div>
                         </div>
 
-                        <!-- Professional Details Card -->
+
                         <div class="stat-card-purple rounded-xl p-5 border">
                             <h3 class="text-sm font-bold text-[var(--text-primary)] mb-4 flex items-center gap-2">
                                 <i class="fas fa-briefcase text-purple-500"></i>
@@ -979,7 +961,7 @@
                             </div>
                         </div>
 
-                        <!-- Activity Information Card -->
+
                         <div class="stat-card-green rounded-xl p-5 border">
                             <h3 class="text-sm font-bold text-[var(--text-primary)] mb-4 flex items-center gap-2">
                                 <i class="far fa-clock text-green-500"></i>
@@ -1002,9 +984,8 @@
                         </div>
                     </div>
 
-                    <!-- Editable Form (hidden by default) -->
                     <form id="userEditForm" class="space-y-6 hidden">
-                        <!-- Personal Information Card -->
+
                         <div class="stat-card-blue rounded-xl p-5 border">
                             <h3 class="text-sm font-bold text-[var(--text-primary)] mb-4 flex items-center gap-2">
                                 <i class="fas fa-user text-blue-500"></i>
@@ -1038,7 +1019,7 @@
                             </div>
                         </div>
 
-                        <!-- Professional Details Card -->
+
                         <div class="stat-card-purple rounded-xl p-5 border">
                             <h3 class="text-sm font-bold text-[var(--text-primary)] mb-4 flex items-center gap-2">
                                 <i class="fas fa-briefcase text-purple-500"></i>
@@ -1079,7 +1060,6 @@
                     </form>
                 </div>
 
-                <!-- Footer - Actions (no explicit Close button, use header X or backdrop) -->
                 <div class="px-6 py-4 border-t border-[var(--input-border)] bg-[var(--input-bg)]/50 flex-shrink-0">
                     <div class="flex flex-wrap items-center gap-2 justify-end">
                         <button id="userModalEditSaveBtn"

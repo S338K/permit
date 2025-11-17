@@ -1,9 +1,6 @@
-// Lightweight bridge to shared/layout.js theme logic for pages that don't mount the full layout yet (e.g., login)
-// It mirrors the [data-theme-toggle] behavior: toggles html.dark + data-theme and persists in storage.
 (function () {
   try {
     const STORAGE_KEY = "theme";
-
     function getCurrentTheme() {
       const html = document.documentElement;
       return html.classList.contains("dark")
@@ -15,9 +12,7 @@
       try {
         localStorage.setItem(STORAGE_KEY, theme);
         sessionStorage.setItem(STORAGE_KEY, theme);
-      } catch (_) {
-        /* ignore */
-      }
+      } catch (_) {}
     }
 
     function applyTheme(theme) {
@@ -43,7 +38,6 @@
           return;
         }
       } catch (_) {}
-      // fallback to system
       const prefersDark =
         window.matchMedia &&
         window.matchMedia("(prefers-color-scheme: dark)").matches;
@@ -56,7 +50,7 @@
       persistTheme(next);
       try {
         window.dispatchEvent(
-          new CustomEvent("theme:changed", { detail: { theme: next } }),
+          new CustomEvent("theme:changed", { detail: { theme: next } })
         );
       } catch (_) {}
     }
@@ -67,9 +61,8 @@
         const label = isDark ? "Dark mode" : "Light mode";
         el.setAttribute("aria-label", label);
         el.title = label;
-        // Animate only the currently visible icon (opacity > 0 per CSS)
         const icons = el.querySelectorAll(
-          "i.fa-sun, i.fa-moon, i.icon-sun, i.icon-moon",
+          "i.fa-sun, i.fa-moon, i.icon-sun, i.icon-moon"
         );
         icons.forEach((ic) => {
           try {
@@ -78,18 +71,14 @@
               ic.classList.add("rotating");
               setTimeout(() => ic.classList.remove("rotating"), 400);
             }
-          } catch (_) {
-            /* ignore */
-          }
+          } catch (_) {}
         });
       });
     }
 
-    // init
     initFromStorageOrSystem();
     updateToggleIcons();
 
-    // wire
     document.querySelectorAll("[data-theme-toggle]").forEach((el) => {
       el.addEventListener("click", (e) => {
         e.preventDefault();
@@ -105,7 +94,6 @@
       });
     });
 
-    // sync if other code changes theme
     try {
       const html = document.documentElement;
       const mo = new MutationObserver(() => updateToggleIcons());
@@ -115,7 +103,5 @@
       });
       window.addEventListener("theme:changed", updateToggleIcons);
     } catch (_) {}
-  } catch (_) {
-    /* ignore */
-  }
+  } catch (_) {}
 })();

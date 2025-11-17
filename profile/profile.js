@@ -22,6 +22,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   };
 
   // Page-specific layout adjustments that were previously inline in profile.html
+  // markAsProfilePage: adjust layout for profile page
   function markAsProfilePage() {
     try {
       const layoutWrapper = document.querySelector("[data-layout-wrapper]");
@@ -63,7 +64,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   let _permitsCurrentPage = 1;
   let _permitsPerPage = 10;
 
-  // Debounce helper
+  // debounce: return a debounced function
   function debounce(fn, wait = 200) {
     let t = null;
     return (...args) => {
@@ -72,7 +73,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     };
   }
 
-  // Simple HTML escape used when inserting fetched values
+  // escapeHtml: sanitize text for HTML insertion
   function escapeHtml(s) {
     return String(s || "")
       .replace(/&/g, "&amp;")
@@ -82,7 +83,7 @@ document.addEventListener("DOMContentLoaded", async function () {
       .replace(/'/g, "&#39;");
   }
 
-  // Fallback view trigger used by action buttons
+  // triggerView: open shared permit viewer or dispatch event
   function triggerView(id) {
     try {
       if (typeof window.viewPermitDetails === "function") {
@@ -100,19 +101,21 @@ document.addEventListener("DOMContentLoaded", async function () {
   // when present, or dispatch `profile:view-permit` for backwards
   // compatibility.
 
-  // Helpers for analytics
+  // monthKeyFromDate: return YYYY-MM key for date
   function monthKeyFromDate(d) {
     const dt = new Date(d);
     if (isNaN(dt)) return null;
     return `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, "0")}`;
   }
 
+  // percentChange: calculate percentage change between values
   function percentChange(curr, prev) {
     if (prev === 0 && curr === 0) return 0;
     if (prev === 0) return 100;
     return Math.round(((curr - prev) / Math.abs(prev)) * 100);
   }
 
+  // formatDurationHours: format duration expressed in hours
   function formatDurationHours(hours) {
     if (hours === "--" || hours === undefined || hours === null) return "--";
     if (typeof hours !== "number") return String(hours);
@@ -125,6 +128,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     return `${days}d`;
   }
 
+  // renderSparkline: draw a small inline sparkline SVG
   function renderSparkline(canvasId, values, color) {
     // Render a small inline SVG sparkline for crisp rendering at small sizes.
     const el = document.getElementById(canvasId);

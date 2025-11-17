@@ -1,20 +1,13 @@
-// session.js (shared)
-// Centralized session management for all protected pages
-
 import { API_BASE } from "../config.js";
 
-/* ===== Check if session is valid ===== */
-
-// session/session.js
+// Function: getLoginUrl — Build login page URL (handles GitHub Pages prefix)
 function getLoginUrl() {
-  // Handle GitHub Pages project sites (e.g., https://<user>.github.io/<repo>/...)
-  // by prefixing the repo segment to the login path. Locally, this stays root-relative.
   try {
     const { hostname, pathname } = window.location;
     let prefix = "";
     if (hostname.endsWith("github.io")) {
       const segments = pathname.split("/").filter(Boolean);
-      if (segments.length > 0) prefix = `/${segments[0]}`; // '/<repo>'
+      if (segments.length > 0) prefix = `/${segments[0]}`;
     }
     return `${prefix}/login/index.html`;
   } catch (_) {
@@ -22,6 +15,7 @@ function getLoginUrl() {
   }
 }
 
+// Function: checkSession — Verify session by calling /api/profile and return merged user
 export async function checkSession() {
   try {
     const res = await fetch(`${API_BASE}/api/profile`, {
@@ -39,7 +33,6 @@ export async function checkSession() {
     }
 
     const data = await res.json();
-    // Flatten: return user fields + role from session and include clientIp if provided
     const merged = { ...data.user, role: data.session.role };
     if (data.clientIp) merged.clientIp = data.clientIp;
     return merged;
@@ -49,31 +42,26 @@ export async function checkSession() {
   }
 }
 
-/* ===== Idle Timeout Auto‑Logout ===== */
-const IDLE_LIMIT = 10 * 60 * 1000; // 10 minutes total
-// Show warning when 3 minutes remain
-const WARNING_TIME = 3 * 60 * 1000; // 3 minutes warning
+const IDLE_LIMIT = 10 * 60 * 1000;
+const WARNING_TIME = 3 * 60 * 1000;
 let idleTimer;
 let warningTimer;
 let countdownInterval;
 
+// Function: initIdleTimer — Initialize idle timers and activity listeners
 export function initIdleTimer() {
   function resetIdleTimer() {
     clearTimeout(idleTimer);
     clearTimeout(warningTimer);
     clearInterval(countdownInterval);
     hideIdleWarning();
-    // Schedule warning when WARNING_TIME remains
-    const warningDelay = IDLE_LIMIT - WARNING_TIME; // e.g., 7 minutes of activity before a 3-minute warning
+    const warningDelay = IDLE_LIMIT - WARNING_TIME;
     warningTimer = setTimeout(showIdleWarning, warningDelay);
-    // Auto-logout will be triggered if the countdown reaches zero without user action
     idleTimer = null;
   }
 
-  // Track user activity to reset timers. When the warning modal is showing we ignore activity
   ["mousemove", "keydown", "click", "scroll"].forEach((evt) =>
     document.addEventListener(evt, (e) => {
-      // If warning modal visible, do not reset timers until user explicitly chooses to continue
       if (
         document.getElementById("idleWarningModal") &&
         document.getElementById("idleWarningModal").style.display === "flex"
@@ -81,34 +69,31 @@ export function initIdleTimer() {
         return;
       }
       resetIdleTimer(e);
-    }),
+    })
   );
 
   resetIdleTimer();
 }
 
-/* ===== Idle warning UI ===== */
+// Function: createIdleWarning — Placeholder (modal in page markup)
 function createIdleWarning() {
-  // Modal exists in the page markup (admin.html). No dynamic element creation here.
   return;
 }
 
+// Function: showIdleWarning — Display idle-warning modal and handle countdown
 function showIdleWarning() {
   const modal = document.getElementById("idleWarningModal");
   const countdownEl = document.getElementById("idleWarningCountdown");
   const textEl = document.getElementById("idleWarningText");
   if (!modal || !countdownEl || !textEl) return;
 
-  // remaining time starts at WARNING_TIME (3 minutes)
   let remainingMs = WARNING_TIME;
 
-  // Prevent any scheduled auto-logout while modal is visible
   if (idleTimer) {
     clearTimeout(idleTimer);
     idleTimer = null;
   }
 
-  // show modal and blur background
   modal.classList.remove("hidden");
   modal.style.display = "flex";
   modal.setAttribute("aria-hidden", "false");
@@ -116,7 +101,6 @@ function showIdleWarning() {
   textEl.textContent =
     'Your session is about to expire due to inactivity. Please choose on "Continue" to stay logged in or you will be logged out automatically.';
 
-  // Wire buttons (idempotent)
   const extendBtn = document.getElementById("idleExtendBtn");
   const logoutBtn = document.getElementById("idleLogoutBtn");
 
@@ -134,7 +118,6 @@ function showIdleWarning() {
       } catch (err) {
         console.warn("Keepalive ping failed", err);
       }
-      // reset timers by dispatching an artificial activity event
       const ev = new Event("mousemove");
       document.dispatchEvent(ev);
       cleanup();
@@ -150,7 +133,6 @@ function showIdleWarning() {
 
   function update() {
     if (remainingMs <= 0) {
-      // Auto-logout immediately when timer reaches zero
       countdownEl.textContent = "0:00";
       clearInterval(countdownInterval);
       logoutUser();
@@ -169,22 +151,21 @@ function showIdleWarning() {
   countdownInterval = setInterval(update, 1000);
 }
 
+// Function: hideIdleWarning — Hide idle modal and restore state
 function hideIdleWarning() {
   const modal = document.getElementById("idleWarningModal");
   if (!modal) return;
   modal.style.display = "none";
   clearInterval(countdownInterval);
-  // Restore scroll/interactions
   if (document.body.dataset.prevOverflow !== undefined) {
     document.body.style.overflow = document.body.dataset.prevOverflow;
     delete document.body.dataset.prevOverflow;
   }
 }
 
-/* ===== Logout Helper ===== */
+// Function: logoutUser — Perform logout and redirect to login
 export async function logoutUser() {
   try {
-    // prefer shared helper if present (it clears per-tab token and broadcasts)
     if (window.ptwLogout) {
       await window.ptwLogout();
       return;

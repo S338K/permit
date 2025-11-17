@@ -1,5 +1,3 @@
-// Smart API base detection: only set production URL when NOT in dev environment
-// This allows dev (localhost/127.0.0.1) to work without explicit overrides
 if (!window.__API_BASE__ && !localStorage.getItem("API_BASE")) {
   const { hostname } = window.location;
   // Only set production URL if NOT on localhost/127.0.0.1
@@ -8,9 +6,7 @@ if (!window.__API_BASE__ && !localStorage.getItem("API_BASE")) {
   }
 }
 
-// Minimal, robust layout scripting: theme + hamburger/sidebar behavior
 (function () {
-  // Toast helpers are now in shared/toast.js; keep a defensive guard in case it's not loaded.
   try {
     if (typeof window.showToast !== "function") {
       window.showToast = function (_type, _message) {
@@ -28,7 +24,7 @@ if (!window.__API_BASE__ && !localStorage.getItem("API_BASE")) {
   // --- Global fetch interceptor for revoked sessions ---
   try {
     const origFetch = window.fetch.bind(window);
-    // Helper to read per-tab access token (sessionStorage)
+    // getAccessToken: return per-tab access token
     function getAccessToken() {
       try {
         return sessionStorage.getItem("accessToken");
@@ -37,7 +33,7 @@ if (!window.__API_BASE__ && !localStorage.getItem("API_BASE")) {
       }
     }
 
-    // Broadcast helpers for session events (login/logout) to other tabs
+    // __ptw_broadcastSession: broadcast session events to other tabs
     window.__ptw_broadcastSession = function (data) {
       try {
         localStorage.setItem(
@@ -55,11 +51,7 @@ if (!window.__API_BASE__ && !localStorage.getItem("API_BASE")) {
       } catch (_) {}
     };
 
-    // Listen for session broadcast events from other tabs and react in a conservative way.
-    // Previously we reloaded on any session broadcast which caused tabs to flip state when
-    // another tab logged in (or rotated the refresh cookie). That breaks multi-tab workflows
-    // where different users want to remain signed-in in separate tabs. We'll only reload on
-    // logout/session_expired or when a login for a different user is detected.
+    // storage event listener: handle cross-tab session messages
     window.addEventListener("storage", (ev) => {
       try {
         if (!ev.key) return;
@@ -121,9 +113,10 @@ if (!window.__API_BASE__ && !localStorage.getItem("API_BASE")) {
       }
     });
 
-    // Single-refresh lock and queue: ensures only one /api/refresh-token call runs at a time
+    // runRefreshOnce: single-refresh lock and queue to ensure only one refresh runs
     let __ptw_refreshPromise = null;
 
+    // isReplayableBody: check if request body can be replayed for retry
     function isReplayableBody(body) {
       try {
         if (!body) return true;
@@ -139,6 +132,7 @@ if (!window.__API_BASE__ && !localStorage.getItem("API_BASE")) {
       }
     }
 
+    // runRefreshOnce: perform token refresh once and return success
     async function runRefreshOnce() {
       if (__ptw_refreshPromise) return __ptw_refreshPromise;
       __ptw_refreshPromise = (async () => {
@@ -176,6 +170,7 @@ if (!window.__API_BASE__ && !localStorage.getItem("API_BASE")) {
       return __ptw_refreshPromise;
     }
 
+    // fetch: global wrapper that handles attaching tokens, refresh, and session errors
     window.fetch = async function (...args) {
       // Normalize args -> [url, options]
       const url = args[0];
