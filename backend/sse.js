@@ -12,7 +12,9 @@ function addClient(userId, res) {
   const cleanup = () => {
     try {
       removeClient(userId, res);
-    } catch (e) {}
+    } catch (e) {
+      // Silently handle remove client errors
+    }
   };
 
   if (typeof res.on === 'function') {
@@ -46,7 +48,9 @@ function sendToUser(userId, payload) {
       } catch (e) {
         try {
           removeClient(userId, res);
-        } catch (err) {}
+        } catch (err) {
+          // Silently handle remove client errors
+        }
       }
     }
     return true;
@@ -68,7 +72,9 @@ function sendPing() {
       } catch (e) {
         try {
           removeClient(userId, res);
-        } catch (err) {}
+        } catch (err) {
+          // Silently handle remove client errors
+        }
       }
     }
   }
