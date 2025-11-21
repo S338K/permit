@@ -81,13 +81,17 @@ router.get('/api/notifications/stream', async (req, res) => {
     try {
       res.write(`event: notification\n`);
       res.write(`data: ${JSON.stringify({ type: 'init', notifications: formatted })}\n\n`);
-    } catch (e) {}
+    } catch (e) {
+      // Silently handle write errors for SSE connection
+    }
 
     // keep connection alive with periodic comments
     const iv = setInterval(() => {
       try {
         res.write(`: keepalive\n\n`);
-      } catch (e) {}
+      } catch (e) {
+        // Silently handle write errors for SSE connection
+      }
     }, 20000);
 
     // Cleanup on close
@@ -99,7 +103,9 @@ router.get('/api/notifications/stream', async (req, res) => {
     console.error('SSE stream error', err);
     try {
       res.end();
-    } catch (_) {}
+    } catch (_) {
+      // Silently handle end errors for closed SSE connection
+    }
   }
 });
 

@@ -10,7 +10,7 @@ const logger = require('../logger');
 // ----- REGISTER -----
 router.post('/register', async (req, res) => {
   try {
-    const { username, company, email, phone, mobile, password, role } = req.body;
+    const { username, company, email, phone, mobile, password, role, city, country } = req.body;
 
     if (!username || !email || !password) {
       return res.status(400).json({ message: 'All fields are required' });
